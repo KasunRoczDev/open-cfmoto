@@ -1,0 +1,77 @@
+package dev.zanderp.opencfmoto
+
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Test
+
+class MetricsStripLayoutTest {
+    @Test
+    fun resolvePxKeepsRequestedWhenItFits() {
+        assertEquals(64, MetricsStripLayout.resolvePx(64, 384))
+        assertEquals(80, MetricsStripLayout.resolvePx(80, 944))
+    }
+
+    @Test
+    fun resolvePxClampsToQuarterAndMinimum() {
+        assertEquals(50, MetricsStripLayout.resolvePx(80, 200))   // 200 / 4
+        assertEquals(32, MetricsStripLayout.resolvePx(20, 384))   // below MIN_PX
+        assertEquals(32, MetricsStripLayout.resolvePx(64, 128))   // exactly MIN_CANVAS_H
+    }
+
+    @Test
+    fun resolvePxZeroWhenOffOrCanvasTooSmall() {
+        assertEquals(0, MetricsStripLayout.resolvePx(0, 384))
+        assertEquals(0, MetricsStripLayout.resolvePx(64, 127))
+    }
+
+    @Test
+    fun stripRectSitsAtBottomInTopOriginCoords() {
+        assertEquals(StripRect(0, 320, 800, 64), MetricsStripLayout.stripRect(800, 384, 64))
+    }
+
+    @Test
+    fun glPlacementPutsBandAtGlBottomAndShiftsAa() {
+        assertTrue(MetricsStripLayout.STRIP_AT_GL_BOTTOM)
+        assertEquals(0, MetricsStripLayout.glStripY(384, 64))
+        assertEquals(64, MetricsStripLayout.glAaShift(64))
+        assertEquals(0, MetricsStripLayout.glAaShift(0))
+    }
+
+    @Test
+    fun touchInsideBandIsInStrip() {
+        assertTrue(MetricsStripLayout.isInStrip(320, 384, 64))
+        assertTrue(MetricsStripLayout.isInStrip(383, 384, 64))
+        assertFalse(MetricsStripLayout.isInStrip(319, 384, 64))
+        assertFalse(MetricsStripLayout.isInStrip(383, 384, 0))
+    }
+
+    @Test
+    fun panelForAaSubtractsBandWithFloor() {
+        assertEquals(800 to 320, MetricsStripLayout.panelForAa(800, 384, 64))
+        assertEquals(800 to 384, MetricsStripLayout.panelForAa(800, 384, 0))
+        assertEquals(800 to 16, MetricsStripLayout.panelForAa(800, 20, 64))
+    }
+
+    @Test
+    fun fourEqualCellsWithTurn() {
+        val c = MetricsStripLayout.cells(800, 64, hasTurn = true)
+        assertEquals(
+            listOf(StripRect(0, 0, 200, 64), StripRect(200, 0, 200, 64), StripRect(400, 0, 200, 64), StripRect(600, 0, 200, 64)),
+            c,
+        )
+    }
+
+    @Test
+    fun speedTakesTwoUnitsWithoutTurn() {
+        val c = MetricsStripLayout.cells(800, 64, hasTurn = false)
+        assertEquals(listOf(StripRect(0, 0, 400, 64), StripRect(400, 0, 200, 64), StripRect(600, 0, 200, 64)), c)
+    }
+
+    @Test
+    fun lastCellAbsorbsRemainder() {
+        val c = MetricsStripLayout.cells(803, 48, hasTurn = true)
+        assertEquals(803, c.sumOf { it.w })
+        assertEquals(203, c.last().w)
+    }
+}
