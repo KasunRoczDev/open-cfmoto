@@ -1,5 +1,6 @@
 package dev.zanderp.opencfmoto
 
+import android.graphics.Bitmap
 import android.graphics.SurfaceTexture
 import android.opengl.EGL14
 import android.opengl.EGLConfig
@@ -9,6 +10,7 @@ import android.opengl.EGLExt
 import android.opengl.EGLSurface
 import android.opengl.GLES11Ext
 import android.opengl.GLES20
+import android.opengl.GLUtils
 import android.opengl.Matrix
 import android.os.Handler
 import android.os.HandlerThread
@@ -86,6 +88,34 @@ class AaCompositor(private val log: (String) -> Unit) {
     @Volatile private var vpW = 0
     @Volatile private var vpH = 0
     @Volatile private var fitMode: ScreenFit = ScreenFit.FILL
+
+    // Rider metrics strip: a band of [stripPx] dash pixels reserved under Android Auto on the BIKE
+    // output only (never the phone preview). AA is viewported above it; the strip bitmap is pasted in.
+    @Volatile private var stripPx = 0
+    private var stripProgram = 0
+    private var sPosition = 0
+    private var sTexCoord = 0
+    private var stripTexId = 0
+    private var stripTexW = 0
+    private var stripTexH = 0
+    private var stripReady = false
+    private var stripFailLogged = false
+
+    // Strip quad: pos.xy + tex.uv. Bitmap row 0 is the visual top; pick v so it lands upright for the
+    // GL orientation chosen in MetricsStripLayout.STRIP_AT_GL_BOTTOM.
+    private val stripQuad: FloatBuffer = run {
+        val vBottom = if (MetricsStripLayout.STRIP_AT_GL_BOTTOM) 1f else 0f
+        val vTop = 1f - vBottom
+        ByteBuffer.allocateDirect(4 * 4 * 4).order(ByteOrder.nativeOrder()).asFloatBuffer().apply {
+            put(floatArrayOf(
+                -1f, -1f, 0f, vBottom,
+                 1f, -1f, 1f, vBottom,
+                -1f,  1f, 0f, vTop,
+                 1f,  1f, 1f, vTop,
+            ))
+            position(0)
+        }
+    }
 
     private val texMatrix = FloatArray(16)
 
@@ -190,6 +220,11 @@ class AaCompositor(private val log: (String) -> Unit) {
                 canvasW = cw; canvasH = ch; srcW = sw; srcH = sh; fitMode = fit
                 computeViewport()
                 log("[COMPOSITOR] output set canvas=${cw}x$ch src=${sw}x$sh fit=$fit → draw rect=${vpW}x$vpH @($vpX,$vpY)")
+                if (stripPx > 0) {
+                    val r = MetricsStripLayout.stripRect(cw, ch, stripPx)
+                    log("[STRIP] on canvas=${cw}x$ch strip=${stripPx}px rect(top-origin)=${r.x},${r.y},${r.w},${r.h} " +
+                        "glY=${MetricsStripLayout.glStripY(ch, stripPx)} aaRect=${vpW}x$vpH @($vpX,$vpY)")
+                }
             } catch (e: Exception) {
                 log("[COMPOSITOR] setOutput failed: $e")
             }
@@ -279,6 +314,7 @@ class AaCompositor(private val log: (String) -> Unit) {
      * FILL+margins gets a dedicated, gated fix.
      */
     fun mapCanvasToSource(cx: Int, cy: Int): Pair<Int, Int>? {
+        if (MetricsStripLayout.isInStrip(cy, canvasH, stripPx)) return null
         if (vpW == 0 || vpH == 0 || srcW == 0 || srcH == 0) return null
         val rx = cx - vpX
         val ry = cy - vpY
@@ -298,12 +334,14 @@ class AaCompositor(private val log: (String) -> Unit) {
     private fun computeViewport() {
         if (canvasW == 0 || canvasH == 0 || srcW == 0 || srcH == 0) return
         // Inset by rider/profile screen margins so chrome (e.g. 800NK pull-down) stays black.
-        val mT = ScreenMargins.top.coerceIn(0, canvasH)
-        val mB = ScreenMargins.bottom.coerceIn(0, canvasH - mT)
+        // The metrics band (if any) comes off the canvas first; AA + rider margins share the rest.
+        val aaCanvasH = (canvasH - stripPx).coerceAtLeast(1)
+        val mT = ScreenMargins.top.coerceIn(0, aaCanvasH)
+        val mB = ScreenMargins.bottom.coerceIn(0, aaCanvasH - mT)
         val mL = ScreenMargins.left.coerceIn(0, canvasW)
         val mR = ScreenMargins.right.coerceIn(0, canvasW - mL)
         val areaW = (canvasW - mL - mR).coerceAtLeast(1)
-        val areaH = (canvasH - mT - mB).coerceAtLeast(1)
+        val areaH = (aaCanvasH - mT - mB).coerceAtLeast(1)
         val srcAspect = srcW.toFloat() / srcH
         val areaAspect = areaW.toFloat() / areaH
         when (fitMode) {
@@ -352,6 +390,55 @@ class AaCompositor(private val log: (String) -> Unit) {
                 log("[COMPOSITOR] screen margins: ${ScreenMargins.summary()}")
             }
         }
+    }
+
+    /** Reserve a band of [px] dash pixels under Android Auto on the bike output (0 = off). Call before [setOutput]. */
+    fun setStrip(px: Int) {
+        handler.post {
+            stripPx = px.coerceAtLeast(0)
+            if (stripPx == 0) stripReady = false
+            computeViewport()
+        }
+    }
+
+    /** Upload a freshly rendered strip and re-emit a frame. Takes ownership of [bmp] (recycled here). */
+    fun setStripBitmap(bmp: Bitmap) {
+        handler.post {
+            try {
+                if (eglDisplay == EGL14.EGL_NO_DISPLAY || stripPx <= 0) return@post
+                if (stripTexId == 0) {
+                    val ids = IntArray(1)
+                    GLES20.glGenTextures(1, ids, 0)
+                    stripTexId = ids[0]
+                    GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, stripTexId)
+                    GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR)
+                    GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR)
+                    GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE)
+                    GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE)
+                } else {
+                    GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, stripTexId)
+                }
+                if (bmp.width != stripTexW || bmp.height != stripTexH) {
+                    GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bmp, 0)
+                    stripTexW = bmp.width
+                    stripTexH = bmp.height
+                } else {
+                    GLUtils.texSubImage2D(GLES20.GL_TEXTURE_2D, 0, 0, 0, bmp)
+                }
+                stripReady = true
+                if (hasContent) drawFrame()
+            } catch (e: Exception) {
+                logStripFailure("upload", e)
+            } finally {
+                bmp.recycle()
+            }
+        }
+    }
+
+    private fun logStripFailure(what: String, e: Exception) {
+        if (stripFailLogged) return
+        stripFailLogged = true
+        log("[STRIP] $what failed: $e — band stays black, Android Auto unaffected")
     }
 
     /** Set the live-frame cap (frames/sec) from the user's [dev.zanderp.opencfmoto.PowerMode]. */
@@ -422,14 +509,17 @@ class AaCompositor(private val log: (String) -> Unit) {
 
         // FILL may compute a viewport taller/wider than the canvas (center-crop). Scissor so we
         // never paint outside the bike encoder surface.
-        val clipW = if (target === windowSurface) canvasW else previewW
-        val clipH = if (target === windowSurface) canvasH else previewH
+        val isBike = target === windowSurface
+        val clipW = if (isBike) canvasW else previewW
+        val clipH = if (isBike) canvasH else previewH
+        val band = if (isBike) stripPx else 0
+        val shift = if (band > 0) MetricsStripLayout.glAaShift(band) else 0
         if (clipW > 0 && clipH > 0) {
             GLES20.glEnable(GLES20.GL_SCISSOR_TEST)
-            GLES20.glScissor(0, 0, clipW, clipH)
+            GLES20.glScissor(0, shift, clipW, clipH - band)
         }
 
-        GLES20.glViewport(vx, vy, vw, vh)
+        GLES20.glViewport(vx, vy + shift, vw, vh)
         GLES20.glUseProgram(program)
 
         quad.position(0)
@@ -451,9 +541,39 @@ class AaCompositor(private val log: (String) -> Unit) {
         GLES20.glDisableVertexAttribArray(aTexCoord)
         GLES20.glDisable(GLES20.GL_SCISSOR_TEST)
 
+        if (band > 0) {
+            try {
+                drawStrip(band)
+            } catch (e: Exception) {
+                logStripFailure("draw", e)
+            }
+        }
+
         // Monotonic presentation time so repeated (keep-alive) frames aren't dropped as duplicate PTS.
         EGLExt.eglPresentationTimeANDROID(eglDisplay, target, System.nanoTime())
         EGL14.eglSwapBuffers(eglDisplay, target)
+    }
+
+    /** Paste the latest strip texture into the band. Band stays black (from glClear) until one exists. */
+    private fun drawStrip(band: Int) {
+        if (!stripReady || stripTexId == 0 || stripProgram == 0 || canvasW == 0) return
+        val y = MetricsStripLayout.glStripY(canvasH, band)
+        GLES20.glEnable(GLES20.GL_SCISSOR_TEST)
+        GLES20.glScissor(0, y, canvasW, band)
+        GLES20.glViewport(0, y, canvasW, band)
+        GLES20.glUseProgram(stripProgram)
+        stripQuad.position(0)
+        GLES20.glVertexAttribPointer(sPosition, 2, GLES20.GL_FLOAT, false, 16, stripQuad)
+        GLES20.glEnableVertexAttribArray(sPosition)
+        stripQuad.position(2)
+        GLES20.glVertexAttribPointer(sTexCoord, 2, GLES20.GL_FLOAT, false, 16, stripQuad)
+        GLES20.glEnableVertexAttribArray(sTexCoord)
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, stripTexId)
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4)
+        GLES20.glDisableVertexAttribArray(sPosition)
+        GLES20.glDisableVertexAttribArray(sTexCoord)
+        GLES20.glDisable(GLES20.GL_SCISSOR_TEST)
     }
 
     fun release() {
@@ -540,6 +660,29 @@ class AaCompositor(private val log: (String) -> Unit) {
         GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR)
         GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE)
         GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE)
+
+        val svs = """
+            attribute vec4 aPosition;
+            attribute vec2 aTexCoord;
+            varying vec2 vTexCoord;
+            void main() { gl_Position = aPosition; vTexCoord = aTexCoord; }
+        """.trimIndent()
+        val sfs = """
+            precision mediump float;
+            varying vec2 vTexCoord;
+            uniform sampler2D sTexture;
+            void main() { gl_FragColor = texture2D(sTexture, vTexCoord); }
+        """.trimIndent()
+        // A strip shader failure must never take down the AA compositor: leave stripProgram = 0
+        // (drawStrip then skips) and log once.
+        try {
+            stripProgram = linkProgram(svs, sfs)
+            sPosition = GLES20.glGetAttribLocation(stripProgram, "aPosition")
+            sTexCoord = GLES20.glGetAttribLocation(stripProgram, "aTexCoord")
+        } catch (e: Exception) {
+            stripProgram = 0
+            logStripFailure("shader", e)
+        }
     }
 
     private fun linkProgram(vsSrc: String, fsSrc: String): Int {
