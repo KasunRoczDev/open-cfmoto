@@ -257,10 +257,17 @@ object VideoPrefs {
     /** Margins to advertise for the current AA [spec], or [AaMargins.NONE]. */
     fun aaMarginsFor(ctx: Context, spec: AaVideoSpec, ssid: String? = null): AaMargins {
         val mode = matchAspectMode(ctx)
+        val stripReq = MetricsStripPrefs.height(ctx).px
         val panel = when (mode) {
             MatchAspectMode.OFF -> {
-                LogBus.log("[match-aspect] OFF — margins 0")
-                return AaMargins.NONE
+                // OFF means "no margins" — except the metrics strip still needs AA laid out for the
+                // shorter area above the band, so use the known panel when the strip is on.
+                val detected = if (stripReq > 0) detectedPanelSize(ctx, ssid) else null
+                if (detected == null) {
+                    LogBus.log("[match-aspect] OFF — margins 0")
+                    return AaMargins.NONE
+                }
+                detected
             }
             MatchAspectMode.MANUAL -> aspectTarget(ctx)
             MatchAspectMode.AUTO -> {
@@ -272,9 +279,12 @@ object VideoPrefs {
                 detected
             }
         }
-        val margins = AaMargins.forAspect(spec, panel.first, panel.second)
+        val stripPx = MetricsStripLayout.resolvePx(stripReq, panel.second)
+        val (targetW, targetH) = MetricsStripLayout.panelForAa(panel.first, panel.second, stripPx)
+        val margins = AaMargins.forAspect(spec, targetW, targetH)
+        val stripNote = if (stripPx > 0) " strip −${stripPx}px" else ""
         LogBus.log(
-            "[match-aspect] $mode panel ${panel.first}x${panel.second} → " +
+            "[match-aspect] $mode panel ${panel.first}x${panel.second}$stripNote → " +
                 "AA ${spec.width}x${spec.height} margins ${margins.marginW}x${margins.marginH}",
         )
         return margins
