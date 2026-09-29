@@ -23,6 +23,16 @@ import android.provider.Settings
 object RivalClient {
     const val PKG = "com.cfmoto.cfmotointernational"
 
+    /** How long after "App settings" a return to OpenCfMoto still counts as "back from Force stop". */
+    const val RETRY_WINDOW_MS = 5L * 60L * 1000L
+
+    /**
+     * True when the rider was sent to the rival's App-info screen at [sentAtMs] (elapsedRealtime; null
+     * = never) and came back within [RETRY_WINDOW_MS] — reconnect for them instead of a second tap.
+     */
+    fun shouldRetryOnResume(sentAtMs: Long?, nowMs: Long): Boolean =
+        sentAtMs != null && nowMs >= sentAtMs && nowMs - sentAtMs <= RETRY_WINDOW_MS
+
     fun isInstalled(ctx: Context): Boolean = try {
         ctx.packageManager.getPackageInfo(PKG, 0); true
     } catch (_: PackageManager.NameNotFoundException) {

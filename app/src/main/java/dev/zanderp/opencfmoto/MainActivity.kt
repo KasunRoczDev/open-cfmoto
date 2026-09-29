@@ -59,6 +59,8 @@ class MainActivity : AppCompatActivity() {
     private var pendingAaStart = false
     /** Guards the "close the official CFMoto app" prompt so it shows once per error, not every redraw. */
     private var rivalPromptShown = false
+    // elapsedRealtime when the rival dialog sent the rider to its App-info (Force stop); null = not pending.
+    private var rivalSettingsSentAt: Long? = null
     /** Guards the VPN kill-switch prompt so it shows once per error, not every redraw. */
     private var vpnPromptShown = false
 
@@ -696,6 +698,7 @@ class MainActivity : AppCompatActivity() {
         // Retry auto-connect on resume: after finishing first-run setup, or once the bike's Wi-Fi
         // comes into range shortly after launch. Guarded so it only ever starts one attempt.
         if (SetupActivity.hasSeen(this)) maybeAutoConnect()
+        maybeRetryAfterRivalStop()
         maybeCheckUpdate()
         maybeResumeFromParked(intent)
     }
@@ -961,11 +964,14 @@ class MainActivity : AppCompatActivity() {
                 connectBtn.postDelayed({ reconnectSavedBike() }, 1500)
             }
             .setNeutralButton("App settings") { _, _ ->
-                if (!RivalClient.openAppInfo(this)) {
+                if (RivalClient.openAppInfo(this)) {
+                    // Coming back after Force stop reconnects on its own (see onResume).
+                    rivalSettingsSentAt = android.os.SystemClock.elapsedRealtime()
+                } else {
                     Toast.makeText(this, R.string.main_settings_failed, Toast.LENGTH_SHORT).show()
                 }
             }
-            .setNegativeButton("Dismiss", null)
+            .setNegativeButton("Dismiss") { _, _ -> rivalSettingsSentAt = null }
             .setCancelable(true)
             .apply { if (!installed) setMessage("Something is holding the bike's link ports (10920-10922). Close any other CFMoto/EasyConnect app and reconnect.") }
             .show()
@@ -1004,6 +1010,19 @@ class MainActivity : AppCompatActivity() {
     }
 
     /** Re-run the one-tap Connect for the saved bike (used after closing the rival app). */
+    /**
+     * The rider went to the official CFMoto app's App-info from [promptCloseRival] (to Force stop it)
+     * and came back: reconnect for them. One shot — if the ports are still held, the same error
+     * re-opens the dialog, so this can never loop on its own.
+     */
+    private fun maybeRetryAfterRivalStop() {
+        val sentAt = rivalSettingsSentAt ?: return
+        rivalSettingsSentAt = null
+        if (!RivalClient.shouldRetryOnResume(sentAt, android.os.SystemClock.elapsedRealtime())) return
+        log("→ back from CFMoto app settings — retrying")
+        connectBtn.postDelayed({ reconnectSavedBike() }, 1000)
+    }
+
     private fun reconnectSavedBike() {
         val saved = BikeMemory.lastQr(this) ?: return
         ProjectionHolder.projection = null
