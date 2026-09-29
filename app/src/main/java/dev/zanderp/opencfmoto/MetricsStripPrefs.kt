@@ -14,6 +14,21 @@ enum class StripHeight(val px: Int, @StringRes val labelRes: Int) {
     LARGE(80, R.string.pref_strip_large),
 }
 
+/**
+ * Strip settings frozen at Connect ([MetricsStripPrefs.snapshot] → [BikeProfileHolder.stripSession]),
+ * so AA margins, the reserved band and the nav service all agree for the whole connection — including
+ * a park/resume after the rider changed Setup mid-ride.
+ */
+data class StripSnapshot(val requestPx: Int, val turnInfo: Boolean) {
+    companion object {
+        val OFF = StripSnapshot(0, false)
+
+        /** Turn info only makes sense with a visible strip. */
+        fun of(height: StripHeight, turnInfo: Boolean): StripSnapshot =
+            StripSnapshot(height.px, turnInfo && height != StripHeight.OFF)
+    }
+}
+
 /** Per-bike metrics-strip settings (scoped via [BikeScope]). Read at Connect; changes apply next connect. */
 object MetricsStripPrefs {
     private const val PREFS = "opencfmoto_bike"
@@ -30,7 +45,6 @@ object MetricsStripPrefs {
 
     fun setHeight(ctx: Context, h: StripHeight) {
         BikeScope.putString(prefs(ctx), ctx, KEY_HEIGHT, h.name)
-        BikeProfileHolder.aaTurnInfo = turnInfoActive(ctx)
     }
 
     /** Experimental: ask Android Auto for next-turn data (instrument cluster service). */
@@ -38,9 +52,8 @@ object MetricsStripPrefs {
 
     fun setTurnInfo(ctx: Context, on: Boolean) {
         BikeScope.putBoolean(prefs(ctx), ctx, KEY_TURN_INFO, on)
-        BikeProfileHolder.aaTurnInfo = turnInfoActive(ctx)
     }
 
-    /** Turn info only makes sense with a visible strip. */
-    fun turnInfoActive(ctx: Context): Boolean = turnInfo(ctx) && height(ctx) != StripHeight.OFF
+    /** Settings to freeze into [BikeProfileHolder.stripSession] at Connect. */
+    fun snapshot(ctx: Context): StripSnapshot = StripSnapshot.of(height(ctx), turnInfo(ctx))
 }

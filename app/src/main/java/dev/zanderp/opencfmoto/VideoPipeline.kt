@@ -300,7 +300,8 @@ class VideoPipeline(
             val usableH = (src.height - margins.marginH).coerceIn(16, src.height)
             aaCompositor?.setFrameCap(power.fps)
             aaCompositor?.setSourceCrop(usableW.toFloat() / src.width, usableH.toFloat() / src.height)
-            val stripReq = MetricsStripPrefs.height(context).px
+            // Frozen at Connect (MainActivity.applyProfile) so the band always matches the AA margins.
+            val stripReq = BikeProfileHolder.stripSession.requestPx
             val stripPx = MetricsStripLayout.resolvePx(stripReq, h)
             if (stripReq > 0 && stripPx == 0) {
                 log("[STRIP] canvas ${w}x$h too small (< ${MetricsStripLayout.MIN_CANVAS_H}px tall) — strip off this session")
@@ -310,7 +311,8 @@ class VideoPipeline(
             MetricsStrip.stop()
             val comp = aaCompositor
             if (stripPx > 0 && comp != null) {
-                MetricsStrip.start(context, w, stripPx, comp::setStripBitmap, log)
+                // Runs before the bike's config-capture reply — a strip failure must not break the link.
+                stripGuarded(log, "start") { MetricsStrip.start(context, w, stripPx, comp::setStripBitmap, log) }
             }
             log("[VIDEO] bike canvas ${w}x$h configured; AA source ${src.width}x${src.height} " +
                 "usable ${usableW}x$usableH (margins ${margins.marginW}x${margins.marginH}) → " +
@@ -648,7 +650,8 @@ class VideoPipeline(
 
     /** Compositor mode: map a bike-canvas touch point to Android Auto source coords (letterbox-aware);
      *  null if the point is in a black bar. See AaCompositor.mapCanvasToSource. */
-    fun mapBikeTouchToSource(cx: Int, cy: Int): Pair<Int, Int>? = aaCompositor?.mapCanvasToSource(cx, cy)
+    fun mapBikeTouchToSource(cx: Int, cy: Int, isDown: Boolean = true): Pair<Int, Int>? =
+        aaCompositor?.mapCanvasToSource(cx, cy, isDown)
 
     /** Compositor mode: attach an in-app phone preview surface (HudViewActivity). No-op otherwise. */
     fun setPreviewSurface(surface: Surface, w: Int, h: Int) = aaCompositor?.setPreview(surface, w, h)

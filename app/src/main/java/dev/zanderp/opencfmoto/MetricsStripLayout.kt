@@ -39,6 +39,17 @@ object MetricsStripLayout {
     /** True when a top-origin canvas y (a dash touch) lands inside the band. */
     fun isInStrip(cy: Int, canvasH: Int, stripPx: Int): Boolean = stripPx > 0 && cy >= canvasH - stripPx
 
+    /**
+     * Touch y to map into Android Auto, or null to drop it. A DOWN that lands in the band is dropped;
+     * a MOVE/UP there is clamped to the last AA row so a drag that ends in the band still lifts the
+     * pointer in AA (dropping it would leave the pointer stuck down).
+     */
+    fun touchY(cy: Int, canvasH: Int, stripPx: Int, isDown: Boolean): Int? = when {
+        !isInStrip(cy, canvasH, stripPx) -> cy
+        isDown -> null
+        else -> canvasH - stripPx - 1
+    }
+
     /** Panel shape Android Auto should lay out for when the band takes [stripPx] off the bottom. */
     fun panelForAa(panelW: Int, panelH: Int, stripPx: Int): Pair<Int, Int> =
         panelW to (panelH - stripPx).coerceAtLeast(16)

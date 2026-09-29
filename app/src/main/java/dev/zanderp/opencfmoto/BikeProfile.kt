@@ -241,11 +241,18 @@ object BikeProfileHolder {
     @Volatile var aaContentMargins: AaMargins = AaMargins.NONE
 
     /**
-     * Advertise Android Auto's navigation-status (instrument cluster) service so Maps/Waze send
-     * next-turn data for the metrics strip. Synced from [MetricsStripPrefs.turnInfoActive]; read by
-     * [dev.zanderp.opencfmoto.aa.ServiceDiscoveryResponse]. Off = handshake unchanged.
+     * Metrics-strip settings frozen at Connect in [MainActivity] (next to [aaContentMargins]), so the
+     * AA margins, the reserved band and the nav service agree for the whole connection — including a
+     * park/resume after the rider changed Setup mid-ride. [StripSnapshot.OFF] = strip off.
      */
-    @Volatile var aaTurnInfo: Boolean = false
+    @Volatile var stripSession: StripSnapshot = StripSnapshot.OFF
+
+    /**
+     * Advertise Android Auto's navigation-status (instrument cluster) service so Maps/Waze send
+     * next-turn data for the metrics strip. Read by [dev.zanderp.opencfmoto.aa.ServiceDiscoveryResponse].
+     * Off = handshake unchanged.
+     */
+    val aaTurnInfo: Boolean get() = stripSession.turnInfo
 
     /**
      * Setup ▸ "Disable touchscreen" — when true, never advertise a touchscreen to Android Auto

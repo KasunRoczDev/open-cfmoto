@@ -30,7 +30,8 @@ class MetricsSource(
         return try {
             lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000L, 0f, this, Looper.getMainLooper())
             true
-        } catch (_: SecurityException) {
+        } catch (_: Exception) {
+            // SecurityException, or a provider that vanished between the check and the request.
             false
         }
     }

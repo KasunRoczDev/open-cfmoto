@@ -47,6 +47,25 @@ class MetricsStripLayoutTest {
     }
 
     @Test
+    fun downInBandIsDropped() {
+        assertEquals(null, MetricsStripLayout.touchY(350, 384, 64, isDown = true))
+    }
+
+    @Test
+    fun moveOrUpInBandClampsToLastAaRow() {
+        // A drag that ends in the band must still reach AA, or the pointer stays stuck down.
+        assertEquals(319, MetricsStripLayout.touchY(350, 384, 64, isDown = false))
+        assertEquals(319, MetricsStripLayout.touchY(383, 384, 64, isDown = false))
+    }
+
+    @Test
+    fun touchAboveBandOrStripOffUnchanged() {
+        assertEquals(200, MetricsStripLayout.touchY(200, 384, 64, isDown = true))
+        assertEquals(200, MetricsStripLayout.touchY(200, 384, 64, isDown = false))
+        assertEquals(383, MetricsStripLayout.touchY(383, 384, 0, isDown = true))
+    }
+
+    @Test
     fun panelForAaSubtractsBandWithFloor() {
         assertEquals(800 to 320, MetricsStripLayout.panelForAa(800, 384, 64))
         assertEquals(800 to 384, MetricsStripLayout.panelForAa(800, 384, 0))

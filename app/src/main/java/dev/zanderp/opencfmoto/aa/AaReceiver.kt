@@ -202,6 +202,8 @@ class AaReceiver(
             AaVideoBridge.scrollSink = null
             AaVideoBridge.previewTouchSink = null
             AaVideoBridge.nightSink = null
+            // AA session over → no route: don't leave a frozen maneuver on the metrics strip.
+            dev.zanderp.opencfmoto.MetricsStrip.setTurn(null)
             try { t.microphone?.stop("transport quit") } catch (_: Exception) {}
             transport = null
             releaseSession()
@@ -223,7 +225,7 @@ class AaReceiver(
         val input = AaInput(t, log)
         var loggedTouchMap = false
         AaVideoBridge.touchSink = { action, pointerId, cx, cy ->
-            val mapped = AaVideoBridge.pipeline?.mapBikeTouchToSource(cx, cy)
+            val mapped = AaVideoBridge.pipeline?.mapBikeTouchToSource(cx, cy, action == AaInput.ACTION_DOWN)
             if (mapped != null) {
                 if (!loggedTouchMap || action != AaInput.ACTION_MOVE) {
                     log("[AA] touch action=$action p$pointerId bike=($cx,$cy) → AA=(${mapped.first},${mapped.second})")

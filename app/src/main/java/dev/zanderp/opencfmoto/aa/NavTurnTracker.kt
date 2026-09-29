@@ -29,7 +29,11 @@ class NavTurnTracker {
     private var road: String? = null
     private var distanceM: Int? = null
 
-    /** @return true when [current] changed. */
+    // A new tracker (new AA session) reports its first result even when it is "no turn", so a turn
+    // left on the strip by the previous session gets cleared.
+    private var reported = false
+
+    /** @return true when [current] changed (always true for the first handled message). */
     fun onMessage(type: Int, data: ByteArray, offset: Int = 0, length: Int = data.size): Boolean {
         when (type) {
             MsgType.INSTRUMENT_CLUSTER_STOP_VALUE -> clear()
@@ -75,8 +79,9 @@ class NavTurnTracker {
             else -> return false
         }
         val next = kind?.let { NextTurn(it, side, exit, distanceM, road) }
-        if (next == current) return false
+        if (next == current && reported) return false
         current = next
+        reported = true
         return true
     }
 
@@ -89,6 +94,10 @@ class NavTurnTracker {
     }
 
     companion object {
+        /** True when something a rider would notice changed (not just the ~1 Hz distance tick) — log gate. */
+        fun significantChange(prev: NextTurn?, next: NextTurn?): Boolean =
+            prev?.copy(distanceM = null) != next?.copy(distanceM = null)
+
         fun typeName(type: Int): String = MsgType.forNumber(type)?.name ?: "UNKNOWN($type)"
 
         internal fun fromNextEvent(e: NextTurnDetail.NextEvent, s: NextTurnDetail.Side): Pair<TurnKind, TurnSide> {

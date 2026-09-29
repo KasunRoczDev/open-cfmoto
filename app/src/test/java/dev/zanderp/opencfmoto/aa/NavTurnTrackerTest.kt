@@ -43,10 +43,12 @@ class NavTurnTrackerTest {
     @Test
     fun distanceBeforeDetailIsKept() {
         val t = NavTurnTracker()
-        assertFalse(t.onMessage(MsgType.NEXTTURNDISTANCEANDTIME_VALUE, distance(900)))
+        assertTrue(t.onMessage(MsgType.NEXTTURNDISTANCEANDTIME_VALUE, distance(900)))   // first result is always reported
+        assertNull(t.current)
+        assertFalse(t.onMessage(MsgType.NEXTTURNDISTANCEANDTIME_VALUE, distance(800)))
         assertNull(t.current)
         t.onMessage(MsgType.NEXTTURNDETAILS_VALUE, detail(NextTurnDetail.NextEvent.SLIGHT_TURN, NextTurnDetail.Side.LEFT))
-        assertEquals(NextTurn(TurnKind.SLIGHT, TurnSide.LEFT, distanceM = 900, road = "Main St"), t.current)
+        assertEquals(NextTurn(TurnKind.SLIGHT, TurnSide.LEFT, distanceM = 800, road = "Main St"), t.current)
     }
 
     @Test
@@ -107,6 +109,27 @@ class NavTurnTrackerTest {
     @Test(expected = Exception::class)
     fun malformedPayloadThrows() {
         NavTurnTracker().onMessage(MsgType.NEXTTURNDETAILS_VALUE, byteArrayOf(0x0A, 0x7F))
+    }
+
+    @Test
+    fun freshTrackerReportsFirstClear() {
+        // A new AA session must be able to clear a turn left on the strip by the previous session.
+        assertTrue(NavTurnTracker().onMessage(MsgType.INSTRUMENT_CLUSTER_STOP_VALUE, ByteArray(0)))
+        val t = NavTurnTracker()
+        assertTrue(t.onMessage(MsgType.INSTRUMENT_CLUSTER_NAVIGATION_STATUS_VALUE, status(NavigationClusterStatus.NavigationStatusEnum.INACTIVE)))
+        assertFalse(t.onMessage(MsgType.INSTRUMENT_CLUSTER_NAVIGATION_STATUS_VALUE, status(NavigationClusterStatus.NavigationStatusEnum.INACTIVE)))
+    }
+
+    @Test
+    fun distanceOnlyChangeIsNotSignificant() {
+        val a = NextTurn(TurnKind.NORMAL, TurnSide.RIGHT, distanceM = 350, road = "Main St")
+        assertFalse(NavTurnTracker.significantChange(a, a.copy(distanceM = 340)))
+        assertTrue(NavTurnTracker.significantChange(a, a.copy(side = TurnSide.LEFT)))
+        assertTrue(NavTurnTracker.significantChange(a, a.copy(road = "High St")))
+        assertTrue(NavTurnTracker.significantChange(a, a.copy(kind = TurnKind.ROUNDABOUT, exitNumber = 2)))
+        assertTrue(NavTurnTracker.significantChange(a, null))
+        assertTrue(NavTurnTracker.significantChange(null, a))
+        assertFalse(NavTurnTracker.significantChange(null, null))
     }
 
     @Test

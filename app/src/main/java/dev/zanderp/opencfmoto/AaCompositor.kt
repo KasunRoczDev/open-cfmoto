@@ -313,11 +313,12 @@ class AaCompositor(private val log: (String) -> Unit) {
      * panels; that broke NK Adv touch (~+Y) even with Match off. Keep the v2.0.6 linear map until
      * FILL+margins gets a dedicated, gated fix.
      */
-    fun mapCanvasToSource(cx: Int, cy: Int): Pair<Int, Int>? {
-        if (MetricsStripLayout.isInStrip(cy, canvasH, stripPx)) return null
+    fun mapCanvasToSource(cx: Int, cy: Int, isDown: Boolean = true): Pair<Int, Int>? {
+        // Metrics band: drop a DOWN there, clamp a MOVE/UP to the last AA row (never strand a pointer).
+        val y = MetricsStripLayout.touchY(cy, canvasH, stripPx, isDown) ?: return null
         if (vpW == 0 || vpH == 0 || srcW == 0 || srcH == 0) return null
         val rx = cx - vpX
-        val ry = cy - vpY
+        val ry = y - vpY
         if (rx < 0 || ry < 0 || rx >= vpW || ry >= vpH) return null
         val sx = (rx.toLong() * srcW / vpW).toInt().coerceIn(0, srcW - 1)
         val sy = (ry.toLong() * srcH / vpH).toInt().coerceIn(0, srcH - 1)

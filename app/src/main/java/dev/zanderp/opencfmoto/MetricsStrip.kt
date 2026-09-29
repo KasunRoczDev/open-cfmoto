@@ -14,6 +14,19 @@ import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 
 /**
+ * Run a strip step so that no failure can escape into the bike/AA path (spec: strip failures never
+ * break video). Logs `[STRIP] <what> failed: …` and returns false on any exception.
+ */
+internal inline fun stripGuarded(log: (String) -> Unit, what: String, block: () -> Unit): Boolean =
+    try {
+        block()
+        true
+    } catch (e: Exception) {
+        log("[STRIP] $what failed: $e — band stays black, Android Auto unaffected")
+        false
+    }
+
+/**
  * Metrics strip coordinator for one Android Auto session: GPS ([MetricsSource]) and AA turns
  * ([setTurn]) update [RiderMetrics]; a single `metrics-strip` thread formats them and renders a
  * bitmap only when a displayed value changes (plus a 1 s tick so stale values fall back to `--`).

@@ -271,6 +271,9 @@ internal class AapControlService(private val aapTransport: AapTransport) : AapCo
 internal class AapControlNav : AapControl {
     private val tracker = NavTurnTracker()
     private val seenTypes = HashSet<Int>()
+    private val failedTypes = HashSet<Int>()
+    private var logged: dev.zanderp.opencfmoto.NextTurn? = null
+    private var loggedOnce = false
 
     override fun execute(message: AapMessage): Int {
         val len = message.size - message.dataOffset
@@ -280,16 +283,23 @@ internal class AapControlNav : AapControl {
         val changed = try {
             tracker.onMessage(message.type, message.data, message.dataOffset, len)
         } catch (e: Exception) {
-            dev.zanderp.opencfmoto.LogBus.log("[NAV] parse failed ${NavTurnTracker.typeName(message.type)}: $e")
+            if (failedTypes.add(message.type)) {
+                dev.zanderp.opencfmoto.LogBus.log("[NAV] parse failed ${NavTurnTracker.typeName(message.type)}: $e")
+            }
             false
         }
         if (changed) {
             val t = tracker.current
-            dev.zanderp.opencfmoto.LogBus.log(
-                if (t == null) "[NAV] turn cleared"
-                else "[NAV] turn → ${t.kind} ${t.side} ${t.distanceM ?: "?"} m" +
-                    (t.exitNumber?.let { " exit $it" } ?: "") + " \"${t.road.orEmpty()}\"",
-            )
+            // Log maneuver changes only — distance ticks ~1 Hz and would flood the shared log.
+            if (!loggedOnce || NavTurnTracker.significantChange(logged, t)) {
+                loggedOnce = true
+                logged = t
+                dev.zanderp.opencfmoto.LogBus.log(
+                    if (t == null) "[NAV] turn cleared"
+                    else "[NAV] turn → ${t.kind} ${t.side} ${t.distanceM ?: "?"} m" +
+                        (t.exitNumber?.let { " exit $it" } ?: "") + " \"${t.road.orEmpty()}\"",
+                )
+            }
             dev.zanderp.opencfmoto.MetricsStrip.setTurn(t)
         }
         return 0
