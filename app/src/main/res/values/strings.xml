@@ -637,4 +637,11 @@
     <string name="setup_anonymous_telemetry_on">On — anonymous pings &amp; crash reports</string>
     <string name="setup_anonymous_telemetry_off">Off — nothing uploaded</string>
     <string name="setup_anonymous_id">Anonymous id: %1$s</string>
+    <string name="setup_metrics_strip">Metrics strip under Android Auto</string>
+    <string name="setup_metrics_strip_desc">Speed, altitude and heading in a band below the map on the dash. Android Auto is drawn above it. Applies next connect.</string>
+    <string name="pref_strip_off">Off</string>
+    <string name="pref_strip_small">Small</string>
+    <string name="pref_strip_medium">Medium</string>
+    <string name="pref_strip_large">Large</string>
+    <string name="setup_toast_metrics_strip">Metrics strip: %1$s</string>
 </resources>

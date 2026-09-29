@@ -125,6 +125,10 @@ class SetupActivity : AppCompatActivity() {
         findViewById<MaterialButton>(R.id.dpi_180).setOnClickListener { setAaDpi(180) }
         findViewById<MaterialButton>(R.id.dpi_240).setOnClickListener { setAaDpi(240) }
         findViewById<MaterialButton>(R.id.dpi_320).setOnClickListener { setAaDpi(320) }
+        findViewById<MaterialButton>(R.id.strip_off).setOnClickListener { setStripHeight(StripHeight.OFF) }
+        findViewById<MaterialButton>(R.id.strip_small).setOnClickListener { setStripHeight(StripHeight.SMALL) }
+        findViewById<MaterialButton>(R.id.strip_medium).setOnClickListener { setStripHeight(StripHeight.MEDIUM) }
+        findViewById<MaterialButton>(R.id.strip_large).setOnClickListener { setStripHeight(StripHeight.LARGE) }
         findViewById<MaterialButton>(R.id.btn_bt_trigger).setOnClickListener { pickBtTrigger() }
         findViewById<MaterialButton>(R.id.theme_auto).setOnClickListener { setMapTheme(MapTheme.AUTO) }
         findViewById<MaterialButton>(R.id.theme_day).setOnClickListener { setMapTheme(MapTheme.DAY) }
@@ -309,6 +313,12 @@ class SetupActivity : AppCompatActivity() {
             if (dpi == null) getString(R.string.setup_aa_dpi_auto)
             else getString(R.string.setup_aa_dpi) + ": $dpi",
         )
+    }
+
+    private fun setStripHeight(h: StripHeight) {
+        MetricsStripPrefs.setHeight(this, h)
+        refreshOptions()
+        toast(getString(R.string.setup_toast_metrics_strip, getString(h.labelRes)))
     }
 
     private fun pickBtTrigger() {
@@ -539,6 +549,11 @@ class SetupActivity : AppCompatActivity() {
             R.id.dpi_240 to 240,
             R.id.dpi_320 to 320,
         )
+        highlight(MetricsStripPrefs.height(this),
+            R.id.strip_off to StripHeight.OFF,
+            R.id.strip_small to StripHeight.SMALL,
+            R.id.strip_medium to StripHeight.MEDIUM,
+            R.id.strip_large to StripHeight.LARGE)
         highlight(theme,
             R.id.theme_auto to MapTheme.AUTO,
             R.id.theme_day to MapTheme.DAY,

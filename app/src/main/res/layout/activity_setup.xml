@@ -628,6 +628,69 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
+                    android:text="@string/setup_metrics_strip"
+                    android:textColor="@color/text_primary"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginBottom="6dp"
+                    android:text="@string/setup_metrics_strip_desc"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="13sp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:baselineAligned="false"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/strip_off"
+                        style="@style/Widget.OpenCfMoto.Segment"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="4dp"
+                        android:layout_weight="1"
+                        android:text="@string/pref_strip_off" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/strip_small"
+                        style="@style/Widget.OpenCfMoto.Segment"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:layout_marginEnd="4dp"
+                        android:layout_weight="1"
+                        android:text="@string/pref_strip_small" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/strip_medium"
+                        style="@style/Widget.OpenCfMoto.Segment"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:layout_marginEnd="4dp"
+                        android:layout_weight="1"
+                        android:text="@string/pref_strip_medium" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/strip_large"
+                        style="@style/Widget.OpenCfMoto.Segment"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:layout_weight="1"
+                        android:text="@string/pref_strip_large" />
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
                     android:text="@string/setup_disable_touchscreen"
                     android:textColor="@color/text_primary"
                     android:textSize="16sp"
