@@ -37,19 +37,25 @@ object MetricsStripRenderer {
     }
     private val arrowFill = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.WHITE; style = Paint.Style.FILL }
 
-    fun render(v: StripValues, w: Int, h: Int): Bitmap {
+    /** [metrics] = the rider's chosen cells; the turn cell is added whenever a turn is known. */
+    fun render(v: StripValues, w: Int, h: Int, metrics: Set<StripCell> = StripCells.ALL): Bitmap {
         val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
         val c = Canvas(bmp)
         c.drawColor(Color.BLACK)
-        val hasTurn = v.turn != null
-        val cells = MetricsStripLayout.cells(w, h, hasTurn)
-        var i = 0
-        if (hasTurn) drawTurn(c, cells[i++], v)
-        drawValue(c, cells[i++], v.speed, v.speedUnit, if (hasTurn) 0.55f else 0.65f)
-        drawValue(c, cells[i++], v.altitude, "ALT ${v.altitudeUnit}", 0.55f)
-        drawValue(c, cells[i], v.compass, v.degrees, 0.55f)
+        val shown = if (v.turn != null) metrics + StripCell.TURN else metrics - StripCell.TURN
+        val cells = MetricsStripLayout.layout(w, h, shown.toList())
+        // Speed gets the double-width cell (and bigger digits) when there's no turn and company.
+        val bigSpeed = v.turn == null && cells.size > 1
+        for ((cell, r) in cells) {
+            when (cell) {
+                StripCell.TURN -> drawTurn(c, r, v)
+                StripCell.SPEED -> drawValue(c, r, v.speed, v.speedUnit, if (bigSpeed) 0.65f else 0.55f)
+                StripCell.ALTITUDE -> drawValue(c, r, v.altitude, "ALT ${v.altitudeUnit}", 0.55f)
+                StripCell.HEADING -> drawValue(c, r, v.compass, v.degrees, 0.55f)
+            }
+        }
         for (k in 1 until cells.size) {
-            val x = cells[k].x.toFloat()
+            val x = cells[k].second.x.toFloat()
             c.drawLine(x, h * 0.15f, x, h * 0.85f, dividerPaint)
         }
         return bmp

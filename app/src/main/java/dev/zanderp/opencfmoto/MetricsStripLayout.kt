@@ -6,6 +6,31 @@ package dev.zanderp.opencfmoto
 /** Axis-aligned rectangle in pixels. Pure, so layout math is unit-testable without Android. */
 data class StripRect(val x: Int, val y: Int, val w: Int, val h: Int)
 
+/** Strip cells, in display order. [TURN] follows Turn info; the rest are the rider's choice. */
+enum class StripCell { TURN, SPEED, ALTITUDE, HEADING }
+
+/** The rider's choice of metric cells (stored as "SPEED,ALTITUDE,…"). Never empty. */
+object StripCells {
+    val ALL: Set<StripCell> = setOf(StripCell.SPEED, StripCell.ALTITUDE, StripCell.HEADING)
+
+    /** Unknown/missing → all metrics (the pre-choice behaviour). [StripCell.TURN] is ignored. */
+    fun parse(s: String?): Set<StripCell> {
+        val set = s.orEmpty().split(',')
+            .mapNotNull { runCatching { StripCell.valueOf(it.trim()) }.getOrNull() }
+            .filter { it != StripCell.TURN }
+            .toSet()
+        return set.ifEmpty { ALL }
+    }
+
+    fun serialize(set: Set<StripCell>): String = set.sortedBy { it.ordinal }.joinToString(",") { it.name }
+
+    /** [set] with [cell] flipped, or null when that would leave no cells (use Off to hide the strip). */
+    fun toggle(set: Set<StripCell>, cell: StripCell): Set<StripCell>? {
+        val next = if (cell in set) set - cell else set + cell
+        return next.ifEmpty { null }
+    }
+}
+
 /**
  * Geometry for the rider metrics strip: the band reserved under Android Auto on the bike dash.
  * Canvas coordinates are top-left origin; GL placement goes through [glStripY]/[glAaShift] only.
@@ -55,17 +80,20 @@ object MetricsStripLayout {
         panelW to (panelH - stripPx).coerceAtLeast(16)
 
     /**
-     * Cell rects in strip-local coordinates. With a turn: 4 equal cells [turn, speed, altitude,
-     * heading]. Without: [speed (2 units), altitude, heading]. The last cell absorbs the remainder.
+     * Cell rects (strip-local) for the [shown] cells, in [StripCell] order. Cells share the width
+     * equally, except speed takes two units when there's no turn cell (and it isn't alone). The last
+     * cell absorbs the rounding remainder.
      */
-    fun cells(stripW: Int, stripH: Int, hasTurn: Boolean): List<StripRect> {
-        val unit = stripW / 4
-        val widths = if (hasTurn) {
-            listOf(unit, unit, unit, stripW - 3 * unit)
-        } else {
-            listOf(2 * unit, unit, stripW - 3 * unit)
-        }
+    fun layout(stripW: Int, stripH: Int, shown: List<StripCell>): List<Pair<StripCell, StripRect>> {
+        val cells = shown.distinct().sortedBy { it.ordinal }
+        if (cells.isEmpty()) return emptyList()
+        val hasTurn = StripCell.TURN in cells
+        val units = cells.map { if (it == StripCell.SPEED && !hasTurn && cells.size > 1) 2 else 1 }
+        val unitW = stripW / units.sum()
         var x = 0
-        return widths.map { w -> StripRect(x, 0, w, stripH).also { x += w } }
+        return cells.mapIndexed { i, cell ->
+            val w = if (i == cells.lastIndex) stripW - x else units[i] * unitW
+            (cell to StripRect(x, 0, w, stripH)).also { x += w }
+        }
     }
 }

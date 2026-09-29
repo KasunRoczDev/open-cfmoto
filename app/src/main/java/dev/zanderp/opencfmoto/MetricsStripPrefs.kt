@@ -19,13 +19,17 @@ enum class StripHeight(val px: Int, @StringRes val labelRes: Int) {
  * so AA margins, the reserved band and the nav service all agree for the whole connection — including
  * a park/resume after the rider changed Setup mid-ride.
  */
-data class StripSnapshot(val requestPx: Int, val turnInfo: Boolean) {
+data class StripSnapshot(
+    val requestPx: Int,
+    val turnInfo: Boolean,
+    val cells: Set<StripCell> = StripCells.ALL,
+) {
     companion object {
         val OFF = StripSnapshot(0, false)
 
         /** Turn info only makes sense with a visible strip. */
-        fun of(height: StripHeight, turnInfo: Boolean): StripSnapshot =
-            StripSnapshot(height.px, turnInfo && height != StripHeight.OFF)
+        fun of(height: StripHeight, turnInfo: Boolean, cells: Set<StripCell> = StripCells.ALL): StripSnapshot =
+            StripSnapshot(height.px, turnInfo && height != StripHeight.OFF, cells)
     }
 }
 
@@ -34,6 +38,7 @@ object MetricsStripPrefs {
     private const val PREFS = "opencfmoto_bike"
     private const val KEY_HEIGHT = "metrics_strip_height"
     private const val KEY_TURN_INFO = "metrics_strip_turn_info"
+    private const val KEY_CELLS = "metrics_strip_cells"
 
     private fun prefs(ctx: Context) =
         ctx.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
@@ -54,6 +59,14 @@ object MetricsStripPrefs {
         BikeScope.putBoolean(prefs(ctx), ctx, KEY_TURN_INFO, on)
     }
 
+    /** Which metric cells the strip shows (e.g. no speed on a 150SC, whose dash shows it already). */
+    fun cells(ctx: Context): Set<StripCell> =
+        StripCells.parse(BikeScope.getString(prefs(ctx), ctx, KEY_CELLS, null))
+
+    fun setCells(ctx: Context, cells: Set<StripCell>) {
+        BikeScope.putString(prefs(ctx), ctx, KEY_CELLS, StripCells.serialize(cells))
+    }
+
     /** Settings to freeze into [BikeProfileHolder.stripSession] at Connect. */
-    fun snapshot(ctx: Context): StripSnapshot = StripSnapshot.of(height(ctx), turnInfo(ctx))
+    fun snapshot(ctx: Context): StripSnapshot = StripSnapshot.of(height(ctx), turnInfo(ctx), cells(ctx))
 }

@@ -72,9 +72,12 @@ class MetricsStripLayoutTest {
         assertEquals(800 to 16, MetricsStripLayout.panelForAa(800, 20, 64))
     }
 
+    private val allWithTurn = listOf(StripCell.TURN, StripCell.SPEED, StripCell.ALTITUDE, StripCell.HEADING)
+    private val allNoTurn = listOf(StripCell.SPEED, StripCell.ALTITUDE, StripCell.HEADING)
+
     @Test
     fun fourEqualCellsWithTurn() {
-        val c = MetricsStripLayout.cells(800, 64, hasTurn = true)
+        val c = MetricsStripLayout.layout(800, 64, allWithTurn).map { it.second }
         assertEquals(
             listOf(StripRect(0, 0, 200, 64), StripRect(200, 0, 200, 64), StripRect(400, 0, 200, 64), StripRect(600, 0, 200, 64)),
             c,
@@ -83,13 +86,13 @@ class MetricsStripLayoutTest {
 
     @Test
     fun speedTakesTwoUnitsWithoutTurn() {
-        val c = MetricsStripLayout.cells(800, 64, hasTurn = false)
+        val c = MetricsStripLayout.layout(800, 64, allNoTurn).map { it.second }
         assertEquals(listOf(StripRect(0, 0, 400, 64), StripRect(400, 0, 200, 64), StripRect(600, 0, 200, 64)), c)
     }
 
     @Test
     fun lastCellAbsorbsRemainder() {
-        val c = MetricsStripLayout.cells(803, 48, hasTurn = true)
+        val c = MetricsStripLayout.layout(803, 48, allWithTurn).map { it.second }
         assertEquals(803, c.sumOf { it.w })
         assertEquals(203, c.last().w)
     }

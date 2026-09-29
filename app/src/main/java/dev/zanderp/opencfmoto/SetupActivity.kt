@@ -129,6 +129,9 @@ class SetupActivity : AppCompatActivity() {
         findViewById<MaterialButton>(R.id.strip_small).setOnClickListener { setStripHeight(StripHeight.SMALL) }
         findViewById<MaterialButton>(R.id.strip_medium).setOnClickListener { setStripHeight(StripHeight.MEDIUM) }
         findViewById<MaterialButton>(R.id.strip_large).setOnClickListener { setStripHeight(StripHeight.LARGE) }
+        findViewById<MaterialButton>(R.id.strip_cell_speed).setOnClickListener { toggleStripCell(StripCell.SPEED) }
+        findViewById<MaterialButton>(R.id.strip_cell_altitude).setOnClickListener { toggleStripCell(StripCell.ALTITUDE) }
+        findViewById<MaterialButton>(R.id.strip_cell_heading).setOnClickListener { toggleStripCell(StripCell.HEADING) }
         findViewById<MaterialButton>(R.id.turninfo_on).setOnClickListener { setTurnInfo(true) }
         findViewById<MaterialButton>(R.id.turninfo_off).setOnClickListener { setTurnInfo(false) }
         findViewById<MaterialButton>(R.id.btn_bt_trigger).setOnClickListener { pickBtTrigger() }
@@ -321,6 +324,16 @@ class SetupActivity : AppCompatActivity() {
         MetricsStripPrefs.setHeight(this, h)
         refreshOptions()
         toast(getString(R.string.setup_toast_metrics_strip, getString(h.labelRes)))
+    }
+
+    private fun toggleStripCell(cell: StripCell) {
+        val next = StripCells.toggle(MetricsStripPrefs.cells(this), cell)
+        if (next == null) {
+            Toast.makeText(this, R.string.setup_strip_cells_keep_one, Toast.LENGTH_SHORT).show()
+            return
+        }
+        MetricsStripPrefs.setCells(this, next)
+        refreshOptions()
     }
 
     private fun setTurnInfo(on: Boolean) {
@@ -569,6 +582,15 @@ class SetupActivity : AppCompatActivity() {
         val stripOn = MetricsStripPrefs.height(this) != StripHeight.OFF
         findViewById<MaterialButton>(R.id.turninfo_on).isEnabled = stripOn
         findViewById<MaterialButton>(R.id.turninfo_off).isEnabled = stripOn
+        val shownCells = MetricsStripPrefs.cells(this)
+        for ((id, cell) in listOf(
+            R.id.strip_cell_speed to StripCell.SPEED,
+            R.id.strip_cell_altitude to StripCell.ALTITUDE,
+            R.id.strip_cell_heading to StripCell.HEADING,
+        )) {
+            highlight(cell in shownCells, id to true)
+            findViewById<MaterialButton>(id).isEnabled = stripOn
+        }
         highlight(theme,
             R.id.theme_auto to MapTheme.AUTO,
             R.id.theme_day to MapTheme.DAY,

@@ -7,6 +7,13 @@ import org.junit.Test
 
 class MetricsStripSessionTest {
     @Test
+    fun snapshotCarriesChosenCells() {
+        val cells = setOf(StripCell.ALTITUDE, StripCell.HEADING)
+        assertEquals(cells, StripSnapshot.of(StripHeight.SMALL, turnInfo = true, cells = cells).cells)
+        assertEquals(StripCells.ALL, StripSnapshot.of(StripHeight.SMALL, turnInfo = false).cells)
+    }
+
+    @Test
     fun snapshotTiesTurnInfoToVisibleStrip() {
         assertEquals(StripSnapshot(0, false), StripSnapshot.of(StripHeight.OFF, turnInfo = true))
         assertEquals(StripSnapshot(64, true), StripSnapshot.of(StripHeight.MEDIUM, turnInfo = true))

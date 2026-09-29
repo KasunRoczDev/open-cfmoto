@@ -312,7 +312,8 @@ class VideoPipeline(
             val comp = aaCompositor
             if (stripPx > 0 && comp != null) {
                 // Runs before the bike's config-capture reply — a strip failure must not break the link.
-                stripGuarded(log, "start") { MetricsStrip.start(context, w, stripPx, comp::setStripBitmap, log) }
+                val cells = BikeProfileHolder.stripSession.cells
+                stripGuarded(log, "start") { MetricsStrip.start(context, w, stripPx, comp::setStripBitmap, log, cells) }
             }
             log("[VIDEO] bike canvas ${w}x$h configured; AA source ${src.width}x${src.height} " +
                 "usable ${usableW}x$usableH (margins ${margins.marginW}x${margins.marginH}) → " +

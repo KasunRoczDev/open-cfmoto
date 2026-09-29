@@ -42,12 +42,20 @@ object MetricsStrip {
     @Volatile private var units = MapUnits.METRIC
     @Volatile private var stripW = 0
     @Volatile private var stripH = 0
+    @Volatile private var cells: Set<StripCell> = StripCells.ALL
     @Volatile private var metrics = RiderMetrics()
     private var lastValues: StripValues? = null   // metrics-strip thread only
     private var failLogged = false                // metrics-strip thread only
 
     @Synchronized
-    fun start(ctx: Context, canvasW: Int, stripPx: Int, sink: (Bitmap) -> Unit, log: (String) -> Unit) {
+    fun start(
+        ctx: Context,
+        canvasW: Int,
+        stripPx: Int,
+        sink: (Bitmap) -> Unit,
+        log: (String) -> Unit,
+        cells: Set<StripCell> = StripCells.ALL,
+    ) {
         stop()
         val app = ctx.applicationContext
         this.sink = sink
@@ -55,6 +63,7 @@ object MetricsStrip {
         units = MapPrefs.units(app)
         stripW = canvasW
         stripH = stripPx
+        this.cells = cells
         lastValues = null
         failLogged = false
         val ex = Executors.newSingleThreadScheduledExecutor { r ->
@@ -65,7 +74,7 @@ object MetricsStrip {
         val src = MetricsSource(app) { loc -> onFix(loc) }
         source = src
         if (!src.start()) log("[STRIP] no GPS (permission or GPS off) — showing --")
-        log("[STRIP] started ${canvasW}x$stripPx units=$units")
+        log("[STRIP] started ${canvasW}x$stripPx units=$units cells=${StripCells.serialize(cells)}")
     }
 
     @Synchronized
@@ -111,7 +120,7 @@ object MetricsStrip {
             val out = sink ?: return
             val v = MetricsFormat.values(metrics, units, SystemClock.elapsedRealtime())
             if (v == lastValues) return
-            val bmp = MetricsStripRenderer.render(v, stripW, stripH)
+            val bmp = MetricsStripRenderer.render(v, stripW, stripH, cells)
             lastValues = v
             out(bmp)
         } catch (e: Exception) {
