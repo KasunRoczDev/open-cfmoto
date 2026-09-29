@@ -300,7 +300,18 @@ class VideoPipeline(
             val usableH = (src.height - margins.marginH).coerceIn(16, src.height)
             aaCompositor?.setFrameCap(power.fps)
             aaCompositor?.setSourceCrop(usableW.toFloat() / src.width, usableH.toFloat() / src.height)
+            val stripReq = MetricsStripPrefs.height(context).px
+            val stripPx = MetricsStripLayout.resolvePx(stripReq, h)
+            if (stripReq > 0 && stripPx == 0) {
+                log("[STRIP] canvas ${w}x$h too small (< ${MetricsStripLayout.MIN_CANVAS_H}px tall) — strip off this session")
+            }
+            aaCompositor?.setStrip(stripPx)
             aaCompositor?.setOutput(surf, w, h, usableW, usableH, fit)
+            MetricsStrip.stop()
+            val comp = aaCompositor
+            if (stripPx > 0 && comp != null) {
+                MetricsStrip.start(context, w, stripPx, comp::setStripBitmap, log)
+            }
             log("[VIDEO] bike canvas ${w}x$h configured; AA source ${src.width}x${src.height} " +
                 "usable ${usableW}x$usableH (margins ${margins.marginW}x${margins.marginH}) → " +
                 "fit=$fit power=${power.fps}fps")
@@ -727,6 +738,7 @@ class VideoPipeline(
         if (dumpOut != null) log("[DUMP] stopped: $dumpPath ($dumpFrames frames) — Share Log to send it")
         dumpOut = null
         drainThread?.interrupt(); drainThread = null
+        MetricsStrip.stop()
         try { aaCompositor?.release() } catch (_: Exception) {}
         aaCompositor = null
         try { mirrorScaler?.release() } catch (_: Exception) {}
