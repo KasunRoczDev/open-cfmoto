@@ -152,3 +152,13 @@ Optional band under Android Auto on the **bike output only** (not the in-app Das
 - `VideoPrefs.aaMarginsFor` — AA is laid out for `panelH − band` (also when match-aspect is OFF).
 - Logs: `[STRIP] on canvas=… rect(top-origin)=… glY=… aaRect=…`, `[STRIP] started …`,
   `[STRIP] no GPS …`, `[STRIP] … failed`.
+
+## Rider metrics strip (phase 2 — turn info, experimental)
+
+- Setup → *Turn info* (needs the strip) sets `BikeProfileHolder.aaTurnInfo`; `ServiceDiscoveryResponse`
+  then advertises `NavigationStatusService` on `Channel.ID_NAV` (`ImageCodesOnly`, 1000 ms). Off =
+  handshake unchanged.
+- `aa/AapControlNav` → `aa/NavTurnTracker` (pure; handles NEXTTURNDETAILS/NEXTTURNDISTANCEANDTIME and
+  NAVIGATION_STATE/CURRENT_POSITION) → `MetricsStrip.setTurn`.
+- Logs: `[NAV] first <TYPE> len=…`, `[NAV] turn → KIND SIDE N m "road"`, `[NAV] turn cleared`,
+  `[NAV] parse failed …`.
