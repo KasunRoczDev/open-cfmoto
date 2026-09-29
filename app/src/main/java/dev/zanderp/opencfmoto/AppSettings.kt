@@ -21,6 +21,9 @@ import android.content.Context
 object AppSettings {
     private const val PREFS = "opencfmoto_bike"
     private const val KEY_AUTO_CONNECT = "auto_connect"
+    private const val KEY_COMMUTE_NAV = "commute_nav"
+    private const val KEY_COMMUTE_AM = "commute_morning_slot"
+    private const val KEY_COMMUTE_PM = "commute_evening_slot"
     private const val KEY_AUTO_RECOVERY = "auto_recovery"
     private const val KEY_LOG_TRIPS = "log_trips"
     private const val KEY_FORCE_NON_TOUCH = "force_non_touch"
@@ -41,6 +44,21 @@ object AppSettings {
     fun autoConnect(ctx: Context): Boolean = prefs(ctx).getBoolean(KEY_AUTO_CONNECT, true)
     fun setAutoConnect(ctx: Context, on: Boolean) =
         prefs(ctx).edit().putBoolean(KEY_AUTO_CONNECT, on).apply()
+
+    /** Navigate on Connect ▸ Commute (see [CommuteNav]). Rider-wide, like [SavedPlaces]. */
+    fun commuteNav(ctx: Context): Boolean = prefs(ctx).getBoolean(KEY_COMMUTE_NAV, false)
+    fun setCommuteNav(ctx: Context, on: Boolean) =
+        prefs(ctx).edit().putBoolean(KEY_COMMUTE_NAV, on).apply()
+
+    /** Saved-place slot (0-based) used before [CommuteNav.SWITCH_HOUR]. */
+    fun commuteMorningSlot(ctx: Context): Int = prefs(ctx).getInt(KEY_COMMUTE_AM, 1).coerceIn(0, SavedPlaces.COUNT - 1)
+    fun setCommuteMorningSlot(ctx: Context, slot: Int) =
+        prefs(ctx).edit().putInt(KEY_COMMUTE_AM, slot).apply()
+
+    /** Saved-place slot (0-based) used from [CommuteNav.SWITCH_HOUR]. */
+    fun commuteEveningSlot(ctx: Context): Int = prefs(ctx).getInt(KEY_COMMUTE_PM, 0).coerceIn(0, SavedPlaces.COUNT - 1)
+    fun setCommuteEveningSlot(ctx: Context, slot: Int) =
+        prefs(ctx).edit().putInt(KEY_COMMUTE_PM, slot).apply()
 
     fun autoRecovery(ctx: Context): Boolean = prefs(ctx).getBoolean(KEY_AUTO_RECOVERY, true)
     fun setAutoRecovery(ctx: Context, on: Boolean) =

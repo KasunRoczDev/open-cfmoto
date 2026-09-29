@@ -666,6 +666,7 @@ class AndroidAutoService : Service() {
 
     override fun onDestroy() {
         isRunning = false
+        CommuteNav.disarm()   // Stop ends the session; a later stream needs a fresh Connect.
         aaParked = false
         if (active === this) active = null
         watchdogHandler.removeCallbacksAndMessages(null)

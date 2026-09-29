@@ -46,6 +46,7 @@ object ConnectionState {
      * component can flip to [Phase.STREAMING] without knowing which bike it is).
      */
     fun set(newPhase: Phase, newDetail: String? = null) {
+        val wasStreaming = phase == Phase.STREAMING
         phase = newPhase
         if (newDetail != null) detail = newDetail
         val d = detail
@@ -54,6 +55,10 @@ object ConnectionState {
         try {
             listener?.invoke(newPhase, d)
         } catch (_: Exception) {
+        }
+        // First stream after a rider-initiated Connect → commute navigation (one shot).
+        if (newPhase == Phase.STREAMING && !wasStreaming) {
+            try { CommuteNav.onStreaming() } catch (_: Exception) {}
         }
     }
 }

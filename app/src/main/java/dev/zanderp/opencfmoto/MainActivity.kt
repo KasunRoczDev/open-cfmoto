@@ -184,12 +184,14 @@ class MainActivity : AppCompatActivity() {
 
     /** Start the Android Auto → bike projection for [qr]. Shared by the one-tap Connect reconnect
      *  and a fresh scan, so both paths behave identically. */
-    private fun startAaFlow(qr: QrData) {
+    /** @param armCommute false for a parked-resume: only a real Connect may start commute navigation. */
+    private fun startAaFlow(qr: QrData, armCommute: Boolean = true) {
         try {
             if (!WifiGate.ensureEnabledOrPrompt(this)) return
             // AA Connect needs Nearby + Bluetooth so HUR (START_WIRELESS_PROJECTION) can run when
             // WirelessStartupActivity is a no-op (common on AA 16.4+/17.4+). Mirror/Map unchanged.
             if (!ensureNearbyBtForAaConnect()) return
+            if (armCommute) CommuteNav.armForConnect(this) else CommuteNav.disarm()
             // Map / Mirror / stale PXC must die first — half-switches leave framesSent=0.
             tearDownForModeSwitch(clearMap = true, clearMirror = true)
             applyProfile(qr)
@@ -721,7 +723,7 @@ class MainActivity : AppCompatActivity() {
         AndroidAutoService.notifyForegroundResuming()
         ProjectionHolder.projection = null
         ensureLocationPermission()
-        startAaFlow(saved)
+        startAaFlow(saved, armCommute = false)
     }
 
     /** Helmet remote / watch ACL → same one-tap Connect as a saved-QR tap. */

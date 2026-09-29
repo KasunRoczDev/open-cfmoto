@@ -650,6 +650,15 @@
     <string name="pref_cell_altitude">Altitude</string>
     <string name="pref_cell_heading">Heading</string>
     <string name="setup_strip_cells_keep_one">Keep at least one — choose Off above to hide the strip</string>
+    <string name="setup_commute">Navigate on Connect</string>
+    <string name="setup_commute_desc">Commute: when you tap Connect, start Google Maps to a saved place — one before 12:00, another after. Only once per Connect; reconnects never replace your route. Set places in Controls → Navigate to.</string>
+    <string name="pref_commute_off">Off</string>
+    <string name="pref_commute_on">Commute</string>
+    <string name="setup_commute_morning">Before 12:00 → %1$s</string>
+    <string name="setup_commute_evening">After 12:00 → %1$s</string>
+    <string name="setup_commute_pick">Pick a saved place</string>
+    <string name="setup_commute_place_unset">Place %1$d (not set)</string>
+    <string name="setup_commute_overlay">Allow \"Display over other apps\" so Maps can start while OpenCfMoto is in the background</string>
     <string name="setup_turn_info">Turn info on the strip (experimental)</string>
     <string name="setup_turn_info_desc">Shows the next turn from Google Maps / Waze in the metrics strip. Needs the strip on. If Android Auto stops connecting, turn this off. Applies next connect.</string>
     <string name="pref_turn_info_on">On</string>

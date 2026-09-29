@@ -151,6 +151,10 @@ class SetupActivity : AppCompatActivity() {
         findViewById<MaterialButton>(R.id.hold_long).setOnClickListener { setLongPress(LongPressDelay.LONG) }
         findViewById<MaterialButton>(R.id.autoconnect_on).setOnClickListener { setAutoConnect(true) }
         findViewById<MaterialButton>(R.id.autoconnect_off).setOnClickListener { setAutoConnect(false) }
+        findViewById<MaterialButton>(R.id.commute_off).setOnClickListener { setCommute(false) }
+        findViewById<MaterialButton>(R.id.commute_on).setOnClickListener { setCommute(true) }
+        findViewById<MaterialButton>(R.id.commute_morning).setOnClickListener { pickCommutePlace(morning = true) }
+        findViewById<MaterialButton>(R.id.commute_evening).setOnClickListener { pickCommutePlace(morning = false) }
         findViewById<MaterialButton>(R.id.recovery_on).setOnClickListener { setAutoRecovery(true) }
         findViewById<MaterialButton>(R.id.recovery_off).setOnClickListener { setAutoRecovery(false) }
         findViewById<MaterialButton>(R.id.btclock_on).setOnClickListener { setBtClock(true) }
@@ -404,6 +408,43 @@ class SetupActivity : AppCompatActivity() {
         Toast.makeText(this, "Auto-connect ${if (on) "on" else "off"}", Toast.LENGTH_SHORT).show()
     }
 
+    private fun setCommute(on: Boolean) {
+        AppSettings.setCommuteNav(this, on)
+        refreshOptions()
+        toast(getString(R.string.setup_commute) + ": " +
+            getString(if (on) R.string.pref_commute_on else R.string.pref_commute_off))
+        // Maps is started while we're backgrounded (AA is in front) — same need as handlebar nav buttons.
+        if (on && !NavLauncher.canLaunchFromBackground(this)) {
+            Toast.makeText(this, R.string.setup_commute_overlay, Toast.LENGTH_LONG).show()
+            try {
+                startActivity(NavLauncher.overlayPermissionIntent(this))
+            } catch (e: Exception) {
+                LogBus.log("couldn't open the overlay permission screen ($e)")
+            }
+        }
+    }
+
+    private fun commutePlaceLabel(slot: Int): String =
+        if (SavedPlaces.isSet(this, slot)) {
+            SavedPlaces.name(this, slot).ifBlank { SavedPlaces.query(this, slot) }
+        } else {
+            getString(R.string.setup_commute_place_unset, slot + 1)
+        }
+
+    private fun pickCommutePlace(morning: Boolean) {
+        val labels = Array(SavedPlaces.COUNT) { commutePlaceLabel(it) }
+        val current = if (morning) AppSettings.commuteMorningSlot(this) else AppSettings.commuteEveningSlot(this)
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.setup_commute_pick)
+            .setSingleChoiceItems(labels, current) { dialog, which ->
+                if (morning) AppSettings.setCommuteMorningSlot(this, which)
+                else AppSettings.setCommuteEveningSlot(this, which)
+                refreshOptions()
+                dialog.dismiss()
+            }
+            .show()
+    }
+
     private fun setAutoRecovery(on: Boolean) {
         AppSettings.setAutoRecovery(this, on)
         refreshOptions()
@@ -611,6 +652,18 @@ class SetupActivity : AppCompatActivity() {
         highlight(AppSettings.autoConnect(this),
             R.id.autoconnect_on to true,
             R.id.autoconnect_off to false)
+        val commuteOn = AppSettings.commuteNav(this)
+        highlight(commuteOn,
+            R.id.commute_on to true,
+            R.id.commute_off to false)
+        findViewById<MaterialButton>(R.id.commute_morning).apply {
+            text = getString(R.string.setup_commute_morning, commutePlaceLabel(AppSettings.commuteMorningSlot(this@SetupActivity)))
+            isEnabled = commuteOn
+        }
+        findViewById<MaterialButton>(R.id.commute_evening).apply {
+            text = getString(R.string.setup_commute_evening, commutePlaceLabel(AppSettings.commuteEveningSlot(this@SetupActivity)))
+            isEnabled = commuteOn
+        }
         highlight(AppSettings.autoRecovery(this),
             R.id.recovery_on to true,
             R.id.recovery_off to false)
