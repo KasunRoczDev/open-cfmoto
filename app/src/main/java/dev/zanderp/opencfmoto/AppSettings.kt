@@ -154,6 +154,7 @@ object AppSettings {
         BikeProfileHolder.forceNonTouch = forceNonTouch(ctx)
         BikeProfileHolder.forceTouch = forceTouch(ctx)
         BikeProfileHolder.aaDpiOverride = VideoPrefs.dpiOverride(ctx)
+        BikeProfileHolder.aaTurnInfo = MetricsStripPrefs.turnInfoActive(ctx)
         LogBus.includeSecrets = includeSecretsInLogs(ctx)
         ProfilePrefs.applyToHolder(ctx)
         ButtonMap.ensureDefaultsMigrated(ctx)

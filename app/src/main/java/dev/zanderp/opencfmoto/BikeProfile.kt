@@ -241,6 +241,13 @@ object BikeProfileHolder {
     @Volatile var aaContentMargins: AaMargins = AaMargins.NONE
 
     /**
+     * Advertise Android Auto's navigation-status (instrument cluster) service so Maps/Waze send
+     * next-turn data for the metrics strip. Synced from [MetricsStripPrefs.turnInfoActive]; read by
+     * [dev.zanderp.opencfmoto.aa.ServiceDiscoveryResponse]. Off = handshake unchanged.
+     */
+    @Volatile var aaTurnInfo: Boolean = false
+
+    /**
      * Setup ▸ "Disable touchscreen" — when true, never advertise a touchscreen to Android Auto
      * (focus/knob UI) even if the active profile claims touch. Synced from [AppSettings.forceNonTouch].
      * Mutually exclusive with [forceTouch].

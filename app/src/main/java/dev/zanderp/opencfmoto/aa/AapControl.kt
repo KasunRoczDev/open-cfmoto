@@ -267,12 +267,42 @@ internal class AapControlService(private val aapTransport: AapTransport) : AapCo
     }
 }
 
+/** Instrument-cluster navigation (channel 10): next-turn data for the metrics strip. */
+internal class AapControlNav : AapControl {
+    private val tracker = NavTurnTracker()
+    private val seenTypes = HashSet<Int>()
+
+    override fun execute(message: AapMessage): Int {
+        val len = message.size - message.dataOffset
+        if (seenTypes.add(message.type)) {
+            dev.zanderp.opencfmoto.LogBus.log("[NAV] first ${NavTurnTracker.typeName(message.type)} len=$len")
+        }
+        val changed = try {
+            tracker.onMessage(message.type, message.data, message.dataOffset, len)
+        } catch (e: Exception) {
+            dev.zanderp.opencfmoto.LogBus.log("[NAV] parse failed ${NavTurnTracker.typeName(message.type)}: $e")
+            false
+        }
+        if (changed) {
+            val t = tracker.current
+            dev.zanderp.opencfmoto.LogBus.log(
+                if (t == null) "[NAV] turn cleared"
+                else "[NAV] turn → ${t.kind} ${t.side} ${t.distanceM ?: "?"} m" +
+                    (t.exitNumber?.let { " exit $it" } ?: "") + " \"${t.road.orEmpty()}\"",
+            )
+            dev.zanderp.opencfmoto.MetricsStrip.setTurn(t)
+        }
+        return 0
+    }
+}
+
 internal class AapControlGateway(
     private val aapTransport: AapTransport,
     private val serviceControl: AapControl,
     private val mediaControl: AapControl,
     private val touchControl: AapControl,
-    private val sensorControl: AapControl
+    private val sensorControl: AapControl,
+    private val navControl: AapControl
 ) : AapControl {
 
     constructor(aapTransport: AapTransport) : this(
@@ -280,7 +310,8 @@ internal class AapControlGateway(
         AapControlService(aapTransport),
         AapControlMedia(aapTransport),
         AapControlTouch(aapTransport),
-        AapControlSensor(aapTransport)
+        AapControlSensor(aapTransport),
+        AapControlNav()
     )
 
     override fun execute(message: AapMessage): Int {
@@ -292,6 +323,7 @@ internal class AapControlGateway(
             Channel.ID_CTR -> return serviceControl.execute(message)
             Channel.ID_INP -> return touchControl.execute(message)
             Channel.ID_SEN -> return sensorControl.execute(message)
+            Channel.ID_NAV -> return navControl.execute(message)
             Channel.ID_VID, Channel.ID_AUD, Channel.ID_AU1, Channel.ID_AU2, Channel.ID_MIC -> return mediaControl.execute(message)
         }
         return 0

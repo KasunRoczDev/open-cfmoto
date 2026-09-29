@@ -129,6 +129,8 @@ class SetupActivity : AppCompatActivity() {
         findViewById<MaterialButton>(R.id.strip_small).setOnClickListener { setStripHeight(StripHeight.SMALL) }
         findViewById<MaterialButton>(R.id.strip_medium).setOnClickListener { setStripHeight(StripHeight.MEDIUM) }
         findViewById<MaterialButton>(R.id.strip_large).setOnClickListener { setStripHeight(StripHeight.LARGE) }
+        findViewById<MaterialButton>(R.id.turninfo_on).setOnClickListener { setTurnInfo(true) }
+        findViewById<MaterialButton>(R.id.turninfo_off).setOnClickListener { setTurnInfo(false) }
         findViewById<MaterialButton>(R.id.btn_bt_trigger).setOnClickListener { pickBtTrigger() }
         findViewById<MaterialButton>(R.id.theme_auto).setOnClickListener { setMapTheme(MapTheme.AUTO) }
         findViewById<MaterialButton>(R.id.theme_day).setOnClickListener { setMapTheme(MapTheme.DAY) }
@@ -319,6 +321,13 @@ class SetupActivity : AppCompatActivity() {
         MetricsStripPrefs.setHeight(this, h)
         refreshOptions()
         toast(getString(R.string.setup_toast_metrics_strip, getString(h.labelRes)))
+    }
+
+    private fun setTurnInfo(on: Boolean) {
+        MetricsStripPrefs.setTurnInfo(this, on)
+        refreshOptions()
+        toast(getString(R.string.setup_toast_turn_info,
+            getString(if (on) R.string.pref_turn_info_on else R.string.pref_turn_info_off)))
     }
 
     private fun pickBtTrigger() {
@@ -554,6 +563,12 @@ class SetupActivity : AppCompatActivity() {
             R.id.strip_small to StripHeight.SMALL,
             R.id.strip_medium to StripHeight.MEDIUM,
             R.id.strip_large to StripHeight.LARGE)
+        highlight(MetricsStripPrefs.turnInfo(this),
+            R.id.turninfo_on to true,
+            R.id.turninfo_off to false)
+        val stripOn = MetricsStripPrefs.height(this) != StripHeight.OFF
+        findViewById<MaterialButton>(R.id.turninfo_on).isEnabled = stripOn
+        findViewById<MaterialButton>(R.id.turninfo_off).isEnabled = stripOn
         highlight(theme,
             R.id.theme_auto to MapTheme.AUTO,
             R.id.theme_day to MapTheme.DAY,

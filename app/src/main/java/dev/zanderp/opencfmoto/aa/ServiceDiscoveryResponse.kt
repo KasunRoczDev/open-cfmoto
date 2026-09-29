@@ -2,7 +2,8 @@
 // Video-only head-unit profile for OpenCfMoto: advertises 720x1280 PORTRAIT H.264 video
 // (composited aspect-correct into the bike's requested canvas — the CFDL26 dash is a tall 800x951
 // panel), a driving-status sensor, a touchscreen input service, and a PCM microphone (required for
-// AA bring-up). Audio sink, navigation-status, media-playback and bluetooth services from HUR are
+// AA bring-up). Audio sink, media-playback and bluetooth services from HUR are
+// (Navigation-status is advertised only when Setup → Turn info is on — see BikeProfileHolder.aaTurnInfo.)
 // intentionally dropped (video-only v1 — see docs 03 M5).
 package dev.zanderp.opencfmoto.aa
 
@@ -123,6 +124,18 @@ class ServiceDiscoveryResponse
                     }.build()
                 }.build()
             }.build())
+
+            // --- Navigation status (instrument cluster) — next-turn data for the metrics strip.
+            //     Only when the rider opted in (Setup → Turn info); otherwise the handshake is unchanged. ---
+            if (BikeProfileHolder.aaTurnInfo) {
+                services.add(Control.Service.newBuilder().also { service ->
+                    service.id = Channel.ID_NAV
+                    service.navigationStatusService = Control.Service.NavigationStatusService.newBuilder().apply {
+                        minimumIntervalMs = 1000
+                        type = Control.Service.NavigationStatusService.ClusterType.ImageCodesOnly
+                    }.build()
+                }.build())
+            }
 
             return Control.ServiceDiscoveryResponse.newBuilder().apply {
                 make = "OpenCfMoto"

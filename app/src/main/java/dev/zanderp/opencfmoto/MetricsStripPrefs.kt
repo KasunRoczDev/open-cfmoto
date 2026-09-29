@@ -18,6 +18,7 @@ enum class StripHeight(val px: Int, @StringRes val labelRes: Int) {
 object MetricsStripPrefs {
     private const val PREFS = "opencfmoto_bike"
     private const val KEY_HEIGHT = "metrics_strip_height"
+    private const val KEY_TURN_INFO = "metrics_strip_turn_info"
 
     private fun prefs(ctx: Context) =
         ctx.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
@@ -29,5 +30,17 @@ object MetricsStripPrefs {
 
     fun setHeight(ctx: Context, h: StripHeight) {
         BikeScope.putString(prefs(ctx), ctx, KEY_HEIGHT, h.name)
+        BikeProfileHolder.aaTurnInfo = turnInfoActive(ctx)
     }
+
+    /** Experimental: ask Android Auto for next-turn data (instrument cluster service). */
+    fun turnInfo(ctx: Context): Boolean = BikeScope.getBoolean(prefs(ctx), ctx, KEY_TURN_INFO, false)
+
+    fun setTurnInfo(ctx: Context, on: Boolean) {
+        BikeScope.putBoolean(prefs(ctx), ctx, KEY_TURN_INFO, on)
+        BikeProfileHolder.aaTurnInfo = turnInfoActive(ctx)
+    }
+
+    /** Turn info only makes sense with a visible strip. */
+    fun turnInfoActive(ctx: Context): Boolean = turnInfo(ctx) && height(ctx) != StripHeight.OFF
 }
