@@ -137,3 +137,18 @@ first, then scanned.) The mirror path (`ProjectionHolder`) is unchanged.
 - **Touch input** back to AA (CFDL26 is a touch panel — `supportScreenTouch`, `supportHID`).
 - **Audio** to the bike / phone / BT helmet (currently video-only; the AA audio sink is advertised but
   its PCM is discarded).
+
+## Rider metrics strip (phase 1)
+
+Optional band under Android Auto on the **bike output only** (not the in-app Dash view). Spec:
+`docs/superpowers/specs/2026-09-30-rider-metrics-strip-design.md`.
+
+- `MetricsStripLayout` — pure geometry (band height clamp 32..H/4, cells, GL placement flag
+  `STRIP_AT_GL_BOTTOM`, touch exclusion, AA panel shape).
+- `RiderMetrics` / `MetricsFormat` — pure values + formatting (5 s staleness, units from `MapPrefs`).
+- `MetricsStrip` — per-session coordinator: `MetricsSource` (own GPS listener) → render on change
+  (`MetricsStripRenderer`, Canvas → Bitmap) → `AaCompositor.setStripBitmap`.
+- `AaCompositor` — `setStrip(px)` shrinks the AA viewport; the strip texture is drawn into the band.
+- `VideoPrefs.aaMarginsFor` — AA is laid out for `panelH − band` (also when match-aspect is OFF).
+- Logs: `[STRIP] on canvas=… rect(top-origin)=… glY=… aaRect=…`, `[STRIP] started …`,
+  `[STRIP] no GPS …`, `[STRIP] … failed`.
