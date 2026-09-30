@@ -203,7 +203,7 @@ class AaReceiver(
             AaVideoBridge.previewTouchSink = null
             AaVideoBridge.nightSink = null
             // AA session over → no route: don't leave a frozen maneuver on the metrics strip.
-            dev.zanderp.opencfmoto.MetricsStrip.setTurn(null)
+            dev.zanderp.opencfmoto.MetricsStrip.clearNavigation()
             try { t.microphone?.stop("transport quit") } catch (_: Exception) {}
             transport = null
             releaseSession()

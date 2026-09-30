@@ -92,6 +92,9 @@ class AaCompositor(private val log: (String) -> Unit) {
     // Rider metrics strip: a band of [stripPx] dash pixels reserved under Android Auto on the BIKE
     // output only (never the phone preview). AA is viewported above it; the strip bitmap is pasted in.
     @Volatile private var stripPx = 0
+    @Volatile private var stripOverlay = false
+    @Volatile private var stripVisible = true
+    private fun stripGeometry() = StripGeometry.of(stripPx, stripOverlay, stripVisible)
     private var stripProgram = 0
     private var sPosition = 0
     private var sTexCoord = 0
@@ -223,7 +226,7 @@ class AaCompositor(private val log: (String) -> Unit) {
                 if (stripPx > 0) {
                     val r = MetricsStripLayout.stripRect(cw, ch, stripPx)
                     log("[STRIP] on canvas=${cw}x$ch strip=${stripPx}px rect(top-origin)=${r.x},${r.y},${r.w},${r.h} " +
-                        "glY=${MetricsStripLayout.glStripY(ch, stripPx)} aaRect=${vpW}x$vpH @($vpX,$vpY)")
+                        "glY=${MetricsStripLayout.glStripY(ch, stripPx)} aaRect=${vpW}x$vpH @($vpX,$vpY) overlay=$stripOverlay")
                 }
             } catch (e: Exception) {
                 log("[COMPOSITOR] setOutput failed: $e")
@@ -315,7 +318,7 @@ class AaCompositor(private val log: (String) -> Unit) {
      */
     fun mapCanvasToSource(cx: Int, cy: Int, isDown: Boolean = true): Pair<Int, Int>? {
         // Metrics band: drop a DOWN there, clamp a MOVE/UP to the last AA row (never strand a pointer).
-        val y = MetricsStripLayout.touchY(cy, canvasH, stripPx, isDown) ?: return null
+        val y = MetricsStripLayout.touchY(cy, canvasH, stripGeometry().touchPx, isDown) ?: return null
         if (vpW == 0 || vpH == 0 || srcW == 0 || srcH == 0) return null
         val rx = cx - vpX
         val ry = y - vpY
@@ -336,7 +339,7 @@ class AaCompositor(private val log: (String) -> Unit) {
         if (canvasW == 0 || canvasH == 0 || srcW == 0 || srcH == 0) return
         // Inset by rider/profile screen margins so chrome (e.g. 800NK pull-down) stays black.
         // The metrics band (if any) comes off the canvas first; AA + rider margins share the rest.
-        val aaCanvasH = (canvasH - stripPx).coerceAtLeast(1)
+        val aaCanvasH = (canvasH - stripGeometry().reservePx).coerceAtLeast(1)
         val mT = ScreenMargins.top.coerceIn(0, aaCanvasH)
         val mB = ScreenMargins.bottom.coerceIn(0, aaCanvasH - mT)
         val mL = ScreenMargins.left.coerceIn(0, canvasW)
@@ -393,12 +396,27 @@ class AaCompositor(private val log: (String) -> Unit) {
         }
     }
 
-    /** Reserve a band of [px] dash pixels under Android Auto on the bike output (0 = off). Call before [setOutput]. */
-    fun setStrip(px: Int) {
+    /**
+     * Band of [px] dash pixels on the bike output (0 = off). [overlay] false = Metrics (reserved under AA);
+     * true = Directions (AA full screen, band drawn over it only while [setStripVisible] is true).
+     * Call before [setOutput].
+     */
+    fun setStrip(px: Int, overlay: Boolean = false) {
         handler.post {
             stripPx = px.coerceAtLeast(0)
+            stripOverlay = overlay
+            stripVisible = !overlay
             if (stripPx == 0) stripReady = false
             computeViewport()
+        }
+    }
+
+    /** Directions mode: show/hide the band (route active or not) and re-emit a frame. */
+    fun setStripVisible(visible: Boolean) {
+        handler.post {
+            if (stripVisible == visible) return@post
+            stripVisible = visible
+            if (hasContent) drawFrame()
         }
     }
 
@@ -513,11 +531,11 @@ class AaCompositor(private val log: (String) -> Unit) {
         val isBike = target === windowSurface
         val clipW = if (isBike) canvasW else previewW
         val clipH = if (isBike) canvasH else previewH
-        val band = if (isBike) stripPx else 0
-        val shift = if (band > 0) MetricsStripLayout.glAaShift(band) else 0
+        val g = if (isBike) stripGeometry() else StripGeometry(0, 0, 0)
+        val shift = if (g.reservePx > 0) MetricsStripLayout.glAaShift(g.reservePx) else 0
         if (clipW > 0 && clipH > 0) {
             GLES20.glEnable(GLES20.GL_SCISSOR_TEST)
-            GLES20.glScissor(0, shift, clipW, clipH - band)
+            GLES20.glScissor(0, shift, clipW, clipH - g.reservePx)
         }
 
         GLES20.glViewport(vx, vy + shift, vw, vh)
@@ -542,9 +560,9 @@ class AaCompositor(private val log: (String) -> Unit) {
         GLES20.glDisableVertexAttribArray(aTexCoord)
         GLES20.glDisable(GLES20.GL_SCISSOR_TEST)
 
-        if (band > 0) {
+        if (g.drawPx > 0) {
             try {
-                drawStrip(band)
+                drawStrip(g.drawPx)
             } catch (e: Exception) {
                 logStripFailure("draw", e)
             }

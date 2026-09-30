@@ -274,6 +274,7 @@ internal class AapControlNav : AapControl {
     private val failedTypes = HashSet<Int>()
     private var logged: dev.zanderp.opencfmoto.NextTurn? = null
     private var loggedOnce = false
+    private var lastParts: String? = null
 
     override fun execute(message: AapMessage): Int {
         val len = message.size - message.dataOffset
@@ -287,6 +288,17 @@ internal class AapControlNav : AapControl {
                 dev.zanderp.opencfmoto.LogBus.log("[NAV] parse failed ${NavTurnTracker.typeName(message.type)}: $e")
             }
             false
+        }
+        // Every understood nav message keeps the Directions band's route fresh (60 s staleness).
+        if (NavTurnTracker.handles(message.type) && !failedTypes.contains(message.type)) {
+            val d = tracker.directions
+            dev.zanderp.opencfmoto.MetricsStrip.setDirections(d)
+            val parts = "then=${if (d.then != null) "y" else "n"} lanes=${d.lanes.size} " +
+                "eta=${if (d.etaText != null || d.etaSeconds != null) "y" else "n"}"
+            if (d.turn != null && parts != lastParts) {
+                lastParts = parts
+                dev.zanderp.opencfmoto.LogBus.log("[NAV] parts: $parts")
+            }
         }
         if (changed) {
             val t = tracker.current

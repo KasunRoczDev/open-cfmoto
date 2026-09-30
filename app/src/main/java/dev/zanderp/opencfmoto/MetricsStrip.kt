@@ -46,6 +46,14 @@ object MetricsStrip {
     @Volatile private var metrics = RiderMetrics()
     private var lastValues: StripValues? = null   // metrics-strip thread only
     private var failLogged = false                // metrics-strip thread only
+    @Volatile private var mode = StripMode.METRICS
+    @Volatile private var onVisible: (Boolean) -> Unit = {}
+    @Volatile private var directions: Directions = Directions.NONE
+    @Volatile private var navAtElapsedMs = 0L
+    @Volatile private var navAtWallMs = 0L
+    @Volatile private var is24h = true
+    private var lastView: DirectionsView? = null     // metrics-strip thread only
+    private var lastVisible: Boolean? = null         // metrics-strip thread only
 
     @Synchronized
     fun start(
@@ -55,6 +63,8 @@ object MetricsStrip {
         sink: (Bitmap) -> Unit,
         log: (String) -> Unit,
         cells: Set<StripCell> = StripCells.ALL,
+        mode: StripMode = StripMode.METRICS,
+        onVisible: (Boolean) -> Unit = {},
     ) {
         stop()
         val app = ctx.applicationContext
@@ -64,6 +74,12 @@ object MetricsStrip {
         stripW = canvasW
         stripH = stripPx
         this.cells = cells
+        this.mode = mode
+        this.onVisible = onVisible
+        is24h = android.text.format.DateFormat.is24HourFormat(app)
+        directions = Directions.NONE
+        lastView = null
+        lastVisible = null
         lastValues = null
         failLogged = false
         val ex = Executors.newSingleThreadScheduledExecutor { r ->
@@ -71,10 +87,13 @@ object MetricsStrip {
         }
         executor = ex
         ex.scheduleWithFixedDelay({ refresh() }, 0L, TICK_MS, TimeUnit.MILLISECONDS)
-        val src = MetricsSource(app) { loc -> onFix(loc) }
-        source = src
-        if (!src.start()) log("[STRIP] no GPS (permission or GPS off) — showing --")
-        log("[STRIP] started ${canvasW}x$stripPx units=$units cells=${StripCells.serialize(cells)}")
+        if (mode == StripMode.METRICS) {
+            val src = MetricsSource(app) { loc -> onFix(loc) }
+            source = src
+            if (!src.start()) log("[STRIP] no GPS (permission or GPS off) — showing --")
+        }
+        log("[STRIP] started ${canvasW}x$stripPx units=$units mode=$mode" +
+            if (mode == StripMode.METRICS) " cells=${StripCells.serialize(cells)}" else " overlay")
     }
 
     @Synchronized
@@ -85,10 +104,27 @@ object MetricsStrip {
         executor = null
         sink = null
         metrics = RiderMetrics()
+        directions = Directions.NONE
+        onVisible = {}
     }
 
     /** Phase 2: next turn from Android Auto (null = no active route). Any thread. */
     fun setTurn(turn: NextTurn?) = update { it.copy(turn = turn) }
+
+    /** Directions from Android Auto; called for every nav message (keeps the route fresh). Any thread. */
+    fun setDirections(d: Directions) {
+        directions = d
+        navAtElapsedMs = SystemClock.elapsedRealtime()
+        navAtWallMs = System.currentTimeMillis()
+        val ex = synchronized(this) { executor }
+        try { ex?.execute { refresh() } } catch (_: RejectedExecutionException) {}
+    }
+
+    /** AA session ended: no route any more (both modes). */
+    fun clearNavigation() {
+        setTurn(null)
+        setDirections(Directions.NONE)
+    }
 
     private fun onFix(loc: Location) {
         val alt = when {
@@ -118,6 +154,10 @@ object MetricsStrip {
     private fun refresh() {
         try {
             val out = sink ?: return
+            if (mode == StripMode.DIRECTIONS) {
+                refreshDirections(out)
+                return
+            }
             val v = MetricsFormat.values(metrics, units, SystemClock.elapsedRealtime())
             if (v == lastValues) return
             val bmp = MetricsStripRenderer.render(v, stripW, stripH, cells)
@@ -129,5 +169,23 @@ object MetricsStrip {
                 log("[STRIP] render failed: $e — band stays black, Android Auto unaffected")
             }
         }
+    }
+
+    private fun refreshDirections(out: (Bitmap) -> Unit) {
+        val d = directions
+        val now = SystemClock.elapsedRealtime()
+        val active = DirectionsFormat.active(d, navAtElapsedMs, now)
+        if (active != lastVisible) {
+            if (active) log("[STRIP] band shown")
+            else log("[STRIP] band hidden (" + (if (d.turn != null) "route stale" else "no route") + ")")
+            lastVisible = active
+            if (!active) lastView = null
+            onVisible(active)
+        }
+        if (!active) return
+        val v = DirectionsFormat.view(d, units, stripW, stripH, navAtWallMs, java.util.TimeZone.getDefault(), is24h) ?: return
+        if (v == lastView) return
+        lastView = v
+        out(DirectionsRenderer.render(v, stripW, stripH))
     }
 }

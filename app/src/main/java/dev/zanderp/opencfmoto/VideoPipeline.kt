@@ -301,19 +301,26 @@ class VideoPipeline(
             aaCompositor?.setFrameCap(power.fps)
             aaCompositor?.setSourceCrop(usableW.toFloat() / src.width, usableH.toFloat() / src.height)
             // Frozen at Connect (MainActivity.applyProfile) so the band always matches the AA margins.
-            val stripReq = BikeProfileHolder.stripSession.requestPx
+            val session = BikeProfileHolder.stripSession
+            val stripReq = session.requestPx
             val stripPx = MetricsStripLayout.resolvePx(stripReq, h)
             if (stripReq > 0 && stripPx == 0) {
                 log("[STRIP] canvas ${w}x$h too small (< ${MetricsStripLayout.MIN_CANVAS_H}px tall) — strip off this session")
             }
-            aaCompositor?.setStrip(stripPx)
+            if (session.overlay && stripPx > 0) log("[STRIP] mode=DIRECTIONS overlay band=${stripPx}px")
+            aaCompositor?.setStrip(stripPx, overlay = session.overlay)
             aaCompositor?.setOutput(surf, w, h, usableW, usableH, fit)
             MetricsStrip.stop()
             val comp = aaCompositor
             if (stripPx > 0 && comp != null) {
                 // Runs before the bike's config-capture reply — a strip failure must not break the link.
                 val cells = BikeProfileHolder.stripSession.cells
-                stripGuarded(log, "start") { MetricsStrip.start(context, w, stripPx, comp::setStripBitmap, log, cells) }
+                stripGuarded(log, "start") {
+                    MetricsStrip.start(
+                        context, w, stripPx, comp::setStripBitmap, log, cells,
+                        mode = session.mode, onVisible = comp::setStripVisible,
+                    )
+                }
             }
             log("[VIDEO] bike canvas ${w}x$h configured; AA source ${src.width}x${src.height} " +
                 "usable ${usableW}x$usableH (margins ${margins.marginW}x${margins.marginH}) → " +
