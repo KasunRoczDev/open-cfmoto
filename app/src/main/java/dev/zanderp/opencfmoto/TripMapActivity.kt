@@ -7,6 +7,9 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
+import android.view.Gravity
+import android.view.View
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -61,25 +64,67 @@ class TripMapActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.map_stats).text =
             "${trip.distanceText()} · ${trip.durationText()} · avg ${trip.avgKmh} · max ${trip.maxKmh} km/h"
 
-        renderRoute(trip)
+        val imperial = MapPrefs.units(this) == MapUnits.IMPERIAL
+        // A ride has at most a few thousand points; analyse off the main thread anyway.
+        Thread {
+            val b = RideAnalysis.analyze(trip, imperial)
+            runOnUiThread {
+                if (isFinishing || isDestroyed) return@runOnUiThread
+                renderRoute(trip, b, imperial)
+                renderStats(trip, b, imperial)
+            }
+        }.start()
     }
 
-    private fun renderRoute(trip: Trip) {
-        val geo = trip.points.map { GeoPoint(it.lat, it.lon) }
+    private fun renderRoute(trip: Trip, b: RideBehaviour, imperial: Boolean) {
+        val pts = trip.points
+        val geo = pts.map { GeoPoint(it.lat, it.lon) }
         if (geo.isEmpty()) {
             map.controller.setZoom(4.0)
             return
         }
 
-        val line = Polyline(map).apply {
-            setPoints(geo)
-            outlinePaint.color = ContextCompat.getColor(this@TripMapActivity, R.color.brand_orange)
-            outlinePaint.strokeWidth = 10f
+        // Route coloured by speed: one polyline per run of segments in the same band.
+        var runStart = 0
+        for (i in 1..b.bands.size) {
+            if (i == b.bands.size || b.bands[i] != b.bands[runStart]) {
+                val band = b.bands[runStart]
+                map.overlays.add(Polyline(map).apply {
+                    setPoints(geo.subList(runStart, i + 1))
+                    outlinePaint.color = RideBehaviourUi.bandColor(band)
+                    outlinePaint.strokeWidth = 10f
+                })
+                runStart = i
+            }
         }
-        map.overlays.add(line)
 
-        addMarker(geo.first(), "Start", Color.GREEN)
-        if (geo.size > 1) addMarker(geo.last(), "End", Color.RED)
+        addMarker(geo.first(), getString(R.string.map_start_label), Color.GREEN)
+        if (geo.size > 1) addMarker(geo.last(), getString(R.string.map_end_label), Color.RED)
+
+        fun at(i: Int) = RideBehaviourUi.clock(pts[i].time)
+        b.maxIndex?.let { i ->
+            behaviourMarker(geo[i], "▲", RideBehaviourUi.TOP,
+                "${getString(R.string.behaviour_top_speed)} · ${RideBehaviourUi.speed(pts[i].speedMs, imperial)} · ${at(i)}")
+        }
+        b.slowestIndex?.let { i ->
+            behaviourMarker(geo[i], "▼", RideBehaviourUi.SLOW,
+                "${getString(R.string.behaviour_slowest)} · ${RideBehaviourUi.speed(pts[i].speedMs, imperial)} · ${at(i)}")
+        }
+        for (s in b.stops) {
+            behaviourMarker(geo[s.index], "P", RideBehaviourUi.STOP,
+                "${getString(R.string.behaviour_stop)} · ${RideBehaviourUi.duration(s.durationMs)} · ${at(s.index)}")
+        }
+        for (e in b.hardBrakes) {
+            behaviourMarker(geo[e.index], "!", RideBehaviourUi.BRAKE,
+                "${getString(R.string.behaviour_hard_brake)} · ${RideBehaviourUi.speedValue(e.fromMs, imperial)} → " +
+                    "${RideBehaviourUi.speed(e.toMs, imperial)} · ${at(e.index)}")
+        }
+        for (e in b.hardAccels) {
+            behaviourMarker(geo[e.index], "»", RideBehaviourUi.ACCEL,
+                "${getString(R.string.behaviour_hard_accel)} · ${RideBehaviourUi.speedValue(e.fromMs, imperial)} → " +
+                    "${RideBehaviourUi.speed(e.toMs, imperial)} · ${at(e.index)}")
+        }
+        map.invalidate()
 
         // Frame the whole route once the map has been laid out.
         val bbox = BoundingBox.fromGeoPoints(geo)
@@ -92,6 +137,81 @@ class TripMapActivity : AppCompatActivity() {
             }
         }
     }
+
+    private fun behaviourMarker(point: GeoPoint, symbol: String, color: Int, label: String) {
+        map.overlays.add(Marker(map).apply {
+            position = point
+            setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+            icon = RideBehaviourUi.markerIcon(this@TripMapActivity, symbol, color)
+            title = label
+        })
+    }
+
+    /** Legend + 3×2 stat cells + distance / time / score rows under the map. */
+    private fun renderStats(trip: Trip, b: RideBehaviour, imperial: Boolean) {
+        val box = findViewById<LinearLayout>(R.id.map_behaviour)
+        box.removeAllViews()
+        box.addView(TextView(this).apply {
+            text = getString(R.string.behaviour_legend)
+            setTextColor(ContextCompat.getColor(context, R.color.text_secondary))
+            textSize = 11f
+        })
+        val none = getString(R.string.behaviour_none)
+        val cells = listOf(
+            RideBehaviourUi.speedValue(b.maxSpeedMs, imperial) to getString(R.string.behaviour_max),
+            RideBehaviourUi.speedValue(b.avgMs, imperial) to getString(R.string.behaviour_avg),
+            RideBehaviourUi.speedValue(b.movingAvgMs, imperial) to getString(R.string.behaviour_moving_avg),
+            (b.slowestMovingMs?.let { RideBehaviourUi.speedValue(it, imperial) } ?: none) to getString(R.string.behaviour_slowest_short),
+            b.stops.size.toString() to getString(R.string.behaviour_stops_short, RideBehaviourUi.duration(b.stopTimeMs)),
+            "${b.hardBrakes.size} / ${b.hardAccels.size}" to getString(R.string.behaviour_brakes_accels),
+        )
+        for (row in cells.chunked(3)) {
+            val line = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+            for ((value, label) in row) line.addView(statCell(value, label), LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
+            box.addView(line)
+        }
+        val totalMs = trip.end - trip.start
+        box.addView(statRow(getString(R.string.behaviour_distance), trip.distanceText()))
+        box.addView(statRow(getString(R.string.behaviour_riding_time),
+            getString(R.string.behaviour_riding_time_value, RideBehaviourUi.duration(trip.movingTimeMs), RideBehaviourUi.duration(totalMs))))
+        box.addView(statRow(getString(R.string.behaviour_score),
+            b.score?.let { getString(R.string.behaviour_score_value, it) } ?: none))
+    }
+
+    private fun statCell(value: String, label: String): View = LinearLayout(this).apply {
+        orientation = LinearLayout.VERTICAL
+        setPadding(dp(4), dp(8), dp(4), dp(8))
+        addView(TextView(context).apply {
+            text = value
+            setTextColor(ContextCompat.getColor(context, R.color.text_primary))
+            textSize = 20f
+            setTypeface(typeface, android.graphics.Typeface.BOLD)
+        })
+        addView(TextView(context).apply {
+            text = label
+            setTextColor(ContextCompat.getColor(context, R.color.text_secondary))
+            textSize = 11f
+        })
+    }
+
+    private fun statRow(label: String, value: String): View = LinearLayout(this).apply {
+        orientation = LinearLayout.HORIZONTAL
+        setPadding(0, dp(6), 0, dp(6))
+        addView(TextView(context).apply {
+            text = label
+            setTextColor(ContextCompat.getColor(context, R.color.text_secondary))
+            textSize = 13f
+        }, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
+        addView(TextView(context).apply {
+            text = value
+            gravity = Gravity.END
+            setTextColor(ContextCompat.getColor(context, R.color.text_primary))
+            textSize = 13f
+            setTypeface(typeface, android.graphics.Typeface.BOLD)
+        })
+    }
+
+    private fun dp(v: Int): Int = (v * resources.displayMetrics.density).toInt()
 
     private fun addMarker(point: GeoPoint, label: String, tint: Int) {
         val marker = Marker(map).apply {

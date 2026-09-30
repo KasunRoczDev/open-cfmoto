@@ -703,4 +703,24 @@
     <string name="pref_strip_mode_metrics">Metrics</string>
     <string name="pref_strip_mode_directions">Directions</string>
     <string name="setup_toast_strip_mode">Strip shows: %1$s</string>
+    <string name="behaviour_top_speed">Top speed</string>
+    <string name="behaviour_slowest">Slowest moving</string>
+    <string name="behaviour_stop">Stop</string>
+    <string name="behaviour_hard_brake">Hard brake</string>
+    <string name="behaviour_hard_accel">Hard acceleration</string>
+    <string name="behaviour_legend">▲ top speed · ▼ slowest moving · P stop · ! hard brake · » hard acceleration · route colour = speed</string>
+    <string name="behaviour_max">max</string>
+    <string name="behaviour_avg">avg</string>
+    <string name="behaviour_moving_avg">moving avg</string>
+    <string name="behaviour_slowest_short">slowest moving</string>
+    <string name="behaviour_stops_short">stops · %1$s</string>
+    <string name="behaviour_brakes_accels">hard brakes / accel</string>
+    <string name="behaviour_distance">Distance</string>
+    <string name="behaviour_riding_time">Riding time</string>
+    <string name="behaviour_riding_time_value">%1$s (%2$s total)</string>
+    <string name="behaviour_score">Behaviour score</string>
+    <string name="behaviour_score_value">%1$d / 100</string>
+    <string name="behaviour_none">—</string>
+    <string name="map_start_label">Start</string>
+    <string name="map_end_label">End</string>
 </resources>
