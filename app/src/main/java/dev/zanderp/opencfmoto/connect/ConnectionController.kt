@@ -43,6 +43,9 @@ class ConnectionController(private val engine: ConnectionEngine) {
 
     fun detach(port: UiPort) { if (this.port === port) this.port = null }
 
+    /** The attached screen's activity, if any (used by the engine for screen-bound Android APIs). */
+    fun currentActivity(): android.app.Activity? = port?.activity
+
     fun refreshBike() { _bike.value = BikeInfo(engine.bikeName(), engine.hasSavedBike()) }
 
     fun dismissDialog() { _dialog.value = null }

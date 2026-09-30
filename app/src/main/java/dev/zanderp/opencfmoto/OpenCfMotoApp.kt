@@ -34,5 +34,8 @@ class OpenCfMotoApp : Application() {
         } catch (e: Exception) {
             android.util.Log.w("OpenCfMoto", "MapLibre init failed: $e")
         }
+        val engine = dev.zanderp.opencfmoto.connect.RealConnectionEngine(this)
+        dev.zanderp.opencfmoto.connect.AppGraph.connection =
+            dev.zanderp.opencfmoto.connect.ConnectionController(engine).also { engine.install(it) }
     }
 }
