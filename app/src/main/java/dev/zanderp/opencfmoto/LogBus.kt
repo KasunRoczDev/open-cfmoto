@@ -4,6 +4,9 @@ import android.util.Log
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 /**
  * Process-wide log sink so components running in the foreground service (Android Auto receiver,
@@ -19,6 +22,18 @@ object LogBus {
     /** Receives each already-timestamped line (MainActivity appends it to the TextView). */
     @Volatile var listener: ((String) -> Unit)? = null
 
+    private val _revision = MutableStateFlow(0L)
+
+    /** Bumped on every appended line and on [clear] — the Logs screen re-reads [tail] on change. */
+    val revision: StateFlow<Long> = _revision.asStateFlow()
+
+    /** Last [maxChars] characters of the log (the Logs screen shows only the end of a 512 KB buffer). */
+    @Synchronized
+    fun tail(maxChars: Int): String {
+        val start = (sb.length - maxChars).coerceAtLeast(0)
+        return sb.substring(start)
+    }
+
     /**
      * When false (default), [LogRedactor] runs on every line before it hits the buffer / UI.
      * Synced from [AppSettings.includeSecretsInLogs] — leave off for Share Logs.
@@ -31,6 +46,7 @@ object LogBus {
         val line = "${ts.format(Date())}  $safe"
         sb.append(line).append('\n')
         if (sb.length > 512 * 1024) sb.delete(0, sb.length - 256 * 1024)
+        _revision.value = _revision.value + 1
         // Mirror to logcat so the full diagnostic stream is capturable over adb (`adb logcat -s
         // OpenCfMoto:*`) during on-hardware debugging, not just in the in-app log view.
         Log.i(TAG, safe)
@@ -58,7 +74,7 @@ object LogBus {
 
     @Synchronized fun snapshot(): String = sb.toString()
 
-    @Synchronized fun clear() { sb.setLength(0) }
+    @Synchronized fun clear() { sb.setLength(0); _revision.value = _revision.value + 1 }
 
     /**
      * Stamp version / git / experimental flags at session start (and after Clear Logs) so

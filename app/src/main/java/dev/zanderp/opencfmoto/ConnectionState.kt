@@ -1,6 +1,9 @@
 package dev.zanderp.opencfmoto
 
 import androidx.annotation.StringRes
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 /**
  * Coarse, process-global view of what the app is currently doing, so the UI can show a single
@@ -40,6 +43,11 @@ object ConnectionState {
     @Volatile
     var listener: ((Phase, String) -> Unit)? = null
 
+    private val _flow = MutableStateFlow(Phase.IDLE to "")
+
+    /** Compose screens observe this; [listener] stays for existing callers. */
+    val flow: StateFlow<Pair<Phase, String>> = _flow.asStateFlow()
+
     /**
      * Move to [newPhase]. Pass [newDetail] to change the trailing detail, or leave it null to keep
      * the existing detail (e.g. the bike name set when the connection started, so a background
@@ -50,6 +58,7 @@ object ConnectionState {
         phase = newPhase
         if (newDetail != null) detail = newDetail
         val d = detail
+        _flow.value = newPhase to d
         val text = if (d.isBlank()) newPhase.logLabel else "${newPhase.logLabel} — $d"
         LogBus.log("[state] $text")
         try {
