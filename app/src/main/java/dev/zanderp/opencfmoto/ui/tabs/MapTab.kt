@@ -45,6 +45,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun MapTab(
     searchFocusTick: Int,
+    openMapEnabled: Boolean,
     onOpenMap: () -> Unit,
     onSearch: (String) -> Boolean,
     onSearchTextChanged: (String) -> Unit,
@@ -59,7 +60,7 @@ fun MapTab(
         OcmCard {
             Text(stringResource(R.string.ui_map_title), style = OcmType.title, color = c.text)
             Text(stringResource(R.string.ui_map_desc), style = OcmType.body, color = c.text2)
-            PrimaryButton(stringResource(R.string.ui_map_open), Icons.Rounded.Map, onOpenMap)
+            PrimaryButton(stringResource(R.string.ui_map_open), Icons.Rounded.Map, onOpenMap, enabled = openMapEnabled)
         }
         SectionLabel(stringResource(R.string.ui_search_label))
         Row(verticalAlignment = Alignment.CenterVertically) {

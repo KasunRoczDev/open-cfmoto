@@ -19,6 +19,7 @@ data class RideUiState(
     val mirrorEnabled: Boolean,
     val dashViewEnabled: Boolean,
     val controlsEnabled: Boolean,
+    val mapEnabled: Boolean,
 )
 
 fun rideUiState(phase: Phase, detail: String, bikeName: String?, hasSavedBike: Boolean): RideUiState {
@@ -43,5 +44,7 @@ fun rideUiState(phase: Phase, detail: String, bikeName: String?, hasSavedBike: B
         mirrorEnabled = !busy || live,
         dashViewEnabled = live,
         controlsEnabled = true,
+        // Opening the hub mid-connect abandons an active NAV_TO route — same rule as the old Map button.
+        mapEnabled = !busy || live,
     )
 }

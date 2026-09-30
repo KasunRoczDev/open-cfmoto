@@ -44,7 +44,7 @@ import dev.zanderp.opencfmoto.TripsListActivity
 import dev.zanderp.opencfmoto.connect.ConnectionController
 import dev.zanderp.opencfmoto.ui.design.Ocm
 import dev.zanderp.opencfmoto.ui.dialog.DialogHost
-import dev.zanderp.opencfmoto.ui.logs.LogsScreen
+import dev.zanderp.opencfmoto.ui.log.LogsScreen
 import dev.zanderp.opencfmoto.ui.ride.RideScreen
 import dev.zanderp.opencfmoto.ui.ride.rideUiState
 import dev.zanderp.opencfmoto.ui.tabs.MapTab
@@ -113,7 +113,7 @@ fun AppShell(c: ConnectionController, searchFocusTick: Int) {
                 )
             }
             composable("map") {
-                MapTab(searchFocusTick, onOpenMap = c::onMapPressed, onSearch = c::navigateToTyped, onSearchTextChanged = c::onSearchTextChanged)
+                MapTab(searchFocusTick, openMapEnabled = ride.mapEnabled, onOpenMap = c::onMapPressed, onSearch = c::navigateToTyped, onSearchTextChanged = c::onSearchTextChanged)
             }
             composable("trips") {
                 TripsTab(onSavedRides = { TripsListActivity.start(ctx) }, onTripComputer = { TripActivity.start(ctx) })

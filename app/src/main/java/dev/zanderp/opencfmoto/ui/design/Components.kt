@@ -65,15 +65,17 @@ fun PrimaryButton(
     onClick: () -> Unit,
     danger: Boolean = false,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
 ) {
     val c = Ocm.colors
     Button(
         onClick = onClick,
+        enabled = enabled,
         modifier = modifier.fillMaxWidth().heightIn(min = 64.dp),
         shape = RoundedCornerShape(18.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = if (danger) c.error else c.accent,
-            contentColor = if (danger) androidx.compose.ui.graphics.Color.White else c.onAccent,
+            contentColor = if (danger) c.onError else c.onAccent,
         ),
     ) {
         Icon(icon, contentDescription = null)

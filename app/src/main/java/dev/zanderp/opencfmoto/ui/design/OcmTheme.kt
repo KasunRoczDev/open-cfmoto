@@ -20,6 +20,8 @@ data class OcmColors(
     val bg: Color, val bgTop: Color, val surface: Color, val surface2: Color,
     val accent: Color, val onAccent: Color, val text: Color, val text2: Color, val outline: Color,
     val live: Color, val busy: Color, val error: Color, val idle: Color,
+    /** Text on [error] (the Stop button): readable at glance distance in both modes. */
+    val onError: Color = Color.White,
 )
 
 val LightOcmColors = OcmColors(
@@ -33,7 +35,7 @@ val DarkOcmColors = OcmColors(
     bg = Color(0xFF0F1419), bgTop = Color(0xFF1C2430), surface = Color(0xFF182029), surface2 = Color(0xFF212B36),
     accent = Color(0xFF27C1D3), onAccent = Color(0xFF06262B), text = Color(0xFFEEF2F6), text2 = Color(0xFF9AA7B4),
     outline = Color(0xFF2A3440), live = Color(0xFF34D399), busy = Color(0xFFFBBF24), error = Color(0xFFF87171),
-    idle = Color(0xFF8A93A3),
+    idle = Color(0xFF8A93A3), onError = Color(0xFF3A0B0B),
 )
 
 val LocalOcmColors = staticCompositionLocalOf { DarkOcmColors }

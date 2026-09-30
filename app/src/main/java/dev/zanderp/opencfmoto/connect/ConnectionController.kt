@@ -388,6 +388,8 @@ class ConnectionController(private val engine: ConnectionEngine) {
             }
         } else {
             rivalPromptShown = false
+            // The error went away before the rider saw it — don't show a stale prompt on return.
+            if (_dialog.value is AppDialog.Rival) _dialog.value = null
         }
         // Only a confirmed kill-switch with a live internet VPN.
         if (phase == Phase.ERROR && detail.contains("kill-switch", ignoreCase = true) && engine.vpnActive()) {
@@ -397,6 +399,7 @@ class ConnectionController(private val engine: ConnectionEngine) {
             }
         } else {
             vpnPromptShown = false
+            if (_dialog.value === AppDialog.VpnKillSwitch) _dialog.value = null
         }
     }
 
@@ -484,7 +487,10 @@ class ConnectionController(private val engine: ConnectionEngine) {
     }
 
     private fun maybeCheckUpdate() {
-        engine.checkUpdate(manual = false) { release -> if (release != null) _dialog.value = AppDialog.Update(release) }
+        // Never replace a pending rider prompt (rival / VPN / Bluetooth / crash) with an update offer.
+        engine.checkUpdate(manual = false) { release ->
+            if (release != null && _dialog.value == null) _dialog.value = AppDialog.Update(release)
+        }
     }
 
     fun donate() {

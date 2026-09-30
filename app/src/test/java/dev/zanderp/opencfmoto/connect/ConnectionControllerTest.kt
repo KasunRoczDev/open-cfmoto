@@ -183,4 +183,21 @@ class ConnectionControllerTest {
         c.onHostCreated(false, false, false)
         assertSame(AppDialog.CrashRecovery, c.dialog.value)
     }
+
+    @Test
+    fun updateDoesNotReplaceARiderPrompt() {
+        c.onPhaseChanged(Phase.ERROR, "Close the official CFMoto app")
+        e.updateResult = dev.zanderp.opencfmoto.UpdateChecker.Release("9.9.9", "notes", null, "https://x")
+        c.onHostResumed(false)
+        assertEquals(AppDialog.Rival(installed = true), c.dialog.value)
+    }
+
+    @Test
+    fun rivalPromptClearedWhenErrorGoesAway() {
+        c.detach(port)
+        c.onPhaseChanged(Phase.ERROR, "Close the official CFMoto app")
+        c.onPhaseChanged(Phase.STREAMING, "")
+        c.attach(port)
+        assertNull(c.dialog.value)
+    }
 }

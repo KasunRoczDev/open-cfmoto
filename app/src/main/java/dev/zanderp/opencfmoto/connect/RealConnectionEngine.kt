@@ -206,8 +206,10 @@ class RealConnectionEngine(private val app: Application) : ConnectionEngine {
     }
 
     override fun triggerSelfMode(activity: Activity?) {
-        val a = activity ?: return noScreen("AA self-mode trigger")
-        dev.zanderp.opencfmoto.aa.AaSelfMode.trigger(a, log = LogBus::log)
+        // Prefer the foreground activity (BAL-safe launch); with no screen attached still run the
+        // trigger from the app context — it adds NEW_TASK itself and its Receiver/HUR fallbacks
+        // only need a Context (the old code fired them even through a dead activity).
+        dev.zanderp.opencfmoto.aa.AaSelfMode.trigger(activity ?: ctx, log = LogBus::log)
     }
 
     override fun joinWifi(qr: QrData, gateOnAaSteady: Boolean, activity: Activity?) {
@@ -357,15 +359,21 @@ class RealConnectionEngine(private val app: Application) : ConnectionEngine {
                     )
                     main.post {
                         ConnectionState.set(Phase.ERROR, ctx.getString(R.string.main_phone_hotspot_no_iface))
-                        val a = activity ?: run { noScreen("hotspot dialog"); return@post }
-                        com.google.android.material.dialog.MaterialAlertDialogBuilder(a)
-                            .setTitle(R.string.main_phone_hotspot_dialog_title)
-                            .setMessage(R.string.main_phone_hotspot_no_iface)
-                            .setPositiveButton(R.string.main_phone_hotspot_open_settings) { _, _ ->
-                                PhoneHotspotAssist.openHotspotSettings(a)
-                            }
-                            .setNegativeButton(android.R.string.ok, null)
-                            .show()
+                        // ~45 s after the scan started: use the screen attached *now* (the one captured
+                        // at start may be destroyed), and never let a dialog failure kill the process.
+                        val a = screen() ?: run { noScreen("hotspot dialog"); return@post }
+                        try {
+                            com.google.android.material.dialog.MaterialAlertDialogBuilder(a)
+                                .setTitle(R.string.main_phone_hotspot_dialog_title)
+                                .setMessage(R.string.main_phone_hotspot_no_iface)
+                                .setPositiveButton(R.string.main_phone_hotspot_open_settings) { _, _ ->
+                                    PhoneHotspotAssist.openHotspotSettings(a)
+                                }
+                                .setNegativeButton(android.R.string.ok, null)
+                                .show()
+                        } catch (e: Exception) {
+                            LogBus.log("[HOTSPOT] dialog failed: $e")
+                        }
                     }
                     return@Thread
                 }

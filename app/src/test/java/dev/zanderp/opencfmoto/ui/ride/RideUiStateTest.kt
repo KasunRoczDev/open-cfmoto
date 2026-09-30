@@ -55,4 +55,12 @@ class RideUiStateTest {
     fun detailPassesThrough() {
         assertEquals("Linking…", rideUiState(Phase.PXC_CONNECTING, "Linking…", "Bike", true).detail)
     }
+
+    @Test
+    fun openMapBlockedWhileConnectingOrReconnecting() {
+        // Opening the Map hub mid-connect abandons an active NAV_TO route (review finding).
+        for (p in Phase.values().filter { it.busy }) assertFalse(p.name, rideUiState(p, "", "Bike", true).mapEnabled)
+        assertTrue(rideUiState(Phase.IDLE, "", "Bike", true).mapEnabled)
+        assertTrue(rideUiState(Phase.MIRRORING, "", "Bike", true).mapEnabled)
+    }
 }

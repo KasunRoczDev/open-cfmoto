@@ -504,7 +504,8 @@ class VideoPipeline(
             val pres = Presentation(context, display)
             // VirtualDisplay Presentation contexts often lack the app theme — AppCompat/Material
             // ?attr/… then fail with InflateException "Error inflating class <unknown>".
-            val themed = ContextThemeWrapper(pres.context, R.style.Theme_OpenCfMoto)
+            // The app theme is DayNight; the dash always uses the dark variant, whatever the phone's mode.
+            val themed = ContextThemeWrapper(dashNightContext(pres.context), R.style.Theme_OpenCfMoto)
             val root = LayoutInflater.from(themed).inflate(R.layout.presentation_gpx, null)
             val ui = GpxDashUi(themed, root, log, isAlive = { running }, projected = true)
             if (!ui.bind()) {
@@ -812,5 +813,17 @@ class VideoPipeline(
         const val DUMP_H264 = false
         /** How many access units to capture before auto-stopping the dump (~20s at 30fps). */
         const val DUMP_CAP = 600
+
+        /** [uiMode] with the night bits forced to NIGHT_YES (type bits kept). */
+        internal fun forceNightUiMode(uiMode: Int): Int =
+            (uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK.inv()) or
+                android.content.res.Configuration.UI_MODE_NIGHT_YES
+
+        /** A context whose resources resolve values-night/, so the DayNight app theme stays dark on the dash. */
+        internal fun dashNightContext(base: android.content.Context): android.content.Context {
+            val cfg = android.content.res.Configuration(base.resources.configuration)
+            cfg.uiMode = forceNightUiMode(cfg.uiMode)
+            return base.createConfigurationContext(cfg)
+        }
     }
 }
