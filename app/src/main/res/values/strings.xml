@@ -737,4 +737,11 @@
     <string name="behaviour_axis_accel">Smooth accel</string>
     <string name="behaviour_prev_month">Previous month</string>
     <string name="behaviour_next_month">Next month</string>
+    <string name="pref_strip_mode_side">Side panel</string>
+    <string name="setup_strip_side">Side panel position</string>
+    <string name="setup_strip_side_desc">Directions and your eco tree in a column beside Android Auto (which gets the rest of the width, without its media card). Size: Narrow 25% · Medium 30% · Wide 35%. Applies next connect.</string>
+    <string name="pref_side_left">Left</string>
+    <string name="pref_side_right">Right</string>
+    <string name="pref_strip_narrow">Narrow</string>
+    <string name="pref_strip_wide">Wide</string>
 </resources>

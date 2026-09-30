@@ -132,6 +132,9 @@ class SetupActivity : AppCompatActivity() {
         findViewById<MaterialButton>(R.id.strip_large).setOnClickListener { setStripHeight(StripHeight.LARGE) }
         findViewById<MaterialButton>(R.id.strip_mode_metrics).setOnClickListener { setStripMode(StripMode.METRICS) }
         findViewById<MaterialButton>(R.id.strip_mode_directions).setOnClickListener { setStripMode(StripMode.DIRECTIONS) }
+        findViewById<MaterialButton>(R.id.strip_mode_side).setOnClickListener { setStripMode(StripMode.SIDE) }
+        findViewById<MaterialButton>(R.id.strip_side_left).setOnClickListener { setSideLeft(true) }
+        findViewById<MaterialButton>(R.id.strip_side_right).setOnClickListener { setSideLeft(false) }
         findViewById<MaterialButton>(R.id.strip_cell_speed).setOnClickListener { toggleStripCell(StripCell.SPEED) }
         findViewById<MaterialButton>(R.id.strip_cell_altitude).setOnClickListener { toggleStripCell(StripCell.ALTITUDE) }
         findViewById<MaterialButton>(R.id.strip_cell_heading).setOnClickListener { toggleStripCell(StripCell.HEADING) }
@@ -336,13 +339,22 @@ class SetupActivity : AppCompatActivity() {
     private fun setStripMode(m: StripMode) {
         MetricsStripPrefs.setMode(this, m)
         // Directions needs a visible band; start at Medium if the strip was Off.
-        if (m == StripMode.DIRECTIONS && MetricsStripPrefs.height(this) == StripHeight.OFF) {
+        if (m != StripMode.METRICS && MetricsStripPrefs.height(this) == StripHeight.OFF) {
             MetricsStripPrefs.setHeight(this, StripHeight.MEDIUM)
         }
         refreshOptions()
         toast(getString(R.string.setup_toast_strip_mode, getString(
-            if (m == StripMode.DIRECTIONS) R.string.pref_strip_mode_directions else R.string.pref_strip_mode_metrics,
+            when (m) {
+                StripMode.DIRECTIONS -> R.string.pref_strip_mode_directions
+                StripMode.SIDE -> R.string.pref_strip_mode_side
+                else -> R.string.pref_strip_mode_metrics
+            },
         )))
+    }
+
+    private fun setSideLeft(left: Boolean) {
+        MetricsStripPrefs.setSideLeft(this, left)
+        refreshOptions()
     }
 
     private fun toggleStripCell(cell: StripCell) {
@@ -633,10 +645,19 @@ class SetupActivity : AppCompatActivity() {
             R.id.strip_medium to StripHeight.MEDIUM,
             R.id.strip_large to StripHeight.LARGE)
         val stripMode = MetricsStripPrefs.mode(this)
-        val directionsMode = stripMode == StripMode.DIRECTIONS
+        val directionsMode = stripMode != StripMode.METRICS
         highlight(stripMode,
             R.id.strip_mode_metrics to StripMode.METRICS,
-            R.id.strip_mode_directions to StripMode.DIRECTIONS)
+            R.id.strip_mode_directions to StripMode.DIRECTIONS,
+            R.id.strip_mode_side to StripMode.SIDE)
+        val sideMode = stripMode == StripMode.SIDE
+        findViewById<View>(R.id.strip_side_group).visibility = if (sideMode) View.VISIBLE else View.GONE
+        highlight(MetricsStripPrefs.sideLeft(this),
+            R.id.strip_side_left to true,
+            R.id.strip_side_right to false)
+        // In Side panel mode the size row means the panel width.
+        findViewById<MaterialButton>(R.id.strip_small).setText(if (sideMode) R.string.pref_strip_narrow else R.string.pref_strip_small)
+        findViewById<MaterialButton>(R.id.strip_large).setText(if (sideMode) R.string.pref_strip_wide else R.string.pref_strip_large)
         // Directions requires turn info: show it as On and locked.
         highlight(MetricsStripPrefs.turnInfo(this) || directionsMode,
             R.id.turninfo_on to true,
