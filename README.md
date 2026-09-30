@@ -80,6 +80,7 @@ CFMoto · Voge · Morini · Morbidelli · QJ Motor · Rieju · UM · Wmoto · GO
 | 📊 **Metrics strip** | Optional band under Android Auto on the dash: GPS speed, altitude and heading — or **Directions**: next turn, lanes and ETA from Google Maps, shown over Android Auto only while navigating — plus **next turn** from Google Maps / Waze (experimental). Setup → Metrics strip / Turn info. Android Auto is laid out above it. |
 | 🧭 **Ride behaviour** | Per ride: top / slowest / average speed, stops, hard brakes and hard accelerations marked on a speed-coloured route map, plus a score. Per month: totals and a behaviour radar on the Trips screen. Works on past rides. |
 | 🌳 **Side panel & eco forest** | Optional column beside Android Auto (left or right) with turn-by-turn directions and a tree that grows while you ride smoothly — completed trees fill your Forest (Me ▸ Forest). |
+| 🏍 **My moto** | Ride screen with your model name and photo, last ride and this month's km, and a one-tap Park here / walk back to the bike. |
 | 🏍️ **Garage (multiple bikes)** | Name + photo per bike; each keeps its own display, resolution, power, and button settings. |
 | 🛰️ **Trip computer + ride logging** | Live speed/distance/duration from GPS, auto-logs every ride, day calendar of saved trips, route thumbnails, **Export GPX**. |
 | 📐 **Smart resolution & learned panels** | Auto-fits recognized dashes; remembers measured panel size and picks a better AA resolution next connect. |

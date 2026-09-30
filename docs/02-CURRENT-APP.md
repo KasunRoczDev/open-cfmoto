@@ -214,3 +214,17 @@ Spec: `docs/superpowers/specs/2026-09-30-side-panel-eco-forest-design.md`.
   (directions while a route is active + `TreeDrawing`).
 - App: Me ▸ Forest (`ui/forest/ForestScreen`).
 - Logs: `[STRIP] mode=SIDE side=… panel=…px aa=…`, `[ECO] tree complete (#N)`, `[ECO] saved eco=… km`.
+
+## Compose redesign — Part 2 (Ride)
+
+Spec: `docs/superpowers/specs/2026-10-01-compose-redesign-part2-ride-design.md`.
+
+- Ride tab hero: faded model name (Garage ▸ bike ▸ **Set model**, `SavedBike.model`; falls back to the bike name),
+  the Garage photo or a neutral bike, **Last ride / This month** from saved rides (`ui/ride/RideSummary`, reloaded each
+  time the tab becomes visible), and a **Park here / Parked here** tile (saves the last fix as the single parked pin;
+  when set, opens Google Maps directions to it).
+- Dash view (`HudViewActivity`), Controls, Button mapping and QR scan keep their Activities but draw Compose
+  (`ui/ride/*Screen.kt`); the AA `SurfaceView`, CameraX `PreviewView` and GPX preview host are Activity-owned Views
+  in `AndroidView`. Pad key/scroll routing is shared in `AaKeys` + `ui/ride/AaPad`.
+- Bike checks: Dash view touch + pad on the dash, handlebar teach + mapping, QR pairing, Controls place chip → route
+  on the dash.
