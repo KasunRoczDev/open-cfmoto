@@ -201,3 +201,16 @@ Spec: `docs/superpowers/specs/2026-09-30-ride-behaviour-design.md`.
 - `TripMapActivity`: speed-coloured route, ▲ ▼ P ! » markers with labels, stats under the map.
   `TripsListActivity`: "Riding behaviour" month card with `RadarView`.
 - Test fixture: `docs/superpowers/fixtures/make_ride_fixture.py` (synthetic ride; push with `adb … run-as`).
+
+## Side panel + eco tree + forest
+
+Spec: `docs/superpowers/specs/2026-09-30-side-panel-eco-forest-design.md`.
+
+- Setup → Strip shows **Side panel** → `StripSnapshot.side` (Right/Left, 25/30/35 % from the size row); AA margins
+  computed for `panelW − sidePx`; `AaCompositor.setSidePanel` adds the panel to the left/right margin and draws the
+  panel texture in its column; `SidePanelLayout.touchX` keeps taps on the panel out of Android Auto.
+- `MetricsStrip` SIDE mode: GPS → `EcoScorer` (eco = |a| < 1.5 m/s², swing < 10 km/h over 10 s, 30–70 km/h) →
+  `EcoForest` (20 eco km per tree, 5 stages) → `EcoStore` (every 30 s + on stop); renders `SidePanelRenderer`
+  (directions while a route is active + `TreeDrawing`).
+- App: Me ▸ Forest (`ui/forest/ForestScreen`).
+- Logs: `[STRIP] mode=SIDE side=… panel=…px aa=…`, `[ECO] tree complete (#N)`, `[ECO] saved eco=… km`.
