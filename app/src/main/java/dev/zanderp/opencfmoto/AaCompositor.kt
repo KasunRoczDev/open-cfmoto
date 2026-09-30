@@ -93,6 +93,8 @@ class AaCompositor(private val log: (String) -> Unit) {
     // output only (never the phone preview). AA is viewported above it; the strip bitmap is pasted in.
     @Volatile private var stripPx = 0
     @Volatile private var stripOverlay = false
+    @Volatile private var sidePx = 0
+    @Volatile private var sideLeft = false
     @Volatile private var stripVisible = true
     private fun stripGeometry() = StripGeometry.of(stripPx, stripOverlay, stripVisible)
     private var stripProgram = 0
@@ -318,9 +320,10 @@ class AaCompositor(private val log: (String) -> Unit) {
      */
     fun mapCanvasToSource(cx: Int, cy: Int, isDown: Boolean = true): Pair<Int, Int>? {
         // Metrics band: drop a DOWN there, clamp a MOVE/UP to the last AA row (never strand a pointer).
+        val x = SidePanelLayout.touchX(cx, canvasW, sidePx, sideLeft, isDown) ?: return null
         val y = MetricsStripLayout.touchY(cy, canvasH, stripGeometry().touchPx, isDown) ?: return null
         if (vpW == 0 || vpH == 0 || srcW == 0 || srcH == 0) return null
-        val rx = cx - vpX
+        val rx = x - vpX
         val ry = y - vpY
         if (rx < 0 || ry < 0 || rx >= vpW || ry >= vpH) return null
         val sx = (rx.toLong() * srcW / vpW).toInt().coerceIn(0, srcW - 1)
@@ -342,8 +345,11 @@ class AaCompositor(private val log: (String) -> Unit) {
         val aaCanvasH = (canvasH - stripGeometry().reservePx).coerceAtLeast(1)
         val mT = ScreenMargins.top.coerceIn(0, aaCanvasH)
         val mB = ScreenMargins.bottom.coerceIn(0, aaCanvasH - mT)
-        val mL = ScreenMargins.left.coerceIn(0, canvasW)
-        val mR = ScreenMargins.right.coerceIn(0, canvasW - mL)
+        // The side panel is an extra margin on its side: Android Auto is laid out in the rest.
+        val sideL = if (sidePx > 0 && sideLeft) sidePx else 0
+        val sideR = if (sidePx > 0 && !sideLeft) sidePx else 0
+        val mL = (ScreenMargins.left + sideL).coerceIn(0, canvasW)
+        val mR = (ScreenMargins.right + sideR).coerceIn(0, canvasW - mL)
         val areaW = (canvasW - mL - mR).coerceAtLeast(1)
         val areaH = (aaCanvasH - mT - mB).coerceAtLeast(1)
         val srcAspect = srcW.toFloat() / srcH
@@ -422,11 +428,21 @@ class AaCompositor(private val log: (String) -> Unit) {
         }
     }
 
+    /** Side panel: a column of [px] canvas pixels on the left/right that Android Auto is laid out beside (0 = off). */
+    fun setSidePanel(px: Int, left: Boolean) {
+        handler.post {
+            sidePx = px.coerceAtLeast(0)
+            sideLeft = left
+            if (sidePx == 0 && stripPx == 0) stripReady = false
+            computeViewport()
+        }
+    }
+
     /** Upload a freshly rendered strip and re-emit a frame. Takes ownership of [bmp] (recycled here). */
     fun setStripBitmap(bmp: Bitmap) {
         handler.post {
             try {
-                if (eglDisplay == EGL14.EGL_NO_DISPLAY || stripPx <= 0) return@post
+                if (eglDisplay == EGL14.EGL_NO_DISPLAY || (stripPx <= 0 && sidePx <= 0)) return@post
                 if (stripTexId == 0) {
                     val ids = IntArray(1)
                     GLES20.glGenTextures(1, ids, 0)
@@ -535,9 +551,12 @@ class AaCompositor(private val log: (String) -> Unit) {
         val clipH = if (isBike) canvasH else previewH
         val g = if (isBike) stripGeometry() else StripGeometry(0, 0, 0)
         val shift = if (g.reservePx > 0) MetricsStripLayout.glAaShift(g.reservePx) else 0
+        val panel = if (isBike) sidePx else 0
+        val clipX = if (panel > 0 && sideLeft) panel else 0
         if (clipW > 0 && clipH > 0) {
             GLES20.glEnable(GLES20.GL_SCISSOR_TEST)
-            GLES20.glScissor(0, shift, clipW, clipH - g.reservePx)
+            // Never paint Android Auto into the side panel column (FILL can overflow).
+            GLES20.glScissor(clipX, shift, clipW - panel, clipH - g.reservePx)
         }
 
         GLES20.glViewport(vx, vy + shift, vw, vh)
@@ -569,6 +588,13 @@ class AaCompositor(private val log: (String) -> Unit) {
                 logStripFailure("draw", e)
             }
         }
+        if (panel > 0) {
+            try {
+                drawTexture(SidePanelLayout.panelX(canvasW, panel, sideLeft), 0, panel, canvasH)
+            } catch (e: Exception) {
+                logStripFailure("side draw", e)
+            }
+        }
 
         // Monotonic presentation time so repeated (keep-alive) frames aren't dropped as duplicate PTS.
         EGLExt.eglPresentationTimeANDROID(eglDisplay, target, System.nanoTime())
@@ -577,11 +603,15 @@ class AaCompositor(private val log: (String) -> Unit) {
 
     /** Paste the latest strip texture into the band. Band stays black (from glClear) until one exists. */
     private fun drawStrip(band: Int) {
+        drawTexture(0, MetricsStripLayout.glStripY(canvasH, band), canvasW, band)
+    }
+
+    /** Draw the strip/panel texture into the GL rect ([x], [y], [w], [h]) (GL origin bottom-left). */
+    private fun drawTexture(x: Int, y: Int, w: Int, h: Int) {
         if (!stripReady || stripTexId == 0 || stripProgram == 0 || canvasW == 0) return
-        val y = MetricsStripLayout.glStripY(canvasH, band)
         GLES20.glEnable(GLES20.GL_SCISSOR_TEST)
-        GLES20.glScissor(0, y, canvasW, band)
-        GLES20.glViewport(0, y, canvasW, band)
+        GLES20.glScissor(x, y, w, h)
+        GLES20.glViewport(x, y, w, h)
         GLES20.glUseProgram(stripProgram)
         stripQuad.position(0)
         GLES20.glVertexAttribPointer(sPosition, 2, GLES20.GL_FLOAT, false, 16, stripQuad)

@@ -304,22 +304,34 @@ class VideoPipeline(
             val session = BikeProfileHolder.stripSession
             val stripReq = session.requestPx
             val stripPx = MetricsStripLayout.resolvePx(stripReq, h)
-            if (stripReq > 0 && stripPx == 0) {
+            if (!session.side && stripReq > 0 && stripPx == 0) {
                 log("[STRIP] canvas ${w}x$h too small (< ${MetricsStripLayout.MIN_CANVAS_H}px tall) — strip off this session")
             }
             if (session.overlay && stripPx > 0) log("[STRIP] mode=DIRECTIONS overlay band=${stripPx}px")
-            aaCompositor?.setStrip(stripPx, overlay = session.overlay)
+            val sidePx = if (session.side) SidePanelLayout.panelPx(w, session.sidePercent) else 0
+            if (session.side && sidePx == 0) log("[STRIP] canvas ${w}x$h too narrow for the side panel — off this session")
+            if (sidePx > 0) {
+                log("[STRIP] mode=SIDE side=${if (session.sideLeft) "LEFT" else "RIGHT"} panel=${sidePx}px aa=${w - sidePx}x$h")
+            }
+            val bandPx = if (session.side) 0 else stripPx
+            aaCompositor?.setStrip(bandPx, overlay = session.overlay)
+            aaCompositor?.setSidePanel(sidePx, session.sideLeft)
             aaCompositor?.setOutput(surf, w, h, usableW, usableH, fit)
             MetricsStrip.stop()
             val comp = aaCompositor
-            if (stripPx > 0 && comp != null) {
-                // Runs before the bike's config-capture reply — a strip failure must not break the link.
+            if (comp != null) {
                 val cells = BikeProfileHolder.stripSession.cells
-                stripGuarded(log, "start") {
-                    MetricsStrip.start(
-                        context, w, stripPx, comp::setStripBitmap, log, cells,
-                        mode = session.mode, onVisible = comp::setStripVisible,
-                    )
+                if (sidePx > 0) {
+                    stripGuarded(log, "start") {
+                        MetricsStrip.start(context, sidePx, h, comp::setStripBitmap, log, cells, mode = StripMode.SIDE)
+                    }
+                } else if (bandPx > 0) {
+                    stripGuarded(log, "start") {
+                        MetricsStrip.start(
+                            context, w, bandPx, comp::setStripBitmap, log, cells,
+                            mode = session.mode, onVisible = comp::setStripVisible,
+                        )
+                    }
                 }
             }
             log("[VIDEO] bike canvas ${w}x$h configured; AA source ${src.width}x${src.height} " +

@@ -54,6 +54,13 @@ object MetricsStrip {
     @Volatile private var is24h = true
     private var lastView: DirectionsView? = null     // metrics-strip thread only
     private var lastVisible: Boolean? = null         // metrics-strip thread only
+    @Volatile private var appCtx: Context? = null
+    @Volatile private var forest = EcoForest()
+    private var eco = EcoScorer()                    // main-looper (GPS) thread only
+    @Volatile private var ecoPercent: Int? = null
+    @Volatile private var noGps = false
+    private var lastEcoSaveMs = 0L                   // main-looper (GPS) thread only
+    private var lastSide: SidePanelView? = null      // metrics-strip thread only
 
     @Synchronized
     fun start(
@@ -76,6 +83,14 @@ object MetricsStrip {
         this.cells = cells
         this.mode = mode
         this.onVisible = onVisible
+        appCtx = app
+        if (mode == StripMode.SIDE) {
+            forest = EcoStore.load(app)
+            eco = EcoScorer()
+            ecoPercent = null
+            lastEcoSaveMs = SystemClock.elapsedRealtime()
+        }
+        lastSide = null
         is24h = android.text.format.DateFormat.is24HourFormat(app)
         directions = Directions.NONE
         lastView = null
@@ -87,10 +102,11 @@ object MetricsStrip {
         }
         executor = ex
         ex.scheduleWithFixedDelay({ refresh() }, 0L, TICK_MS, TimeUnit.MILLISECONDS)
-        if (mode == StripMode.METRICS) {
+        if (mode == StripMode.METRICS || mode == StripMode.SIDE) {
             val src = MetricsSource(app) { loc -> onFix(loc) }
             source = src
-            if (!src.start()) log("[STRIP] no GPS (permission or GPS off) — showing --")
+            noGps = !src.start()
+            if (noGps) log("[STRIP] no GPS (permission or GPS off) — showing --")
         }
         log("[STRIP] started ${canvasW}x$stripPx units=$units mode=$mode" +
             if (mode == StripMode.METRICS) " cells=${StripCells.serialize(cells)}" else " overlay")
@@ -98,6 +114,7 @@ object MetricsStrip {
 
     @Synchronized
     fun stop() {
+        if (mode == StripMode.SIDE) appCtx?.let { EcoStore.save(it, forest) }
         source?.stop()
         source = null
         executor?.shutdownNow()
@@ -140,6 +157,20 @@ object MetricsStrip {
                 atMs = SystemClock.elapsedRealtime(),
             )
         }
+        if (mode == StripMode.SIDE) {
+            val now = SystemClock.elapsedRealtime()
+            val step = eco.onFix(if (loc.hasSpeed()) loc.speed else 0f, now)
+            ecoPercent = eco.ecoPercent
+            val month = EcoForest.monthKey(System.currentTimeMillis(), java.util.TimeZone.getDefault())
+            val (next, done) = forest.add(step.ecoMeters, step.movingMeters, month)
+            forest = next
+            if (done > 0) log("[ECO] tree complete (#${next.trees})")
+            if (now - lastEcoSaveMs >= 30_000L) {
+                lastEcoSaveMs = now
+                appCtx?.let { EcoStore.save(it, next) }
+                log("[ECO] saved eco=${String.format(java.util.Locale.US, "%.1f", next.currentMeters / 1000)} km")
+            }
+        }
     }
 
     private fun update(f: (RiderMetrics) -> RiderMetrics) {
@@ -154,6 +185,7 @@ object MetricsStrip {
     private fun refresh() {
         try {
             val out = sink ?: return
+            if (mode == StripMode.SIDE) { refreshSide(out); return }
             if (mode == StripMode.DIRECTIONS) {
                 refreshDirections(out)
                 return
@@ -196,5 +228,25 @@ object MetricsStrip {
             lastVisible = true
             onVisible(true)
         }
+    }
+
+    private fun refreshSide(out: (Bitmap) -> Unit) {
+        val d = directions
+        val active = DirectionsFormat.active(d, navAtElapsedMs, SystemClock.elapsedRealtime())
+        // Large nominal width: the side panel stacks the parts vertically, so nothing is dropped for width.
+        val dir = if (active) DirectionsFormat.view(d, units, 100_000, 40, navAtWallMs, java.util.TimeZone.getDefault(), is24h) else null
+        val f = forest
+        val v = SidePanelView(
+            directions = dir,
+            stage = f.stage,
+            progress = (f.progress * 100).toInt() / 100f,
+            ecoKm = (f.currentMeters / 100).toInt() / 10.0,
+            ecoPercent = ecoPercent,
+            treeNumber = f.trees + 1,
+            noGps = noGps,
+        )
+        if (v == lastSide) return
+        lastSide = v
+        out(SidePanelRenderer.render(v, stripW, stripH))
     }
 }
