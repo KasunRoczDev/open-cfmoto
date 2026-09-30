@@ -162,3 +162,16 @@ Optional band under Android Auto on the **bike output only** (not the in-app Das
   NAVIGATION_STATE/CURRENT_POSITION) → `MetricsStrip.setTurn`.
 - Logs: `[NAV] first <TYPE> len=…`, `[NAV] turn → KIND SIDE N m "road"`, `[NAV] turn cleared`,
   `[NAV] parse failed …`.
+
+## Compose redesign — Part 1 (foundation)
+
+Spec: `docs/superpowers/specs/2026-09-30-compose-redesign-part1-foundation-design.md`.
+
+- `MainActivity` is a thin Compose host (lifecycle/intents/launchers + `UiPort`); the connect flow is
+  `connect/ConnectionController` (orchestration, unit-tested with a fake engine) over
+  `connect/RealConnectionEngine` (Android bodies moved verbatim from the old MainActivity).
+- UI: `ui/design` (OcmTheme light/dark tokens, components), `ui/shell/AppShell` (bottom tabs Ride · Map ·
+  Trips · Me), `ui/ride`, `ui/tabs`, `ui/logs`, `ui/dialog`.
+- One DayNight theme; View screens use the same tokens (`values/` light, `values-night/` dark). Dash-drawn UI
+  uses fixed `dash_*` colours.
+- Parts 2–5 replace Ride hero, Me/Settings, Trips, Map with Compose screens.

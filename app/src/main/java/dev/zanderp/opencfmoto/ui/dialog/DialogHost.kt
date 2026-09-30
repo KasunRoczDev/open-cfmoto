@@ -150,7 +150,8 @@ fun DialogHost(dialog: AppDialog?, c: ConnectionController) {
                 onDismissRequest = c::dismissDialog,
                 title = { Text(stringResource(R.string.main_report_a_problem)) },
                 text = {
-                    Column {
+                    // Scrolls so the model/year fields stay reachable in landscape.
+                    Column(Modifier.verticalScroll(rememberScrollState())) {
                         Text(stringResource(R.string.main_report_problem_message))
                         OutlinedTextField(problem, { problem = it }, Modifier.fillMaxWidth(), minLines = 3,
                             placeholder = { Text(stringResource(R.string.main_report_hint_problem)) })
