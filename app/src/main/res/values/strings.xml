@@ -759,6 +759,8 @@
     <string name="ui_mapping_places_none">No places yet</string>
     <string name="ui_mapping_place_n">Place %1$d</string>
     <string name="ui_save">Save</string>
+    <string name="ui_qr_title">Scan your dash</string>
+    <string name="ui_qr_denied">Camera permission is off. You can still scan a photo of the QR or enter the Wi‑Fi name and password.</string>
     <string name="forest_title">My forest</string>
     <string name="forest_trees">Trees grown</string>
     <string name="forest_growing">Growing now</string>

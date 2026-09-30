@@ -6,11 +6,14 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
-import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import android.widget.Button
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
@@ -23,6 +26,9 @@ import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
 import java.util.concurrent.Executors
+import dev.zanderp.opencfmoto.ui.design.OcmTheme
+import dev.zanderp.opencfmoto.ui.ride.QrScanScreen
+import dev.zanderp.opencfmoto.ui.ride.QrUi
 import java.util.concurrent.atomic.AtomicBoolean
 
 class QrScanActivity : AppCompatActivity() {
@@ -34,6 +40,8 @@ class QrScanActivity : AppCompatActivity() {
     private val scanner = BarcodeScanning.getClient()
     private val handled = AtomicBoolean(false)
     private var camera: Camera? = null
+    private lateinit var previewView: PreviewView
+    private var ui by mutableStateOf(QrUi(hint = null, cameraDenied = false))
 
     private val photoPicker = registerForActivityResult(
         ActivityResultContracts.GetContent()
@@ -46,21 +54,31 @@ class QrScanActivity : AppCompatActivity() {
     ) { granted ->
         if (granted) startCamera() else {
             Toast.makeText(this, "Camera permission required", Toast.LENGTH_LONG).show()
-            finish()
+            // Stay open: photo and manual Wi-Fi entry still work without the camera.
+            ui = ui.copy(cameraDenied = true)
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_qr_scan)
-        findViewById<Button>(R.id.btn_qr_photo).setOnClickListener {
-            photoPicker.launch("image/*")
-        }
-        findViewById<Button>(R.id.btn_manual_wifi).setOnClickListener {
-            ManualWifiPairing.show(this) { raw, _ ->
-                if (!handled.compareAndSet(false, true)) return@show
-                setResult(RESULT_OK, Intent().putExtra(RESULT_QR, raw))
-                finish()
+        enableEdgeToEdge()
+        previewView = PreviewView(this)
+        setContent {
+            OcmTheme {
+                QrScanScreen(
+                    ui = ui,
+                    preview = previewView,
+                    onClose = { finish() },
+                    onZoom = ::setZoom,
+                    onPhoto = { photoPicker.launch("image/*") },
+                    onManual = {
+                        ManualWifiPairing.show(this) { raw, _ ->
+                            if (!handled.compareAndSet(false, true)) return@show
+                            setResult(RESULT_OK, Intent().putExtra(RESULT_QR, raw))
+                            finish()
+                        }
+                    },
+                )
             }
         }
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
@@ -79,7 +97,6 @@ class QrScanActivity : AppCompatActivity() {
     }
 
     private fun startCamera() {
-        val previewView = findViewById<PreviewView>(R.id.preview_view)
         val providerFuture = ProcessCameraProvider.getInstance(this)
         providerFuture.addListener({
             val provider = providerFuture.get()
@@ -95,17 +112,10 @@ class QrScanActivity : AppCompatActivity() {
                 camera = provider.bindToLifecycle(
                     this, CameraSelector.DEFAULT_BACK_CAMERA, preview, analysis,
                 )
-                setupZoomButtons()
             } catch (e: Exception) {
-                findViewById<TextView>(R.id.hint).text = "Camera bind failed: ${e.message}"
+                ui = ui.copy(hint = "Camera bind failed: ${e.message}")
             }
         }, ContextCompat.getMainExecutor(this))
-    }
-
-    private fun setupZoomButtons() {
-        findViewById<Button>(R.id.btn_zoom_1x).setOnClickListener { setZoom(1f) }
-        findViewById<Button>(R.id.btn_zoom_2x).setOnClickListener { setZoom(2f) }
-        findViewById<Button>(R.id.btn_zoom_3x).setOnClickListener { setZoom(3f) }
     }
 
     private fun setZoom(ratio: Float) {
