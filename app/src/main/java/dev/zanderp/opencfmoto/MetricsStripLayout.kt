@@ -6,6 +6,22 @@ package dev.zanderp.opencfmoto
 /** Axis-aligned rectangle in pixels. Pure, so layout math is unit-testable without Android. */
 data class StripRect(val x: Int, val y: Int, val w: Int, val h: Int)
 
+/**
+ * How many dash pixels the strip takes in each role. [reservePx]: removed from Android Auto's area.
+ * [drawPx]: band painted this frame. [touchPx]: bottom rows whose taps don't reach Android Auto.
+ * Metrics = reserved + always drawn. Directions (overlay) = AA full screen; band only while visible.
+ */
+data class StripGeometry(val reservePx: Int, val drawPx: Int, val touchPx: Int) {
+    companion object {
+        fun of(stripPx: Int, overlay: Boolean, visible: Boolean): StripGeometry = when {
+            stripPx <= 0 -> StripGeometry(0, 0, 0)
+            !overlay -> StripGeometry(stripPx, stripPx, stripPx)
+            visible -> StripGeometry(0, stripPx, stripPx)
+            else -> StripGeometry(0, 0, 0)
+        }
+    }
+}
+
 /** Strip cells, in display order. [TURN] follows Turn info; the rest are the rider's choice. */
 enum class StripCell { TURN, SPEED, ALTITUDE, HEADING }
 

@@ -14,6 +14,9 @@ enum class StripHeight(val px: Int, @StringRes val labelRes: Int) {
     LARGE(80, R.string.pref_strip_large),
 }
 
+/** What the strip shows: speed/altitude/heading (band reserved under AA) or turn-by-turn directions (overlay). */
+enum class StripMode { METRICS, DIRECTIONS }
+
 /**
  * Strip settings frozen at Connect ([MetricsStripPrefs.snapshot] → [BikeProfileHolder.stripSession]),
  * so AA margins, the reserved band and the nav service all agree for the whole connection — including
@@ -23,13 +26,29 @@ data class StripSnapshot(
     val requestPx: Int,
     val turnInfo: Boolean,
     val cells: Set<StripCell> = StripCells.ALL,
+    val mode: StripMode = StripMode.METRICS,
 ) {
+    /** Directions: the band is drawn over Android Auto (which keeps the full screen) only while navigating. */
+    val overlay: Boolean get() = mode == StripMode.DIRECTIONS && requestPx > 0
+
+    /** Dash pixels Android Auto must be laid out without (only Metrics mode reserves the band). */
+    val aaReservePx: Int get() = if (overlay) 0 else requestPx
+
     companion object {
         val OFF = StripSnapshot(0, false)
 
-        /** Turn info only makes sense with a visible strip. */
-        fun of(height: StripHeight, turnInfo: Boolean, cells: Set<StripCell> = StripCells.ALL): StripSnapshot =
-            StripSnapshot(height.px, turnInfo && height != StripHeight.OFF, cells)
+        /** Turn info only makes sense with a visible strip; Directions requires it. */
+        fun of(
+            height: StripHeight,
+            turnInfo: Boolean,
+            cells: Set<StripCell> = StripCells.ALL,
+            mode: StripMode = StripMode.METRICS,
+        ): StripSnapshot = StripSnapshot(
+            requestPx = height.px,
+            turnInfo = (turnInfo || mode == StripMode.DIRECTIONS) && height != StripHeight.OFF,
+            cells = cells,
+            mode = mode,
+        )
     }
 }
 
@@ -39,6 +58,7 @@ object MetricsStripPrefs {
     private const val KEY_HEIGHT = "metrics_strip_height"
     private const val KEY_TURN_INFO = "metrics_strip_turn_info"
     private const val KEY_CELLS = "metrics_strip_cells"
+    private const val KEY_MODE = "metrics_strip_mode"
 
     private fun prefs(ctx: Context) =
         ctx.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
@@ -67,6 +87,15 @@ object MetricsStripPrefs {
         BikeScope.putString(prefs(ctx), ctx, KEY_CELLS, StripCells.serialize(cells))
     }
 
+    fun mode(ctx: Context): StripMode {
+        val name = BikeScope.getString(prefs(ctx), ctx, KEY_MODE, StripMode.METRICS.name)
+        return runCatching { StripMode.valueOf(name!!) }.getOrDefault(StripMode.METRICS)
+    }
+
+    fun setMode(ctx: Context, m: StripMode) {
+        BikeScope.putString(prefs(ctx), ctx, KEY_MODE, m.name)
+    }
+
     /** Settings to freeze into [BikeProfileHolder.stripSession] at Connect. */
-    fun snapshot(ctx: Context): StripSnapshot = StripSnapshot.of(height(ctx), turnInfo(ctx), cells(ctx))
+    fun snapshot(ctx: Context): StripSnapshot = StripSnapshot.of(height(ctx), turnInfo(ctx), cells(ctx), mode(ctx))
 }

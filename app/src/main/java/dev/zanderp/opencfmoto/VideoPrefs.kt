@@ -258,7 +258,8 @@ object VideoPrefs {
     fun aaMarginsFor(ctx: Context, spec: AaVideoSpec, ssid: String? = null): AaMargins {
         val mode = matchAspectMode(ctx)
         // Set just before this call in MainActivity.applyProfile — the same value VideoPipeline reserves.
-        val stripReq = BikeProfileHolder.stripSession.requestPx
+        // Metrics mode lays AA out above the band; Directions overlays it, so AA keeps the full panel.
+        val stripReq = BikeProfileHolder.stripSession.aaReservePx
         val panel = when (mode) {
             MatchAspectMode.OFF -> {
                 // OFF means "no margins" — except the metrics strip still needs AA laid out for the
