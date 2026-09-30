@@ -37,6 +37,8 @@ import java.util.Locale
 class TripsListActivity : AppCompatActivity() {
 
     private lateinit var container: LinearLayout
+    private lateinit var behaviourHost: LinearLayout
+    private var monthKey: MonthKey? = null
     private lateinit var empty: TextView
     private lateinit var dayLabel: TextView
     private lateinit var daySummary: TextView
@@ -57,6 +59,7 @@ class TripsListActivity : AppCompatActivity() {
             insets
         }
         container = findViewById(R.id.trips_container)
+        behaviourHost = findViewById(R.id.trips_behaviour_host)
         empty = findViewById(R.id.trips_empty)
         dayLabel = findViewById(R.id.trips_day_label)
         daySummary = findViewById(R.id.trips_day_summary)
@@ -88,6 +91,116 @@ class TripsListActivity : AppCompatActivity() {
             }
         }
         renderDay()
+        renderBehaviour()
+    }
+
+    /** "Riding behaviour" month card above the day's rides (analysis off the main thread). */
+    private fun renderBehaviour() {
+        val zone = java.util.TimeZone.getDefault()
+        val trips = allTrips
+        val months = MonthlyBehaviour.months(trips, zone)
+        if (months.isEmpty()) {
+            behaviourHost.removeAllViews()
+            return
+        }
+        val key = monthKey?.takeIf { it in months } ?: months.first()
+        monthKey = key
+        val imperial = MapPrefs.units(this) == MapUnits.IMPERIAL
+        Thread {
+            val s = MonthlyBehaviour.summarize(trips, key, zone)
+            runOnUiThread {
+                if (isFinishing || isDestroyed || monthKey != key) return@runOnUiThread
+                behaviourHost.removeAllViews()
+                if (s != null) behaviourHost.addView(behaviourCard(s, months, imperial))
+            }
+        }.start()
+    }
+
+    private fun behaviourCard(s: MonthSummary, months: List<MonthKey>, imperial: Boolean): View {
+        val card = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(14), dp(10), dp(14), dp(10))
+            background = android.graphics.drawable.GradientDrawable().apply {
+                cornerRadius = dp(18).toFloat()
+                setColor(ContextCompat.getColor(context, R.color.surface))
+                setStroke(dp(1), ContextCompat.getColor(context, R.color.outline))
+            }
+        }
+        val idx = months.indexOf(s.key)
+        val header = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = android.view.Gravity.CENTER_VERTICAL
+        }
+        header.addView(TextView(this).apply {
+            text = getString(R.string.behaviour_title)
+            setTextColor(ContextCompat.getColor(context, R.color.text_primary))
+            textSize = 16f
+            setTypeface(typeface, android.graphics.Typeface.BOLD)
+        }, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
+        // Plain tappable arrows (48 dp) — no style dependency on the old View screen.
+        fun arrow(label: String, desc: Int, target: Int?) = TextView(this).apply {
+            text = label
+            contentDescription = getString(desc)
+            textSize = 24f
+            gravity = android.view.Gravity.CENTER
+            minWidth = dp(48)
+            minHeight = dp(48)
+            setTextColor(ContextCompat.getColor(context, R.color.accent))
+            alpha = if (target != null) 1f else 0.3f
+            isEnabled = target != null
+            setOnClickListener { target?.let { monthKey = months[it]; renderBehaviour() } }
+        }
+        header.addView(arrow("‹", R.string.behaviour_prev_month, (idx + 1).takeIf { it < months.size }))
+        header.addView(TextView(this).apply {
+            val cal = Calendar.getInstance().apply { clear(); set(s.key.year, s.key.month - 1, 1) }
+            text = java.text.SimpleDateFormat("MMM yyyy", Locale.getDefault()).format(cal.time)
+            setTextColor(ContextCompat.getColor(context, R.color.text_primary))
+            textSize = 14f
+        })
+        header.addView(arrow("›", R.string.behaviour_next_month, (idx - 1).takeIf { it >= 0 }))
+        card.addView(header)
+
+        card.addView(RadarView(this).apply {
+            set(s.radar, listOf(
+                getString(R.string.behaviour_axis_distance), getString(R.string.behaviour_axis_time),
+                getString(R.string.behaviour_axis_top), getString(R.string.behaviour_axis_braking),
+                getString(R.string.behaviour_axis_accel),
+            ), s.score?.toString() ?: getString(R.string.behaviour_none))
+        }, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(210)))
+
+        val rows = listOf(
+            getString(R.string.behaviour_rides) to s.rides.toString(),
+            getString(R.string.behaviour_distance) to String.format(Locale.US, "%.1f km", s.distanceKm),
+            getString(R.string.behaviour_riding_time) to RideBehaviourUi.duration(s.ridingTimeMs),
+            getString(R.string.behaviour_top_speed_month) to RideBehaviourUi.speed(s.topSpeedMs, imperial),
+            getString(R.string.behaviour_avg_moving) to RideBehaviourUi.speed(s.avgMovingMs, imperial),
+            getString(R.string.behaviour_hard_brakes) to s.hardBrakes.toString(),
+            getString(R.string.behaviour_hard_accels) to s.hardAccels.toString(),
+            getString(R.string.behaviour_stops) to s.stops.toString(),
+        )
+        for ((label, value) in rows) {
+            val line = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                setPadding(0, dp(5), 0, dp(5))
+            }
+            line.addView(TextView(this).apply {
+                text = label
+                setTextColor(ContextCompat.getColor(context, R.color.text_secondary))
+                textSize = 13f
+            }, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
+            line.addView(TextView(this).apply {
+                text = value
+                setTextColor(ContextCompat.getColor(context, R.color.text_primary))
+                textSize = 13f
+                setTypeface(typeface, android.graphics.Typeface.BOLD)
+            })
+            card.addView(line)
+        }
+        return card.also {
+            it.layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT,
+            ).apply { topMargin = dp(8); bottomMargin = dp(8) }
+        }
     }
 
     private fun shiftDay(delta: Int) {

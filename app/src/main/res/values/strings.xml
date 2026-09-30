@@ -723,4 +723,18 @@
     <string name="behaviour_none">—</string>
     <string name="map_start_label">Start</string>
     <string name="map_end_label">End</string>
+    <string name="behaviour_title">Riding behaviour</string>
+    <string name="behaviour_rides">Rides</string>
+    <string name="behaviour_top_speed_month">Top speed</string>
+    <string name="behaviour_avg_moving">Avg moving speed</string>
+    <string name="behaviour_hard_brakes">Hard brakes</string>
+    <string name="behaviour_hard_accels">Hard accelerations</string>
+    <string name="behaviour_stops">Stops</string>
+    <string name="behaviour_axis_distance">Distance</string>
+    <string name="behaviour_axis_time">Time</string>
+    <string name="behaviour_axis_top">Top speed</string>
+    <string name="behaviour_axis_braking">Smooth braking</string>
+    <string name="behaviour_axis_accel">Smooth accel</string>
+    <string name="behaviour_prev_month">Previous month</string>
+    <string name="behaviour_next_month">Next month</string>
 </resources>
