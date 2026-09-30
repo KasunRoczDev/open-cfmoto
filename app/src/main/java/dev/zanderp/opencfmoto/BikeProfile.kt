@@ -248,6 +248,12 @@ object BikeProfileHolder {
     @Volatile var stripSession: StripSnapshot = StripSnapshot.OFF
 
     /**
+     * True when [VideoPrefs.aaMarginsFor] actually laid Android Auto out beside the side panel at Connect.
+     * The pipeline only carves the panel when this is set (else AA would overflow or be cut).
+     */
+    @Volatile var sidePanelApplied: Boolean = false
+
+    /**
      * Advertise Android Auto's navigation-status (instrument cluster) service so Maps/Waze send
      * next-turn data for the metrics strip. Read by [dev.zanderp.opencfmoto.aa.ServiceDiscoveryResponse].
      * Off = handshake unchanged.

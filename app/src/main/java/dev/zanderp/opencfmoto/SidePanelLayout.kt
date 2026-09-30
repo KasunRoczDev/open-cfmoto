@@ -31,16 +31,38 @@ object SidePanelLayout {
 
     fun aaWidth(panelW: Int, sidePx: Int): Int = (panelW - sidePx).coerceAtLeast(16)
 
-    fun panelX(canvasW: Int, sidePx: Int, left: Boolean): Int = if (left) 0 else canvasW - sidePx
+    /** Left x of the panel, inside the rider's left/right screen margins ([mL], [mR]). */
+    fun panelX(canvasW: Int, sidePx: Int, left: Boolean, mL: Int = 0, mR: Int = 0): Int =
+        if (left) mL else canvasW - mR - sidePx
 
-    fun isInPanel(cx: Int, canvasW: Int, sidePx: Int, left: Boolean): Boolean =
-        sidePx > 0 && if (left) cx < sidePx else cx >= canvasW - sidePx
-
-    /** Touch x to map into Android Auto, or null: DOWN on the panel dropped; MOVE/UP clamped to its edge. */
-    fun touchX(cx: Int, canvasW: Int, sidePx: Int, left: Boolean, isDown: Boolean): Int? = when {
-        !isInPanel(cx, canvasW, sidePx, left) -> cx
-        isDown -> null
-        left -> sidePx
-        else -> canvasW - sidePx - 1
+    fun isInPanel(cx: Int, canvasW: Int, sidePx: Int, left: Boolean, mL: Int = 0, mR: Int = 0): Boolean {
+        if (sidePx <= 0) return false
+        val x = panelX(canvasW, sidePx, left, mL, mR)
+        return cx >= x && cx < x + sidePx
     }
+
+    /**
+     * Touch x to map into Android Auto, or null: DOWN on the panel dropped; MOVE/UP clamped to the adjacent
+     * Android Auto column (never into a margin, where the drag would be dropped and leave a pointer stuck).
+     */
+    fun touchX(cx: Int, canvasW: Int, sidePx: Int, left: Boolean, isDown: Boolean, mL: Int = 0, mR: Int = 0): Int? = when {
+        !isInPanel(cx, canvasW, sidePx, left, mL, mR) -> cx
+        isDown -> null
+        left -> panelX(canvasW, sidePx, true, mL, mR) + sidePx
+        else -> panelX(canvasW, sidePx, false, mL, mR) - 1
+    }
+
+    /**
+     * The panel's GL rect inside the screen margins, vertically matching Android Auto's area (the compositor
+     * passes the same top/bottom margin offsets to GL for the AA viewport).
+     */
+    fun panelRectGl(canvasW: Int, canvasH: Int, sidePx: Int, left: Boolean, mL: Int, mR: Int, mT: Int, mB: Int): StripRect =
+        StripRect(panelX(canvasW, sidePx, left, mL, mR), mT, sidePx, (canvasH - mT - mB).coerceAtLeast(1))
+
+    /** Only carve the panel when Android Auto was actually laid out for it at Connect (else AA overflows). */
+    fun pipelinePanelPx(canvasW: Int, percent: Int, appliedAtConnect: Boolean): Int =
+        if (appliedAtConnect) panelPx(canvasW, percent) else 0
+
+    /** Text size for a panel: the smaller of a height fraction and a width fraction (tall narrow panels). */
+    fun textPx(w: Int, h: Int, heightFrac: Float, widthFrac: Float): Float = minOf(h * heightFrac, w * widthFrac)
 }

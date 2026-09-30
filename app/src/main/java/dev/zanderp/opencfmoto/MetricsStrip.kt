@@ -159,7 +159,8 @@ object MetricsStrip {
         }
         if (mode == StripMode.SIDE) {
             val now = SystemClock.elapsedRealtime()
-            val step = eco.onFix(if (loc.hasSpeed()) loc.speed else 0f, now)
+            // No speed in this fix → skip it (NaN), never score it as a stop.
+            val step = eco.onFix(if (loc.hasSpeed()) loc.speed else Float.NaN, now)
             ecoPercent = eco.ecoPercent
             val month = EcoForest.monthKey(System.currentTimeMillis(), java.util.TimeZone.getDefault())
             val (next, done) = forest.add(step.ecoMeters, step.movingMeters, month)

@@ -308,8 +308,15 @@ class VideoPipeline(
                 log("[STRIP] canvas ${w}x$h too small (< ${MetricsStripLayout.MIN_CANVAS_H}px tall) — strip off this session")
             }
             if (session.overlay && stripPx > 0) log("[STRIP] mode=DIRECTIONS overlay band=${stripPx}px")
-            val sidePx = if (session.side) SidePanelLayout.panelPx(w, session.sidePercent) else 0
-            if (session.side && sidePx == 0) log("[STRIP] canvas ${w}x$h too narrow for the side panel — off this session")
+            val sidePx = if (session.side) {
+                SidePanelLayout.pipelinePanelPx(w, session.sidePercent, BikeProfileHolder.sidePanelApplied)
+            } else 0
+            if (session.side && sidePx == 0) {
+                log(
+                    if (!BikeProfileHolder.sidePanelApplied) "[STRIP] side panel off — dash size unknown at Connect (reconnect once it is learned)"
+                    else "[STRIP] canvas ${w}x$h too narrow for the side panel — off this session",
+                )
+            }
             if (sidePx > 0) {
                 log("[STRIP] mode=SIDE side=${if (session.sideLeft) "LEFT" else "RIGHT"} panel=${sidePx}px aa=${w - sidePx}x$h")
             }

@@ -65,15 +65,15 @@ object SidePanelRenderer {
         }
         c.drawText(MetricsStripRenderer.fit(d.distance, big, textW), textX, pad + arrow * 0.55f, big)
         var y = pad + arrow + pad * 0.4f
-        small.textSize = h * 0.045f
+        small.textSize = SidePanelLayout.textPx(w, h, 0.045f, 0.075f)
         d.road?.let {
             c.drawText(MetricsStripRenderer.fit(it, small, w - 2 * pad), pad, y + small.textSize, small)
             y += small.textSize * 1.5f
         }
         if (d.then != null || d.lanes.isNotEmpty()) {
-            val rowH = h * 0.075f
+            val rowH = minOf(h * 0.075f, w * 0.14f)
             var x = pad
-            if (d.then != null) {
+            if (d.then != null && x + small.measureText("then ") + rowH <= w - pad) {
                 c.drawText("then", x, y + rowH * 0.7f, small)
                 x += small.measureText("then ") 
                 MetricsStripRenderer.drawArrow(c, d.then, x, y, rowH)
@@ -97,7 +97,7 @@ object SidePanelRenderer {
             y += rowH + pad * 0.3f
         }
         d.eta?.let {
-            big.textSize = h * 0.055f
+            big.textSize = SidePanelLayout.textPx(w, h, 0.055f, 0.085f)
             val line = it + (d.remaining?.let { r -> " · $r" } ?: "")
             c.drawText(MetricsStripRenderer.fit(line, big, w - 2 * pad), pad, y + big.textSize, big)
             y += big.textSize * 1.6f
@@ -110,7 +110,7 @@ object SidePanelRenderer {
         TreeDrawing.draw(c, v.stage, pad + size / 2f, top + size, size)
         val x = pad * 2 + size
         small.textSize = size * 0.22f
-        val label = if (v.noGps) "No GPS" else "Eco ${v.ecoPercent?.let { "$it%" } ?: "—"} · tree ${v.stage}/5"
+        val label = if (v.noGps) "No GPS" else "Eco ${v.ecoPercent?.let { "$it%" } ?: "—"} · ${v.stage}/5"
         c.drawText(MetricsStripRenderer.fit(label, small, w - x - pad), x, top + size * 0.4f, small)
         drawBar(c, x, top + size * 0.6f, w - x - pad, size * 0.1f, v.progress)
     }
@@ -119,16 +119,16 @@ object SidePanelRenderer {
         val size = minOf(w - 2 * pad, h * 0.5f)
         TreeDrawing.draw(c, v.stage, w / 2f, pad + size, size)
         var y = pad + size + pad
-        small.textSize = h * 0.045f
+        small.textSize = SidePanelLayout.textPx(w, h, 0.045f, 0.075f)
         small.textAlign = Paint.Align.CENTER
         c.drawText(MetricsStripRenderer.fit("${TreeDrawing.stageName(v.stage)} · stage ${v.stage} of 5", small, w - 2 * pad), w / 2f, y, small)
         y += pad * 0.8f
         drawBar(c, pad * 2, y, w - pad * 4, h * 0.02f, v.progress)
         y += pad * 1.8f
-        big.textSize = h * 0.08f
+        big.textSize = SidePanelLayout.textPx(w, h, 0.08f, 0.16f)
         big.textAlign = Paint.Align.CENTER
         val eco = if (v.noGps) "No GPS" else "Eco ${v.ecoPercent?.let { "$it%" } ?: "—"}"
-        c.drawText(eco, w / 2f, y + big.textSize * 0.4f, big)
+        c.drawText(MetricsStripRenderer.fit(eco, big, w - 2 * pad), w / 2f, y + big.textSize * 0.4f, big)
         y += big.textSize + pad * 0.4f
         c.drawText(
             MetricsStripRenderer.fit(String.format(Locale.US, "%.1f / 20 eco km · tree %d", v.ecoKm, v.treeNumber), small, w - 2 * pad),

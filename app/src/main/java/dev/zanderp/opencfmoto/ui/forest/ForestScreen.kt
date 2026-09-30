@@ -67,7 +67,11 @@ fun ForestScreen() {
                 stringResource(R.string.forest_growing_value, TreeDrawing.stageName(f.stage), f.currentMeters / 1000),
             )
             StatRow(stringResource(R.string.forest_all_time), String.format(Locale.US, "%.0f km", f.allTimeMeters / 1000))
-            StatRow(stringResource(R.string.forest_month), f.monthEcoPercent?.let { "$it%" } ?: "—")
+            StatRow(
+                stringResource(R.string.forest_month),
+                f.monthEcoPercentFor(dev.zanderp.opencfmoto.EcoForest.monthKey(System.currentTimeMillis(), java.util.TimeZone.getDefault()))
+                    ?.let { "$it%" } ?: "—",
+            )
         }
         OcmCard { Text(stringResource(R.string.forest_note), style = OcmType.body, color = c.text2) }
     }

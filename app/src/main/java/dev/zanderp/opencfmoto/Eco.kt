@@ -92,6 +92,9 @@ data class EcoForest(
         get() = if (monthMovingMeters < EcoScorer.MIN_PERCENT_M) null
         else (100.0 * monthEcoMeters / monthMovingMeters).roundToInt()
 
+    /** This month's eco % only if the stored month is [currentMonth] (else "no ride yet this month"). */
+    fun monthEcoPercentFor(currentMonth: String): Int? = if (month == currentMonth) monthEcoPercent else null
+
     /** Adds one step's distances; returns the new state and how many trees were completed. */
     fun add(ecoMeters: Double, movingMeters: Double, month: String): Pair<EcoForest, Int> {
         val eco = if (ecoMeters.isFinite() && ecoMeters > 0) ecoMeters else 0.0

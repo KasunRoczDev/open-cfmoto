@@ -320,7 +320,10 @@ class AaCompositor(private val log: (String) -> Unit) {
      */
     fun mapCanvasToSource(cx: Int, cy: Int, isDown: Boolean = true): Pair<Int, Int>? {
         // Metrics band: drop a DOWN there, clamp a MOVE/UP to the last AA row (never strand a pointer).
-        val x = SidePanelLayout.touchX(cx, canvasW, sidePx, sideLeft, isDown) ?: return null
+        val x = SidePanelLayout.touchX(
+            cx, canvasW, sidePx, sideLeft, isDown,
+            ScreenMargins.left.coerceIn(0, canvasW), ScreenMargins.right.coerceIn(0, canvasW),
+        ) ?: return null
         val y = MetricsStripLayout.touchY(cy, canvasH, stripGeometry().touchPx, isDown) ?: return null
         if (vpW == 0 || vpH == 0 || srcW == 0 || srcH == 0) return null
         val rx = x - vpX
@@ -552,11 +555,18 @@ class AaCompositor(private val log: (String) -> Unit) {
         val g = if (isBike) stripGeometry() else StripGeometry(0, 0, 0)
         val shift = if (g.reservePx > 0) MetricsStripLayout.glAaShift(g.reservePx) else 0
         val panel = if (isBike) sidePx else 0
-        val clipX = if (panel > 0 && sideLeft) panel else 0
+        // Never paint Android Auto into the side panel column or the margin beyond it (FILL can overflow).
+        val panelX = if (panel > 0) {
+            SidePanelLayout.panelX(
+                canvasW, panel, sideLeft,
+                ScreenMargins.left.coerceIn(0, canvasW), ScreenMargins.right.coerceIn(0, canvasW),
+            )
+        } else 0
+        val clipX = if (panel > 0 && sideLeft) panelX + panel else 0
+        val clipRight = if (panel > 0 && !sideLeft) panelX else clipW
         if (clipW > 0 && clipH > 0) {
             GLES20.glEnable(GLES20.GL_SCISSOR_TEST)
-            // Never paint Android Auto into the side panel column (FILL can overflow).
-            GLES20.glScissor(clipX, shift, clipW - panel, clipH - g.reservePx)
+            GLES20.glScissor(clipX, shift, (clipRight - clipX).coerceAtLeast(0), clipH - g.reservePx)
         }
 
         GLES20.glViewport(vx, vy + shift, vw, vh)
@@ -590,7 +600,13 @@ class AaCompositor(private val log: (String) -> Unit) {
         }
         if (panel > 0) {
             try {
-                drawTexture(SidePanelLayout.panelX(canvasW, panel, sideLeft), 0, panel, canvasH)
+                // Inside the rider's screen margins, vertically matching the AA area.
+                val r = SidePanelLayout.panelRectGl(
+                    canvasW, canvasH, panel, sideLeft,
+                    ScreenMargins.left.coerceIn(0, canvasW), ScreenMargins.right.coerceIn(0, canvasW),
+                    ScreenMargins.top.coerceIn(0, canvasH), ScreenMargins.bottom.coerceIn(0, canvasH),
+                )
+                drawTexture(r.x, r.y, r.w, r.h)
             } catch (e: Exception) {
                 logStripFailure("side draw", e)
             }

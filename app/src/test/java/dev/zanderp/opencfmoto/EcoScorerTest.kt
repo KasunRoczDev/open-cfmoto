@@ -72,4 +72,12 @@ class EcoScorerTest {
         // eco 9 × 13.89 m = 125 m; moving 125 m + 10 × 20.83 m = 333 m → 37.5 % → 38
         assertEquals(38, mixed.ecoPercent)
     }
+
+    @Test
+    fun fixWithoutSpeedIsSkippedNotAStop() {
+        // A speedless fix (NaN) must not act as 0 km/h (a fake −13.9 m/s² step + a 0 in the window).
+        val s = EcoScorer()
+        s.onFix(50 / 3.6f, 0); s.onFix(Float.NaN, 1000); s.onFix(50 / 3.6f, 2000); s.onFix(50 / 3.6f, 3000)
+        assertEquals(50 / 3.6 * 2 + 50 / 3.6, s.ecoMeters, 0.01)
+    }
 }

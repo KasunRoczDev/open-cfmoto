@@ -67,4 +67,11 @@ class EcoForestTest {
         assertEquals("2026-10", EcoForest.monthKey(t, TimeZone.getTimeZone("Asia/Colombo")))
         assertEquals("2026-09", EcoForest.monthKey(t, utc))
     }
+
+    @Test
+    fun monthPercentOnlyForCurrentMonth() {
+        val f = EcoForest(month = "2026-09", monthEcoMeters = 840.0, monthMovingMeters = 1_000.0)
+        assertEquals(84, f.monthEcoPercentFor("2026-09"))
+        assertNull(f.monthEcoPercentFor("2026-10"))          // no ride yet this month → not last month's value
+    }
 }

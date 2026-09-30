@@ -261,6 +261,7 @@ object VideoPrefs {
         // Metrics mode lays AA out above the band; Directions overlays it, so AA keeps the full panel.
         val stripReq = BikeProfileHolder.stripSession.aaReservePx
         val session = BikeProfileHolder.stripSession
+        BikeProfileHolder.sidePanelApplied = false
         val panel = when (mode) {
             MatchAspectMode.OFF -> {
                 // OFF means "no margins" — except the metrics strip still needs AA laid out for the
@@ -284,6 +285,7 @@ object VideoPrefs {
         }
         val stripPx = MetricsStripLayout.resolvePx(stripReq, panel.second)
         val sidePx = if (session.side) SidePanelLayout.panelPx(panel.first, session.sidePercent) else 0
+        BikeProfileHolder.sidePanelApplied = sidePx > 0
         val (targetW, targetH) = if (sidePx > 0) {
             SidePanelLayout.aaWidth(panel.first, sidePx) to panel.second
         } else {
