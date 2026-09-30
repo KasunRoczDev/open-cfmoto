@@ -79,7 +79,7 @@ object MetricsStripRenderer {
         drawValue(c, text, v.turnDistance.ifEmpty { MetricsFormat.NONE }, v.turnRoad, 0.45f)
     }
 
-    private fun drawArrow(c: Canvas, t: NextTurn, left: Float, top: Float, s: Float) {
+    internal fun drawArrow(c: Canvas, t: NextTurn, left: Float, top: Float, s: Float) {
         arrowStroke.strokeWidth = s * 0.12f
         val cx = left + s / 2f
         val bottom = top + s
@@ -151,7 +151,7 @@ object MetricsStripRenderer {
         c.drawPath(p, arrowFill)
     }
 
-    private fun fit(text: String, p: Paint, maxW: Float): String {
+    internal fun fit(text: String, p: Paint, maxW: Float): String {
         if (p.measureText(text) <= maxW) return text
         var end = text.length
         val ell = p.measureText("…")
