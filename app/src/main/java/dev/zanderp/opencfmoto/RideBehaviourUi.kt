@@ -51,7 +51,7 @@ object RideBehaviourUi {
     }
 
     fun speedValue(ms: Float, imperial: Boolean): String =
-        (if (imperial) ms * 2.23694f else ms * 3.6f).roundToInt().toString()
+        if (!ms.isFinite()) "—" else (if (imperial) ms * 2.23694f else ms * 3.6f).roundToInt().toString()
 
     fun speed(ms: Float, imperial: Boolean): String =
         speedValue(ms, imperial) + if (imperial) " mph" else " km/h"

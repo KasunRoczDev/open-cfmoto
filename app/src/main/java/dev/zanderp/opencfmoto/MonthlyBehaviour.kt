@@ -37,7 +37,8 @@ object MonthlyBehaviour {
             .sortedWith(compareByDescending<MonthKey> { it.year }.thenByDescending { it.month })
 
     fun summarize(trips: List<Trip>, key: MonthKey, zone: TimeZone): MonthSummary? {
-        val inMonth = trips.filter { monthOf(it.start, zone) == key }
+        // Skip unreadable/corrupt files (non-finite numbers) — spec §5.
+        val inMonth = trips.filter { it.distanceMeters.isFinite() && monthOf(it.start, zone) == key }
         if (inMonth.isEmpty()) return null
         val analyses = inMonth.map { RideAnalysis.analyze(it) }
         val km = inMonth.sumOf { it.distanceKm }

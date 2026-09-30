@@ -62,7 +62,7 @@ class TripMapActivity : AppCompatActivity() {
 
         findViewById<TextView>(R.id.map_title).text = trip.dateText()
         findViewById<TextView>(R.id.map_stats).text =
-            "${trip.distanceText()} · ${trip.durationText()} · avg ${trip.avgKmh} · max ${trip.maxKmh} km/h"
+            "${trip.distanceText()} · ${trip.durationText()} · avg ${trip.avgKmh} km/h"
 
         val imperial = MapPrefs.units(this) == MapUnits.IMPERIAL
         // A ride has at most a few thousand points; analyse off the main thread anyway.
@@ -102,10 +102,6 @@ class TripMapActivity : AppCompatActivity() {
         if (geo.size > 1) addMarker(geo.last(), getString(R.string.map_end_label), Color.RED)
 
         fun at(i: Int) = RideBehaviourUi.clock(pts[i].time)
-        b.maxIndex?.let { i ->
-            behaviourMarker(geo[i], "▲", RideBehaviourUi.TOP,
-                "${getString(R.string.behaviour_top_speed)} · ${RideBehaviourUi.speed(pts[i].speedMs, imperial)} · ${at(i)}")
-        }
         b.slowestIndex?.let { i ->
             behaviourMarker(geo[i], "▼", RideBehaviourUi.SLOW,
                 "${getString(R.string.behaviour_slowest)} · ${RideBehaviourUi.speed(pts[i].speedMs, imperial)} · ${at(i)}")
@@ -123,6 +119,12 @@ class TripMapActivity : AppCompatActivity() {
             behaviourMarker(geo[e.index], "»", RideBehaviourUi.ACCEL,
                 "${getString(R.string.behaviour_hard_accel)} · ${RideBehaviourUi.speedValue(e.fromMs, imperial)} → " +
                     "${RideBehaviourUi.speed(e.toMs, imperial)} · ${at(e.index)}")
+        }
+        // Top speed last: osmdroid draws later overlays on top and gives them the tap (a brake often
+        // starts right at the top-speed point).
+        b.maxIndex?.let { i ->
+            behaviourMarker(geo[i], "▲", RideBehaviourUi.TOP,
+                "${getString(R.string.behaviour_top_speed)} · ${RideBehaviourUi.speed(pts[i].speedMs, imperial)} · ${at(i)}")
         }
         map.invalidate()
 

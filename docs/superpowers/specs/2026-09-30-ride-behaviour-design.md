@@ -56,8 +56,15 @@ acceleration is computed across the gap).
 | **Slowest moving** | min speed among moving points outside stops (and its point); none if the ride never moved |
 | **Average** | distance / (end − start); **moving average** = distance / moving time (the existing `Trip.avgKmh`) |
 
+**Amended after review (real recorder data, 2026-09-30):** step time below 1 s counts as 1 s (fixes are requested ≤ 1/s;
+shorter gaps are callback jitter); a braking step that ends below 5 km/h only counts inside a run that is already
+hard (phones clamp crawling speed to 0, so `30 → 20 → 0` is an ordinary stop); a step up from the recorder's 0 first
+fix is not a hard acceleration (cold GPS start); the higher end of any step with |a| > 8 m/s² is excluded from
+top/slowest (catches multi-sample glitches); "slowest moving" ignores points within 5 s of a sub-3 km/h point; the
+score divides by `max(km, 10)` so rides under 10 km are judged per 10 km; files with non-finite numbers are skipped.
+
 **Behaviour score (per ride and per month):** `events = hardBrakes + hardAccels`; rides shorter than 1 km get
-no score ("—"). `score = clamp(100 − 15 × events ÷ (km ÷ 10), 0, 100)`, rounded. So 1 event per 10 km → 85;
+no score ("—"). `score = clamp(100 − 15 × events ÷ (max(km, 10) ÷ 10), 0, 100)`, rounded. So 1 event per 10 km → 85;
 no events → 100.
 
 **Radar axes (0–1):** Distance = month km ÷ 500 · Riding time = month hours ÷ 20 · Top speed = top km/h ÷ 120 ·

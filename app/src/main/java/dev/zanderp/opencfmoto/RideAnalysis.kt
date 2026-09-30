@@ -46,6 +46,12 @@ object RideAnalysis {
     const val ACCEL_MS2 = 2.8
     const val IMPLAUSIBLE_MS2 = 8.0
     const val SPIKE_MS = 30f / 3.6f
+    /** Fixes are requested ≤ 1/s, so a shorter gap is callback delivery jitter, not physics. */
+    const val MIN_DT_S = 1.0
+    /** Phones clamp crawling speeds to 0; a braking step ending below this only counts inside a hard run. */
+    const val BRAKE_MIN_END_MS = 5f / 3.6f
+    /** "Slowest moving" ignores points this close in time to a sub-3 km/h point (the edges of a stop). */
+    const val STOP_EDGE_MS = 5_000L
     private const val EPS = 1e-3
 
     fun analyze(trip: Trip, imperial: Boolean = false): RideBehaviour {
@@ -54,15 +60,18 @@ object RideAnalysis {
         var maxI: Int? = null
         var slowI: Int? = null
         for (i in 0 until n) {
-            if (isSpike(p, i)) continue
+            // A GPS glitch: a spike, or the higher end of a physically impossible step (glitches jump up).
+            if (isSpike(p, i) || glitchHigh(p, i)) continue
             val v = p[i].speedMs
+            if (!v.isFinite()) continue
             val m = maxI
             if (m == null || v > p[m].speedMs) maxI = i
             val s = slowI
-            if (v >= MOVING_MS && (s == null || v < p[s].speedMs)) slowI = i
+            if (v >= MOVING_MS && !nearStop(p, i) && (s == null || v < p[s].speedMs)) slowI = i
         }
         val brakes = events(p, brake = true)
         val accels = events(p, brake = false)
+        val dist = trip.distanceMeters.takeIf { it.isFinite() } ?: 0.0
         val totalS = (trip.end - trip.start) / 1000.0
         val movingS = trip.movingTimeMs / 1000.0
         return RideBehaviour(
@@ -70,20 +79,50 @@ object RideAnalysis {
             maxSpeedMs = maxI?.let { p[it].speedMs } ?: 0f,
             slowestIndex = slowI,
             slowestMovingMs = slowI?.let { p[it].speedMs },
-            avgMs = if (totalS > 0) (trip.distanceMeters / totalS).toFloat() else 0f,
-            movingAvgMs = if (movingS > 0) (trip.distanceMeters / movingS).toFloat() else 0f,
+            avgMs = if (totalS > 0) (dist / totalS).toFloat() else 0f,
+            movingAvgMs = if (movingS > 0) (dist / movingS).toFloat() else 0f,
             stops = stops(p),
             hardBrakes = brakes,
             hardAccels = accels,
-            score = score(brakes.size + accels.size, trip.distanceMeters / 1000.0),
+            score = score(brakes.size + accels.size, dist / 1000.0),
             bands = (0 until (n - 1).coerceAtLeast(0)).map { band((p[it].speedMs + p[it + 1].speedMs) / 2f, imperial) },
         )
     }
 
-    /** 100 − 15 per hard event per 10 km, clamped 0–100; null under 1 km. */
+    /**
+     * 100 − 15 per hard event per 10 km, clamped 0–100; null under 1 km. Rides shorter than 10 km are
+     * judged per 10 km (not scaled up), so one brake on a 2 km errand doesn't zero the score.
+     */
     fun score(events: Int, km: Double): Int? {
-        if (km < 1.0) return null
-        return (100.0 - 15.0 * events / (km / 10.0)).roundToInt().coerceIn(0, 100)
+        if (!km.isFinite() || km < 1.0) return null
+        return (100.0 - 15.0 * events / (maxOf(km, 10.0) / 10.0)).roundToInt().coerceIn(0, 100)
+    }
+
+    /** Effective step time: gaps > 5 s break the chain (null); < 1 s is delivery jitter (use 1 s). */
+    private fun stepSeconds(p: List<TrackPoint>, a: Int, b: Int): Double? {
+        val dt = (p[b].time - p[a].time) / 1000.0
+        return if (dt <= 0 || dt > GAP_MAX_S) null else maxOf(dt, MIN_DT_S)
+    }
+
+    private fun implausible(p: List<TrackPoint>, a: Int, b: Int): Boolean {
+        if (a < 0 || b >= p.size) return false
+        val dt = stepSeconds(p, a, b) ?: return false
+        val acc = (p[b].speedMs - p[a].speedMs) / dt
+        return !acc.isFinite() || abs(acc) > IMPLAUSIBLE_MS2
+    }
+
+    private fun glitchHigh(p: List<TrackPoint>, i: Int): Boolean {
+        val v = p[i].speedMs
+        return (implausible(p, i - 1, i) && v > p[i - 1].speedMs) ||
+            (implausible(p, i, i + 1) && v > p[i + 1].speedMs)
+    }
+
+    private fun nearStop(p: List<TrackPoint>, i: Int): Boolean {
+        var j = i - 1
+        while (j >= 0 && p[i].time - p[j].time <= STOP_EDGE_MS) { if (p[j].speedMs < MOVING_MS) return true; j-- }
+        j = i + 1
+        while (j < p.size && p[j].time - p[i].time <= STOP_EDGE_MS) { if (p[j].speedMs < MOVING_MS) return true; j++ }
+        return false
     }
 
     fun band(speedMs: Float, imperial: Boolean): SpeedBand {
@@ -134,13 +173,15 @@ object RideAnalysis {
             runStart = -1
         }
         for (i in 1 until p.size) {
-            val dt = (p[i].time - p[i - 1].time) / 1000.0
-            val a = if (dt > 0 && dt <= GAP_MAX_S) (p[i].speedMs - p[i - 1].speedMs) / dt else Double.NaN
-            val plausible = !a.isNaN() && abs(a) <= IMPLAUSIBLE_MS2
+            val dt = stepSeconds(p, i - 1, i)
+            val a = if (dt != null) (p[i].speedMs - p[i - 1].speedMs) / dt else Double.NaN
+            val plausible = a.isFinite() && abs(a) <= IMPLAUSIBLE_MS2
             val hit = plausible && if (brake) {
-                a <= -(BRAKE_MS2 - EPS) && (runStart >= 0 || p[i - 1].speedMs >= BRAKE_MIN_START_MS - EPS)
+                a <= -(BRAKE_MS2 - EPS) && (runStart >= 0 ||
+                    (p[i - 1].speedMs >= BRAKE_MIN_START_MS - EPS && p[i].speedMs >= BRAKE_MIN_END_MS - EPS))
             } else {
-                a >= ACCEL_MS2 - EPS
+                // The recorder writes 0 for the first fix; a jump from it is a cold GPS start, not a launch.
+                a >= ACCEL_MS2 - EPS && !(i == 1 && p[0].speedMs == 0f)
             }
             if (hit) {
                 if (runStart < 0) runStart = i - 1

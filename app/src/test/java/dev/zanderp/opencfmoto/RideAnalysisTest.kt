@@ -29,7 +29,8 @@ class RideAnalysisTest {
     @Test
     fun slowestMovingIgnoresStops() {
         val b = RideAnalysis.analyze(trip(listOf(30f, 2f, 0f, 1f, 12f, 40f)))
-        assertEquals(4, b.slowestIndex)                      // 12 km/h, not the 0–2 km/h crawl
+        // Never the 0–2 km/h crawl (and, since the stop-edge rule, nothing within 5 s of it either).
+        assertTrue(b.slowestIndex == null || b.slowestIndex !in 1..3)
     }
 
     @Test
@@ -96,6 +97,7 @@ class RideAnalysisTest {
         assertEquals(100, RideAnalysis.score(0, 10.0))
         assertEquals(85, RideAnalysis.score(1, 10.0))
         assertEquals(0, RideAnalysis.score(10, 1.0))
+        assertEquals(70, RideAnalysis.score(2, 5.0))           // short rides judged per 10 km, not per 5
         assertNull(RideAnalysis.score(0, 0.9))
     }
 
@@ -120,5 +122,48 @@ class RideAnalysisTest {
         assertEquals(SpeedBand.MEDIUM, RideAnalysis.band(21f / 2.23694f, imperial = true))
         val bands = RideAnalysis.analyze(trip(listOf(10f, 20f, 45f))).bands
         assertEquals(listOf(SpeedBand.SLOW, SpeedBand.MEDIUM), bands)   // segment averages 15 and 32.5 km/h
+    }
+
+    @Test
+    fun twoSampleGlitchIgnoredForTopSpeed() {
+        val b = RideAnalysis.analyze(trip(listOf(40f, 41f, 120f, 120f, 40f, 39f)))
+        assertEquals(41f / 3.6f, b.maxSpeedMs, 1e-4f)
+    }
+
+    @Test
+    fun callbackJitterDoesNotMakeHardBrake() {
+        // 2 m/s² slowdown delivered 0.6 s after the previous fix (fixes come ≤ 1/s; <1 s is delivery jitter).
+        val b = RideAnalysis.analyze(trip(listOf(60f, 60f, 52.8f, 52.8f), dtMs = listOf(1000L, 600L, 1400L)))
+        assertEquals(0, b.hardBrakes.size)
+    }
+
+    @Test
+    fun receiverClampToZeroIsNotAHardBrake() {
+        // Phones often report 0 below walking pace: 30 → 20 → 0 is an ordinary stop.
+        assertEquals(0, RideAnalysis.analyze(trip(listOf(30f, 20f, 0f, 0f))).hardBrakes.size)
+        // A real emergency stop still counts (run starts above 5 km/h).
+        val e = RideAnalysis.analyze(trip(listOf(50f, 30f, 5f, 0f)))
+        assertEquals(1, e.hardBrakes.size)
+        assertEquals(SpeedEvent(0, 50f / 3.6f, 5f / 3.6f), e.hardBrakes[0])
+    }
+
+    @Test
+    fun slowestMovingIgnoresStopEdges() {
+        val kmh = List(6) { 30f } + listOf(4f) + List(6) { 0f } + listOf(5f) + List(6) { 30f } + listOf(12f) + List(3) { 30f }
+        val b = RideAnalysis.analyze(trip(kmh))
+        assertEquals(12f / 3.6f, b.slowestMovingMs!!, 1e-4f)
+    }
+
+    @Test
+    fun coldStartZeroFirstFixIsNotHardAcceleration() {
+        assertEquals(0, RideAnalysis.analyze(trip(listOf(0f, 25f, 26f, 27f))).hardAccels.size)
+    }
+
+    @Test
+    fun nonFiniteTripIsHarmless() {
+        val t = trip(listOf(20f, Float.NaN, 30f), distanceM = Double.NaN)
+        val b = RideAnalysis.analyze(t)
+        assertNull(b.score)
+        assertEquals(30f / 3.6f, b.maxSpeedMs, 1e-4f)
     }
 }

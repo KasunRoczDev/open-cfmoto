@@ -60,4 +60,12 @@ class MonthlyBehaviourTest {
         assertEquals(0.8f, half[3], 1e-6f)   // 2 brakes per 100 km → 1 − 0.2
         assertEquals(1f, MonthlyBehaviour.radar(0.0, 0, 0f, 0, 0)[4], 0f)
     }
+
+    @Test
+    fun corruptTripSkipped() {
+        val good = trip(at(colombo, 2026, 9, 1, 9, 0), 10.0, listOf(30f, 31f))
+        val bad = good.copy(id = "bad", distanceMeters = Double.NaN)
+        val s = MonthlyBehaviour.summarize(listOf(good, bad), MonthKey(2026, 9), colombo)!!
+        assertEquals(1, s.rides)
+    }
 }

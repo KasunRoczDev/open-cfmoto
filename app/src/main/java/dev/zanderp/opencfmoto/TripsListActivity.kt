@@ -306,7 +306,8 @@ class TripsListActivity : AppCompatActivity() {
         stats.addView(stat(getString(R.string.trip_distance), trip.distanceText()))
         stats.addView(stat(getString(R.string.trips_stat_time), trip.durationText()))
         stats.addView(stat(getString(R.string.trips_stat_avg), "${trip.avgKmh} km/h"))
-        stats.addView(stat(getString(R.string.trips_stat_max), "${trip.maxKmh} km/h"))
+        // Glitch-filtered top speed (the recorder's raw max can include a GPS spike).
+        stats.addView(stat(getString(R.string.trips_stat_max), "${(RideAnalysis.analyze(trip).maxSpeedMs * 3.6f).toInt()} km/h"))
         col.addView(stats)
 
         val actions = LinearLayout(this).apply {
@@ -381,6 +382,7 @@ class TripsListActivity : AppCompatActivity() {
                 TripStore.delete(this, trip.id)
                 allTrips = TripStore.list(this)
                 renderDay()
+                renderBehaviour()
             }
             .setNegativeButton(R.string.dash_cancel, null)
             .show()
