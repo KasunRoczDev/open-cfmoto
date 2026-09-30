@@ -3,9 +3,7 @@
 // Part of OpenCfMoto. Free software under the GNU AGPL v3 or later; see LICENSE and NOTICE.
 package dev.zanderp.opencfmoto
 
-import android.Manifest
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.KeyEvent
@@ -16,15 +14,20 @@ import android.view.SurfaceView
 import android.view.View
 import android.view.WindowManager
 import android.widget.FrameLayout
-import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
-import androidx.core.view.ViewCompat
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import dev.zanderp.opencfmoto.aa.AaInput
+import dev.zanderp.opencfmoto.ui.design.OcmTheme
+import dev.zanderp.opencfmoto.ui.ride.DashViewScreen
+import dev.zanderp.opencfmoto.ui.ride.DashViewUi
 
 /**
  * Full-screen in-app dash: live AA video when connected, or Map / GPX phone preview when
@@ -39,39 +42,34 @@ class HudViewActivity : AppCompatActivity() {
 
     private lateinit var surface: SurfaceView
     private lateinit var gpxHost: FrameLayout
-    private lateinit var hint: TextView
-    private lateinit var titleView: TextView
     private var attached = false
     private var noSessionToastAt = 0L
     private var fullscreen = false
     private var gpxPreview = false
+    private var padShown = true
+    private var ui by mutableStateOf(DashViewUi("Dash view", topBar = true, pad = true, hint = true, gpxPreview = false))
     private var gpxUi: GpxDashUi? = null
     private var boundSessionKey: String? = null
     private lateinit var insetsController: WindowInsetsControllerCompat
 
+    /** Recompute what the screen shows from the mode flags (replaces the old per-View visibility). */
+    private fun render(title: String = ui.title, hint: Boolean = ui.hint) {
+        ui = DashViewUi(
+            title = title,
+            topBar = !fullscreen && !gpxPreview,
+            pad = !fullscreen && !gpxPreview && padShown,
+            hint = hint && !gpxPreview,
+            gpxPreview = gpxPreview,
+        )
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_hud_view)
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-
-        surface = findViewById(R.id.hud_surface)
-        gpxHost = findViewById(R.id.hud_gpx_host)
-        hint = findViewById(R.id.hud_hint)
-        titleView = findViewById(R.id.hud_title)
-
-        insetsController = WindowInsetsControllerCompat(window, findViewById(R.id.hud_root)).apply {
+        surface = SurfaceView(this)
+        gpxHost = FrameLayout(this).apply { visibility = View.GONE }
+        insetsController = WindowCompat.getInsetsController(window, window.decorView).apply {
             systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-        }
-        val topbar = findViewById<View>(R.id.hud_topbar)
-        val baseTopPad = topbar.paddingTop
-        val baseLeftPad = topbar.paddingLeft
-        val baseRightPad = topbar.paddingRight
-        ViewCompat.setOnApplyWindowInsetsListener(topbar) { v, insets ->
-            val bars = insets.getInsets(
-                WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
-            )
-            v.setPadding(baseLeftPad + bars.left, baseTopPad + bars.top, baseRightPad + bars.right, v.paddingBottom)
-            insets
         }
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
@@ -107,26 +105,25 @@ class HudViewActivity : AppCompatActivity() {
 
         surface.setOnTouchListener { _, e -> onSurfaceTouch(e); true }
 
-        findViewById<View>(R.id.hud_close).setOnClickListener { finish() }
-        findViewById<View>(R.id.hud_map_hub).setOnClickListener {
-            GpxActivity.start(this)
-        }
-        findViewById<View>(R.id.hud_toggle_controls).setOnClickListener { toggleControls() }
-        findViewById<View>(R.id.hud_fullscreen).setOnClickListener { setFullscreen(!fullscreen) }
-        findViewById<View>(R.id.hud_theme).setOnClickListener { cycleMapTheme() }
-
-        findViewById<View>(R.id.hud_knob_back).setOnClickListener { scroll(-1) }
-        findViewById<View>(R.id.hud_knob_fwd).setOnClickListener { scroll(+1) }
-        findViewById<View>(R.id.hud_left).setOnClickListener { key(AaInput.KEY_LEFT) }
-        findViewById<View>(R.id.hud_right).setOnClickListener { key(AaInput.KEY_RIGHT) }
-        findViewById<View>(R.id.hud_up).setOnClickListener { key(AaInput.KEY_UP) }
-        findViewById<View>(R.id.hud_down).setOnClickListener { key(AaInput.KEY_DOWN) }
-        findViewById<View>(R.id.hud_ok).setOnClickListener { key(AaInput.KEY_ENTER) }
-        findViewById<View>(R.id.hud_back).setOnClickListener { key(AaInput.KEY_BACK) }
-        findViewById<View>(R.id.hud_home).setOnClickListener { key(AaInput.KEY_HOME) }
-        findViewById<View>(R.id.hud_voice).setOnClickListener {
-            ensureMicPermission()
-            key(AaInput.KEY_ASSISTANT)
+        setContent {
+            OcmTheme {
+                DashViewScreen(
+                    ui = ui,
+                    surface = surface,
+                    gpxHost = gpxHost,
+                    onClose = { finish() },
+                    onMapHub = { GpxActivity.start(this) },
+                    onTheme = ::cycleMapTheme,
+                    onTogglePad = ::toggleControls,
+                    onFullscreen = { setFullscreen(!fullscreen) },
+                    onKey = ::key,
+                    onScroll = ::scroll,
+                    onVoice = {
+                        AaKeys.ensureMic(this, REQ_MIC)
+                        key(AaInput.KEY_ASSISTANT)
+                    },
+                )
+            }
         }
     }
 
@@ -176,23 +173,13 @@ class HudViewActivity : AppCompatActivity() {
             startGpxPreview(reload = needReload)
         } else {
             stopGpxPreview()
-            val live = AaVideoBridge.pipeline != null
-            hint.visibility = if (live) View.GONE else View.VISIBLE
-            surface.visibility = View.VISIBLE
-            gpxHost.visibility = View.GONE
-            findViewById<View>(R.id.hud_topbar).visibility =
-                if (fullscreen) View.GONE else View.VISIBLE
-            findViewById<View>(R.id.hud_map_hub).visibility = View.GONE
-            findViewById<View>(R.id.hud_controls).visibility =
-                if (fullscreen) View.GONE else View.VISIBLE
-            findViewById<View>(R.id.hud_toggle_controls).visibility = View.VISIBLE
-            titleView.text = "Dash view"
+            render(title = "Dash view", hint = AaVideoBridge.pipeline == null)
         }
     }
 
     private fun startGpxPreview(reload: Boolean) {
         if (gpxPreview && gpxUi != null && !reload) {
-            hint.visibility = View.GONE
+            render()
             return
         }
         stopGpxPreview()
@@ -232,22 +219,17 @@ class HudViewActivity : AppCompatActivity() {
         }
         gpxUi = ui
         boundSessionKey = sessionKey()
-        surface.visibility = View.GONE
-        gpxHost.visibility = View.VISIBLE
-        hint.visibility = View.GONE
-        // Map chrome has its own search / Hub / close — hide Dash topbar so search
-        // isn't crushed under the punch-hole + app bar.
-        findViewById<View>(R.id.hud_topbar).visibility = View.GONE
-        findViewById<View>(R.id.hud_map_hub).visibility = View.GONE
-        findViewById<View>(R.id.hud_controls).visibility = View.GONE
-        findViewById<View>(R.id.hud_toggle_controls).visibility = View.GONE
+        // Map chrome has its own search / Hub / close — render() hides the Dash top bar and pad so
+        // search isn't crushed under the punch-hole + app bar.
         // Waze-style: ride immersive — no system status bar eating the map.
         insetsController.hide(WindowInsetsCompat.Type.systemBars())
-        titleView.text = when (GpxSession.mode) {
-            GpxSession.Mode.GPX -> "GPX · ${GpxSession.trackName}"
-            GpxSession.Mode.NAV_TO -> "Nav · ${GpxSession.trackName}"
-            GpxSession.Mode.FREE_RIDE -> "Map preview"
-        }
+        render(
+            title = when (GpxSession.mode) {
+                GpxSession.Mode.GPX -> "GPX · ${GpxSession.trackName}"
+                GpxSession.Mode.NAV_TO -> "Nav · ${GpxSession.trackName}"
+                GpxSession.Mode.FREE_RIDE -> "Map preview"
+            },
+        )
         LogBus.log("[HUD] Map preview bound (${GpxSession.mode} '${GpxSession.trackName}')")
     }
 
@@ -261,8 +243,8 @@ class HudViewActivity : AppCompatActivity() {
         try { gpxUi?.release() } catch (_: Exception) {}
         gpxUi = null
         gpxHost.removeAllViews()
-        gpxHost.visibility = View.GONE
         insetsController.show(WindowInsetsCompat.Type.systemBars())
+        render()
     }
 
     private fun cycleMapTheme() {
@@ -276,16 +258,13 @@ class HudViewActivity : AppCompatActivity() {
 
     private fun toggleControls() {
         if (gpxPreview) return
-        val bar = findViewById<View>(R.id.hud_controls)
-        bar.visibility = if (bar.visibility == View.VISIBLE) View.GONE else View.VISIBLE
+        padShown = !padShown
+        render()
     }
 
     private fun setFullscreen(on: Boolean) {
         fullscreen = on
-        findViewById<View>(R.id.hud_topbar).visibility = if (on) View.GONE else View.VISIBLE
-        if (!gpxPreview) {
-            findViewById<View>(R.id.hud_controls).visibility = if (on) View.GONE else View.VISIBLE
-        }
+        render()
         if (on) {
             insetsController.hide(WindowInsetsCompat.Type.systemBars())
             Toast.makeText(this, "Fullscreen — press Back to exit", Toast.LENGTH_SHORT).show()
@@ -359,12 +338,7 @@ class HudViewActivity : AppCompatActivity() {
             Toast.makeText(this, "AA controls need a bike connection", Toast.LENGTH_SHORT).show()
             return
         }
-        val sink = AaVideoBridge.keySink
-        if (sink == null) {
-            Toast.makeText(this, "Connect to the bike first", Toast.LENGTH_SHORT).show()
-        } else {
-            sink(code)
-        }
+        AaKeys.key(this, code, mapFirst = false)
     }
 
     private fun scroll(delta: Int) {
@@ -372,20 +346,7 @@ class HudViewActivity : AppCompatActivity() {
             Toast.makeText(this, "AA controls need a bike connection", Toast.LENGTH_SHORT).show()
             return
         }
-        val sink = AaVideoBridge.scrollSink
-        if (sink == null) {
-            Toast.makeText(this, "Connect to the bike first", Toast.LENGTH_SHORT).show()
-        } else {
-            sink(delta)
-        }
-    }
-
-    private fun ensureMicPermission() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
-            != PackageManager.PERMISSION_GRANTED
-        ) {
-            requestPermissions(arrayOf(Manifest.permission.RECORD_AUDIO), REQ_MIC)
-        }
+        AaKeys.scroll(this, delta, mapFirst = false)
     }
 
     companion object {
