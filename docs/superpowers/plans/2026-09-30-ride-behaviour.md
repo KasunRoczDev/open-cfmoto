@@ -180,8 +180,8 @@ class RideAnalysisTest {
         assertEquals(SpeedBand.VERY_FAST, RideAnalysis.band(91f / 3.6f, imperial = false))
         assertEquals(SpeedBand.VERY_FAST, RideAnalysis.band(56f / 2.23694f, imperial = true))
         assertEquals(SpeedBand.MEDIUM, RideAnalysis.band(21f / 2.23694f, imperial = true))
-        val bands = RideAnalysis.analyze(trip(listOf(10f, 20f, 40f))).bands
-        assertEquals(listOf(SpeedBand.SLOW, SpeedBand.MEDIUM), bands)   // segment averages 15 and 30+ km/h
+        val bands = RideAnalysis.analyze(trip(listOf(10f, 20f, 45f))).bands
+        assertEquals(listOf(SpeedBand.SLOW, SpeedBand.MEDIUM), bands)   // segment averages 15 and 32.5 km/h
     }
 }
 ```
