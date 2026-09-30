@@ -175,3 +175,17 @@ Spec: `docs/superpowers/specs/2026-09-30-compose-redesign-part1-foundation-desig
 - One DayNight theme; View screens use the same tokens (`values/` light, `values-night/` dark). Dash-drawn UI
   uses fixed `dash_*` colours.
 - Parts 2–5 replace Ride hero, Me/Settings, Trips, Map with Compose screens.
+
+## Directions band (metrics strip mode)
+
+Spec: `docs/superpowers/specs/2026-09-30-directions-band-design.md`.
+
+- Setup → Strip shows: **Directions** (per bike) → `StripSnapshot.mode = DIRECTIONS`, `overlay = true`,
+  `aaReservePx = 0` (AA keeps the full panel), Turn info forced on.
+- `aa/NavTurnTracker` builds a `Directions` (turn, then, lanes, ETA, km left); `AapControlNav` feeds it to
+  `MetricsStrip.setDirections` on every nav message. `DirectionsFormat` (pure) decides staleness (60 s), the
+  "then" rule (≤ 1 km) and what fits; `DirectionsRenderer` draws it.
+- `AaCompositor` overlay: `StripGeometry.of(px, overlay, visible)` → band drawn over AA only while
+  `setStripVisible(true)`; hidden band = full-screen touches.
+- Logs: `[STRIP] mode=DIRECTIONS overlay band=…`, `[STRIP] band shown` / `band hidden (no route|route stale)`,
+  `[NAV] parts: then=… lanes=… eta=…`.

@@ -77,7 +77,7 @@ CFMoto · Voge · Morini · Morbidelli · QJ Motor · Rieju · UM · Wmoto · GO
 | ⚡ **One-tap Connect & Auto-connect** | Remembers your bike; reconnects on launch when in range; Wi‑Fi join timeout + auto re-join after ignition cycles. |
 | 📶 **Wi‑Fi AP or Direct (P2P)** | Normal hotspot join, or **Wi‑Fi Direct** for dashes that are Group Owners (e.g. **CL‑C450**). Setup: Auto / AP / P2P. |
 | 🖼️ **Screen margins** | Dedicated page — inset Android Auto from top/bottom/left/right (e.g. blank the 800NK Advanced MotoPlay pull-down). |
-| 📊 **Metrics strip** | Optional band under Android Auto on the dash: GPS speed, altitude and heading, plus **next turn** from Google Maps / Waze (experimental). Setup → Metrics strip / Turn info. Android Auto is laid out above it. |
+| 📊 **Metrics strip** | Optional band under Android Auto on the dash: GPS speed, altitude and heading — or **Directions**: next turn, lanes and ETA from Google Maps, shown over Android Auto only while navigating — plus **next turn** from Google Maps / Waze (experimental). Setup → Metrics strip / Turn info. Android Auto is laid out above it. |
 | 🏍️ **Garage (multiple bikes)** | Name + photo per bike; each keeps its own display, resolution, power, and button settings. |
 | 🛰️ **Trip computer + ride logging** | Live speed/distance/duration from GPS, auto-logs every ride, day calendar of saved trips, route thumbnails, **Export GPX**. |
 | 📐 **Smart resolution & learned panels** | Auto-fits recognized dashes; remembers measured panel size and picks a better AA resolution next connect. |
