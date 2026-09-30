@@ -32,6 +32,8 @@ class ButtonMappingActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        // Rotation recreates this screen: bring back a Saved places dialog with what was typed (spec §9).
+        MappingDialog.Places.restore(savedInstanceState?.getStringArrayList(KEY_PLACES_DRAFT))?.let { dialog = it }
         setContent {
             OcmTheme {
                 ButtonMappingScreen(
@@ -56,6 +58,7 @@ class ButtonMappingActivity : AppCompatActivity() {
                     onDismiss = ::dismissDialog,
                     onPickAction = ::applyAction,
                     onSavePlaces = ::savePlaces,
+                    onEditPlaces = { dialog = it },
                     onVolumePresence = ::setVolumePresence,
                     onRemoteGesture = ::waitForRemoteKey,
                     onPresetChosen = { dialog = MappingDialog.PresetConfirm(it) },
@@ -65,6 +68,11 @@ class ButtonMappingActivity : AppCompatActivity() {
                 )
             }
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        (dialog as? MappingDialog.Places)?.let { outState.putStringArrayList(KEY_PLACES_DRAFT, it.save()) }
     }
 
     override fun onResume() {
@@ -241,6 +249,10 @@ class ButtonMappingActivity : AppCompatActivity() {
         dialog = null
         refresh()
         Toast.makeText(this, "Reset to defaults", Toast.LENGTH_SHORT).show()
+    }
+
+    private companion object {
+        const val KEY_PLACES_DRAFT = "places_draft"
     }
 }
 

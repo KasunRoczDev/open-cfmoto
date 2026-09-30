@@ -9,6 +9,11 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -99,7 +104,8 @@ fun ControlsScreen(
         }
         return
     }
-    OcmScreen {
+    // Standalone screen (no Scaffold): keep right-edge controls clear of a side nav bar / cutout in landscape.
+    OcmScreen(Modifier.windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal))) {
         OcmTopBar(stringResource(R.string.controls_controls), onBack)
         // 1. Navigate to…
         OcmCard {

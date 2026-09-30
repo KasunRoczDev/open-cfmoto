@@ -6,6 +6,11 @@ package dev.zanderp.opencfmoto.ui.ride
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -25,15 +30,12 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.saveable.listSaver
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import dev.zanderp.opencfmoto.ButtonClusterPreset
 import dev.zanderp.opencfmoto.ButtonGesture
 import dev.zanderp.opencfmoto.R
@@ -62,7 +64,19 @@ data class MappingUi(
 /** At most one dialog at a time; the Activity owns it so actions stay next to the prefs they write. */
 sealed interface MappingDialog {
     data class PickAction(val gesture: ButtonGesture, val labels: List<String>, val current: Int) : MappingDialog
-    data class Places(val names: List<String>, val queries: List<String>) : MappingDialog
+    /** Holds the text being typed, so the Activity can save it across rotation. */
+    data class Places(val names: List<String>, val queries: List<String>) : MappingDialog {
+        /** name0, query0, name1, query1, … for a Bundle string list. */
+        fun save(): ArrayList<String> = ArrayList(names.indices.flatMap { listOf(names[it], queries.getOrElse(it) { "" }) })
+
+        companion object {
+            fun restore(saved: List<String>?): Places? {
+                if (saved.isNullOrEmpty() || saved.size % 2 != 0) return null
+                val pairs = saved.chunked(2)
+                return Places(pairs.map { it[0] }, pairs.map { it[1] })
+            }
+        }
+    }
     data object TeachHandlebar : MappingDialog
     data object TeachRemotePick : MappingDialog
     data class TeachRemoteWait(val gesture: ButtonGesture) : MappingDialog
@@ -91,6 +105,7 @@ fun ButtonMappingScreen(
     onDismiss: () -> Unit,
     onPickAction: (ButtonGesture, Int) -> Unit,
     onSavePlaces: (List<String>, List<String>) -> Unit,
+    onEditPlaces: (MappingDialog.Places) -> Unit,
     onVolumePresence: (Int) -> Unit,          // 1 present, 0 absent, -1 reset
     onRemoteGesture: (ButtonGesture) -> Unit,
     onPresetChosen: (ButtonClusterPreset) -> Unit,
@@ -99,7 +114,8 @@ fun ButtonMappingScreen(
     onResetConfirmed: () -> Unit,
 ) {
     val c = Ocm.colors
-    OcmScreen {
+    // Standalone screen (no Scaffold): keep right-edge controls clear of a side nav bar / cutout in landscape.
+    OcmScreen(Modifier.windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal))) {
         OcmTopBar(stringResource(R.string.buttons_button_mapping), onBack)
         // 1. Bluetooth
         OcmCard {
@@ -190,28 +206,32 @@ fun ButtonMappingScreen(
             confirmButton = {},
             dismissButton = { TextButton(onDismiss) { Text(stringResource(android.R.string.cancel)) } },
         )
-        is MappingDialog.Places -> {
-            val names = rememberSaveable(dialog, saver = TextListSaver) { dialog.names.toMutableStateList() }
-            val queries = rememberSaveable(dialog, saver = TextListSaver) { dialog.queries.toMutableStateList() }
-            AlertDialog(
-                onDismissRequest = onDismiss,
-                title = { Text(stringResource(R.string.buttons_saved_places)) },
-                text = {
-                    Column(Modifier.verticalScroll(rememberScrollState())) {
-                        Text(stringResource(R.string.buttons_map_a_gesture_to_navigate_to_saved_place_and_a_p), style = OcmType.body)
-                        for (i in names.indices) {
-                            Text(stringResource(R.string.ui_mapping_place_n, i + 1), style = OcmType.label, modifier = Modifier.padding(top = 12.dp))
-                            OutlinedTextField(names[i], { names[i] = it }, singleLine = true, modifier = Modifier.fillMaxWidth(),
-                                placeholder = { Text(stringResource(R.string.row_saved_place_name_e_g_home)) })
-                            OutlinedTextField(queries[i], { queries[i] = it }, singleLine = true, modifier = Modifier.fillMaxWidth(),
-                                placeholder = { Text(stringResource(R.string.row_saved_place_address_or_place)) })
-                        }
+        is MappingDialog.Places -> AlertDialog(
+            onDismissRequest = onDismiss,
+            // Typed addresses are precious: an outside tap must not throw them away.
+            properties = DialogProperties(dismissOnClickOutside = false),
+            title = { Text(stringResource(R.string.buttons_saved_places)) },
+            text = {
+                Column(Modifier.verticalScroll(rememberScrollState())) {
+                    Text(stringResource(R.string.buttons_map_a_gesture_to_navigate_to_saved_place_and_a_p), style = OcmType.body)
+                    for (i in dialog.names.indices) {
+                        Text(stringResource(R.string.ui_mapping_place_n, i + 1), style = OcmType.label, modifier = Modifier.padding(top = 12.dp))
+                        OutlinedTextField(
+                            dialog.names[i], { v -> onEditPlaces(dialog.copy(names = dialog.names.toMutableList().also { it[i] = v })) },
+                            singleLine = true, modifier = Modifier.fillMaxWidth(),
+                            placeholder = { Text(stringResource(R.string.row_saved_place_name_e_g_home)) },
+                        )
+                        OutlinedTextField(
+                            dialog.queries[i], { v -> onEditPlaces(dialog.copy(queries = dialog.queries.toMutableList().also { it[i] = v })) },
+                            singleLine = true, modifier = Modifier.fillMaxWidth(),
+                            placeholder = { Text(stringResource(R.string.row_saved_place_address_or_place)) },
+                        )
                     }
-                },
-                confirmButton = { TextButton({ onSavePlaces(names.toList(), queries.toList()) }) { Text(stringResource(R.string.ui_save)) } },
-                dismissButton = { TextButton(onDismiss) { Text(stringResource(android.R.string.cancel)) } },
-            )
-        }
+                }
+            },
+            confirmButton = { TextButton({ onSavePlaces(dialog.names, dialog.queries) }) { Text(stringResource(R.string.ui_save)) } },
+            dismissButton = { TextButton(onDismiss) { Text(stringResource(android.R.string.cancel)) } },
+        )
         MappingDialog.TeachHandlebar -> AlertDialog(
             onDismissRequest = onDismiss,
             title = { Text(stringResource(R.string.buttons_teach_title)) },
@@ -257,12 +277,6 @@ fun ButtonMappingScreen(
         )
     }
 }
-
-/** Keeps typed place names/addresses across recomposition and rotation. */
-private val TextListSaver = listSaver<SnapshotStateList<String>, String>(
-    save = { it.toList() },
-    restore = { it.toMutableStateList() },
-)
 
 @Composable
 private fun ActionButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier.fillMaxWidth()) {

@@ -12,16 +12,17 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.displayCutoutPadding
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -38,6 +39,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -77,7 +80,10 @@ fun DashViewScreen(
     Column(Modifier.fillMaxSize().background(Color.Black)) {
         if (ui.topBar) {
             Row(
-                Modifier.fillMaxWidth().background(c.surface).statusBarsPadding().displayCutoutPadding().heightIn(min = 56.dp),
+                // Top + sides: in landscape a side nav bar / cutout must not cover the ⛶ / ✕ buttons.
+                Modifier.fillMaxWidth().background(c.surface)
+                    .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal))
+                    .heightIn(min = 56.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 BarIcon(Icons.Rounded.Close, onClose)
@@ -88,44 +94,67 @@ fun DashViewScreen(
                 BarIcon(Icons.Rounded.Fullscreen, onFullscreen)
             }
         }
-        val video: @Composable (Modifier) -> Unit = { m ->
-            Box(m) {
-                AndroidView(
-                    factory = { surface.detached() }, modifier = Modifier.fillMaxSize(),
-                    update = { it.visibility = if (ui.gpxPreview) View.GONE else View.VISIBLE },
-                )
-                AndroidView(
-                    factory = { gpxHost.detached() }, modifier = Modifier.fillMaxSize(),
-                    update = { it.visibility = if (ui.gpxPreview) View.VISIBLE else View.GONE },
-                )
-                if (ui.hint) {
-                    Text(
-                        stringResource(R.string.hud_start_android_auto_and_connect_to_your_bike_to_s),
-                        style = OcmType.body, color = Color.White, textAlign = TextAlign.Center,
-                        modifier = Modifier.align(Alignment.Center).padding(24.dp),
+        // One Layout for both orientations: the video is always its first child, so a rotation (the
+        // Activity keeps configChanges) only re-lays it out — the SurfaceView / GPX map view are never
+        // detached, and surfaceChanged → updatePreviewSize handles the new size as before.
+        val padWidth = 300.dp
+        Layout(
+            content = {
+                Box(Modifier.fillMaxSize()) {
+                    AndroidView(
+                        factory = { surface.detached() }, modifier = Modifier.fillMaxSize(),
+                        update = { it.visibility = if (ui.gpxPreview) View.GONE else View.VISIBLE },
                     )
+                    AndroidView(
+                        factory = { gpxHost.detached() }, modifier = Modifier.fillMaxSize(),
+                        update = { it.visibility = if (ui.gpxPreview) View.VISIBLE else View.GONE },
+                    )
+                    if (ui.hint) {
+                        Text(
+                            stringResource(R.string.hud_start_android_auto_and_connect_to_your_bike_to_s),
+                            style = OcmType.body, color = Color.White, textAlign = TextAlign.Center,
+                            modifier = Modifier.align(Alignment.Center).padding(24.dp),
+                        )
+                    }
                 }
-            }
-        }
-        if (landscape) {
-            Row(Modifier.weight(1f).fillMaxWidth()) {
-                video(Modifier.weight(1f).fillMaxHeight())
                 if (ui.pad) {
                     AaPad(
                         onKey, onScroll, onVoice,
-                        Modifier.width(300.dp).fillMaxHeight().background(c.bg).navigationBarsPadding()
-                            .verticalScroll(rememberScrollState()).padding(10.dp),
+                        Modifier.background(c.bg).navigationBarsPadding()
+                            .verticalScroll(rememberScrollState()).padding(if (landscape) 10.dp else 12.dp),
                     )
                 }
+            },
+            modifier = Modifier.weight(1f).fillMaxWidth(),
+        ) { measurables, cs ->
+            val w = cs.maxWidth
+            val h = cs.maxHeight
+            val pad = measurables.getOrNull(1)?.let {
+                if (landscape) it.measure(Constraints.fixed(padWidth.roundToPx().coerceAtMost(w), h))
+                else it.measure(Constraints(minWidth = w, maxWidth = w, maxHeight = h))
             }
-        } else {
-            video(Modifier.weight(1f).fillMaxWidth())
-            if (ui.pad) {
-                AaPad(onKey, onScroll, onVoice, Modifier.fillMaxWidth().background(c.bg).navigationBarsPadding().padding(12.dp))
+            val r = dashRects(w, h, landscape, if (pad == null) 0 else if (landscape) pad.width else pad.height)
+            val video = measurables[0].measure(Constraints.fixed(r.videoW, r.videoH))
+            layout(w, h) {
+                video.place(0, 0)
+                pad?.place(r.padX, r.padY)
             }
         }
     }
 }
+
+/** Video size and pad position (px) inside the area below the top bar. */
+internal data class DashRects(val videoW: Int, val videoH: Int, val padX: Int, val padY: Int)
+
+/** Portrait: pad (height [padMain]) under the video. Landscape: pad (width [padMain]) on the right. */
+internal fun dashRects(w: Int, h: Int, landscape: Boolean, padMain: Int): DashRects =
+    if (landscape) {
+        val vw = (w - padMain).coerceAtLeast(0)
+        DashRects(vw, h, vw, 0)
+    } else {
+        val vh = (h - padMain).coerceAtLeast(0)
+        DashRects(w, vh, 0, vh)
+    }
 
 @Composable
 private fun BarIcon(icon: ImageVector, onClick: () -> Unit) {
