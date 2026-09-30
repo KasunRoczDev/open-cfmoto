@@ -105,6 +105,11 @@ object ButtonMap {
     fun isAllDefault(context: Context): Boolean =
         ButtonGesture.entries.all { get(context, it) == it.default }
 
+    /** Gestures that do something (for the "N buttons mapped" summary). */
+    fun mappedCount(actions: Collection<ButtonAction>): Int = actions.count { it != ButtonAction.NONE }
+
+    fun mappedCount(context: Context): Int = mappedCount(ButtonGesture.entries.map { get(context, it) })
+
     /**
      * One-shot upgrade of shipped defaults. Clears stored values that still match a *previous*
      * default so the new ones apply; intentional custom mappings stay.

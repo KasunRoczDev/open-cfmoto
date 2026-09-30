@@ -754,6 +754,8 @@
     <string name="ui_tile_parked">Parked here</string>
     <string name="ui_tile_park">Park here</string>
     <string name="ui_parked_saved">Parking spot saved</string>
+    <string name="ui_controls_mapped">%1$s · %2$d buttons mapped</string>
+    <string name="ui_controls_exit">Exit</string>
     <string name="forest_title">My forest</string>
     <string name="forest_trees">Trees grown</string>
     <string name="forest_growing">Growing now</string>
