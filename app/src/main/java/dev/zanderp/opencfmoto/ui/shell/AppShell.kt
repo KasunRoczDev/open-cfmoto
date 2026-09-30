@@ -19,7 +19,18 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
+import dev.zanderp.opencfmoto.NavLauncher
+import dev.zanderp.opencfmoto.ui.ride.HeroData
+import dev.zanderp.opencfmoto.ui.ride.ParkHere
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -72,6 +83,17 @@ fun AppShell(c: ConnectionController, searchFocusTick: Int) {
     val backStack by nav.currentBackStackEntryAsState()
     val route = backStack?.destination?.route
 
+    // Hero data (model, photo, rides, parked pin) reloads each time the screen becomes visible — a ride just saved or a
+    // model just typed in Garage shows when the rider comes back.
+    var heroTick by remember { mutableIntStateOf(0) }
+    var hero by remember { mutableStateOf(HeroData.EMPTY) }
+    val owner = LocalLifecycleOwner.current
+    LaunchedEffect(owner, bike, heroTick) {
+        owner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            hero = withContext(Dispatchers.IO) { HeroData.load(ctx.applicationContext) }
+        }
+    }
+
     LaunchedEffect(searchFocusTick) { if (searchFocusTick > 0) nav.navigate("map") { launchSingleTop = true } }
 
     Scaffold(
@@ -105,11 +127,18 @@ fun AppShell(c: ConnectionController, searchFocusTick: Int) {
             composable("ride") {
                 RideScreen(
                     s = ride,
+                    hero = hero,
                     onPrimary = c::onConnectPressed,
                     onDashView = { ctx.startActivity(android.content.Intent(ctx, HudViewActivity::class.java)) },
                     onControls = { ctx.startActivity(android.content.Intent(ctx, ControlsActivity::class.java)) },
+                    onParked = {
+                        val p = hero.parked
+                        if (p != null) NavLauncher.navigateLatLon(ctx, p.lat, p.lon, p.name, LogBus::log)
+                        else if (ParkHere.mark(ctx as Activity)) heroTick++
+                    },
                     onMirror = c::onMirrorPressed,
                     onScan = c::startAaScan,
+                    onRides = { TripsListActivity.start(ctx) },
                 )
             }
             composable("map") {

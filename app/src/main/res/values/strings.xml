@@ -746,6 +746,14 @@
     <string name="pref_strip_wide">Wide</string>
     <string name="ui_me_forest">Forest</string>
     <string name="ui_me_forest_desc">Trees you grew by riding smoothly</string>
+    <string name="ui_last_ride">Last ride</string>
+    <string name="ui_this_month">This month</string>
+    <string name="ui_day_today">Today</string>
+    <string name="ui_day_yesterday">Yesterday</string>
+    <string name="ui_km">%1$s km</string>
+    <string name="ui_tile_parked">Parked here</string>
+    <string name="ui_tile_park">Park here</string>
+    <string name="ui_parked_saved">Parking spot saved</string>
     <string name="forest_title">My forest</string>
     <string name="forest_trees">Trees grown</string>
     <string name="forest_growing">Growing now</string>

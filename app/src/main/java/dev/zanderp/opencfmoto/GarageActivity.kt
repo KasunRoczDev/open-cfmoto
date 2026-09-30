@@ -152,6 +152,13 @@ class GarageActivity : AppCompatActivity() {
             textSize = 17f
             setTypeface(typeface, android.graphics.Typeface.BOLD)
         })
+        bike.model?.let { m ->
+            col.addView(TextView(this).apply {
+                text = m
+                setTextColor(ContextCompat.getColor(this@GarageActivity, R.color.text_secondary))
+                textSize = 14f
+            })
+        }
         col.addView(TextView(this).apply {
             text = if (isActive) "Active bike · tap to edit" else (bike.qr?.ssid ?: "tap to select or edit")
             setTextColor(
@@ -173,6 +180,7 @@ class GarageActivity : AppCompatActivity() {
         val items = buildList {
             if (!isActive) add("Use this bike")
             add("Rename")
+            add("Set model")
             add(if (hasPhoto) "Change photo" else "Add photo")
             if (hasPhoto) add("Remove photo")
             add("Remove bike")
@@ -188,6 +196,7 @@ class GarageActivity : AppCompatActivity() {
                         refresh()
                     }
                     "Rename" -> promptRename(bike)
+                    "Set model" -> promptModel(bike)
                     "Add photo", "Change photo" -> {
                         photoTargetRaw = bike.raw
                         photoLauncher.launch("image/*")
@@ -219,6 +228,29 @@ class GarageActivity : AppCompatActivity() {
             .setView(wrap)
             .setPositiveButton("Save") { _, _ ->
                 BikeMemory.rename(this, bike.raw, input.text.toString())
+                refresh()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun promptModel(bike: SavedBike) {
+        val input = EditText(this).apply {
+            setText(bike.model.orEmpty())
+            setSelection(text.length)
+            hint = "e.g. 150 SC"
+        }
+        val pad = dp(20)
+        val wrap = LinearLayout(this).apply {
+            setPadding(pad, dp(8), pad, 0)
+            addView(input)
+        }
+        MaterialAlertDialogBuilder(this)
+            .setTitle("Bike model")
+            .setMessage("Shown big on the Ride screen. Leave empty to show the bike name.")
+            .setView(wrap)
+            .setPositiveButton("Save") { _, _ ->
+                BikeMemory.setModel(this, bike.raw, input.text.toString())
                 refresh()
             }
             .setNegativeButton("Cancel", null)
