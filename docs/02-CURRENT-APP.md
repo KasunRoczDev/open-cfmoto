@@ -189,3 +189,15 @@ Spec: `docs/superpowers/specs/2026-09-30-directions-band-design.md`.
   `setStripVisible(true)`; hidden band = full-screen touches.
 - Logs: `[STRIP] mode=DIRECTIONS overlay band=…`, `[STRIP] band shown` / `band hidden (no route|route stale)`,
   `[NAV] parts: then=… lanes=… eta=…`.
+
+## Ride behaviour
+
+Spec: `docs/superpowers/specs/2026-09-30-ride-behaviour-design.md`.
+
+- `RideAnalysis` (pure) analyses a saved trip's 1 Hz GPS points: top / slowest-moving / average / moving-average
+  speed, stops (< 3 km/h ≥ 20 s), hard brakes (≥ 3.3 m/s² from ≥ 15 km/h), hard accelerations (≥ 2.8 m/s²),
+  GPS-glitch rejection (spikes, |a| > 8 m/s², gaps > 5 s), score and per-segment speed bands.
+- `MonthlyBehaviour` (pure) groups trips by month (phone time zone) → totals, score, radar values.
+- `TripMapActivity`: speed-coloured route, ▲ ▼ P ! » markers with labels, stats under the map.
+  `TripsListActivity`: "Riding behaviour" month card with `RadarView`.
+- Test fixture: `docs/superpowers/fixtures/make_ride_fixture.py` (synthetic ride; push with `adb … run-as`).
