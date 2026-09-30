@@ -54,6 +54,13 @@ object DirectionsFormat {
     internal const val LANES_PAD_W = 0.3f
     internal const val ETA_W = 2.4f
 
+    /** Largest text size ≤ [start] (5 % steps, floor [min]) whose width fits [maxW] — numbers never get "…". */
+    fun shrinkToFit(start: Float, min: Float, maxW: Float, widthAt: (Float) -> Float): Float {
+        var size = start
+        while (size > min && widthAt(size) > maxW) size = (size * 0.95f).coerceAtLeast(min)
+        return size
+    }
+
     /** A route is shown while there's a next turn and Maps spoke within [STALE_MS]. */
     fun active(d: Directions?, lastMsgElapsedMs: Long, nowElapsedMs: Long): Boolean =
         d?.turn != null && nowElapsedMs - lastMsgElapsedMs <= STALE_MS

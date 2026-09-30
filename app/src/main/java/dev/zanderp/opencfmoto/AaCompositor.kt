@@ -416,6 +416,8 @@ class AaCompositor(private val log: (String) -> Unit) {
         handler.post {
             if (stripVisible == visible) return@post
             stripVisible = visible
+            // Hidden overlay: forget the old texture so a later reveal can't show a previous route's band.
+            if (!visible && stripOverlay) stripReady = false
             if (hasContent) drawFrame()
         }
     }

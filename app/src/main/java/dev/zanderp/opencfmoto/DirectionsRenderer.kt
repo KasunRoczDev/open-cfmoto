@@ -36,7 +36,11 @@ object DirectionsRenderer {
         MetricsStripRenderer.drawArrow(c, v.turn, x + pad, (hf - box) / 2f + pad, box - 2 * pad)
         val textX = x + box + hf * 0.1f
         val textW = turnW - box - hf * 0.15f
-        big.textSize = hf * (if (v.road != null) 0.42f else 0.55f)
+        // Shrink the distance to fit rather than cutting it to "2.1 …" (it's the number the band is for).
+        big.textSize = DirectionsFormat.shrinkToFit(hf * (if (v.road != null) 0.42f else 0.55f), hf * 0.3f, textW) { size ->
+            big.textSize = size
+            big.measureText(v.distance)
+        }
         val distBase = if (v.road != null) hf * 0.48f else hf * 0.68f
         c.drawText(MetricsStripRenderer.fit(v.distance, big, textW), textX, distBase, big)
         if (v.road != null) {

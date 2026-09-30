@@ -88,4 +88,14 @@ class DirectionsFormatTest {
         val v = DirectionsFormat.view(Directions(turn.copy(distanceM = null)), MapUnits.METRIC, 640, 64, 0, utc, true)!!
         assertEquals(MetricsFormat.NONE, v.distance)
     }
+
+    @Test
+    fun textShrinksToFitInsteadOfEllipsizing() {
+        val widthAt = { size: Float -> size * 3f }            // text 3× as wide as its size
+        val s = DirectionsFormat.shrinkToFit(start = 40f, min = 20f, maxW = 100f, widthAt = widthAt)
+        assertTrue(widthAt(s) <= 100f)
+        assertTrue(s > 30f)                                    // shrinks only as much as needed
+        assertEquals(40f, DirectionsFormat.shrinkToFit(40f, 20f, 500f, widthAt), 0f)
+        assertEquals(20f, DirectionsFormat.shrinkToFit(40f, 20f, 10f, widthAt), 0f)   // floor
+    }
 }

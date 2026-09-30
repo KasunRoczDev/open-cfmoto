@@ -261,4 +261,18 @@ class NavTurnTrackerTest {
         assertTrue(NavTurnTracker.handles(MsgType.INSTRUMENT_CLUSTER_NAVIGATION_CURRENT_POSITION_VALUE))
         assertFalse(NavTurnTracker.handles(1234))
     }
+
+    @Test
+    fun laneArrowToUseComesFirst() {
+        // Shared straight+right lane where only RIGHT is the way to go: draw the right arrow.
+        val l = NavigationLane.newBuilder()
+            .addLaneDirections(NavigationLane.LaneDirection.newBuilder().setShape(NavigationLane.LaneDirection.Shape.STRAIGHT).setIsHighlighted(false))
+            .addLaneDirections(NavigationLane.LaneDirection.newBuilder().setShape(NavigationLane.LaneDirection.Shape.NORMAL_RIGHT).setIsHighlighted(true))
+            .build()
+        val state = NavigationState.newBuilder()
+            .addSteps(step(NavigationManeuver.NavigationType.TURN_NORMAL_RIGHT, lanes = listOf(l))).build().toByteArray()
+        val t = NavTurnTracker()
+        t.onMessage(MsgType.INSTRUMENT_CLUSTER_NAVIGATION_STATE_VALUE, state)
+        assertEquals(Lane(listOf(TurnKind.NORMAL to TurnSide.RIGHT, TurnKind.STRAIGHT to TurnSide.NONE), true), t.directions.lanes.single())
+    }
 }

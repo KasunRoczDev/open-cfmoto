@@ -83,7 +83,9 @@ class NavTurnTracker {
                     } else null
                     road = step.road.name.takeIf { step.hasRoad() && it.isNotBlank() }
                     lanes = step.lanesList.map { l ->
-                        Lane(l.laneDirectionsList.map { fromLaneShape(it.shape) }, l.laneDirectionsList.any { it.isHighlighted })
+                        // Arrows Maps highlights come first — the renderer draws the first one.
+                        val dirs = l.laneDirectionsList.sortedByDescending { it.isHighlighted }
+                        Lane(dirs.map { fromLaneShape(it.shape) }, dirs.any { it.isHighlighted })
                     }
                     then = if (st.stepsCount > 1) {
                         val s2 = st.getSteps(1)

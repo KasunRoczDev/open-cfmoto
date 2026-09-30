@@ -268,7 +268,9 @@ internal class AapControlService(private val aapTransport: AapTransport) : AapCo
 }
 
 /** Instrument-cluster navigation (channel 10): next-turn data for the metrics strip. */
-internal class AapControlNav : AapControl {
+internal class AapControlNav(
+    private val feed: (dev.zanderp.opencfmoto.Directions) -> Unit = dev.zanderp.opencfmoto.MetricsStrip::setDirections,
+) : AapControl {
     private val tracker = NavTurnTracker()
     private val seenTypes = HashSet<Int>()
     private val failedTypes = HashSet<Int>()
@@ -281,18 +283,21 @@ internal class AapControlNav : AapControl {
         if (seenTypes.add(message.type)) {
             dev.zanderp.opencfmoto.LogBus.log("[NAV] first ${NavTurnTracker.typeName(message.type)} len=$len")
         }
+        var parsedOk = true
         val changed = try {
             tracker.onMessage(message.type, message.data, message.dataOffset, len)
         } catch (e: Exception) {
+            parsedOk = false
             if (failedTypes.add(message.type)) {
                 dev.zanderp.opencfmoto.LogBus.log("[NAV] parse failed ${NavTurnTracker.typeName(message.type)}: $e")
             }
             false
         }
         // Every understood nav message keeps the Directions band's route fresh (60 s staleness).
-        if (NavTurnTracker.handles(message.type) && !failedTypes.contains(message.type)) {
+        // Gate on THIS message parsing, not on the type ever having failed (one bad message must not freeze it).
+        if (parsedOk && NavTurnTracker.handles(message.type)) {
             val d = tracker.directions
-            dev.zanderp.opencfmoto.MetricsStrip.setDirections(d)
+            feed(d)
             val parts = "then=${if (d.then != null) "y" else "n"} lanes=${d.lanes.size} " +
                 "eta=${if (d.etaText != null || d.etaSeconds != null) "y" else "n"}"
             if (d.turn != null && parts != lastParts) {

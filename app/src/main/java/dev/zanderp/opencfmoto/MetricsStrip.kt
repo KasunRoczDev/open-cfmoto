@@ -175,17 +175,26 @@ object MetricsStrip {
         val d = directions
         val now = SystemClock.elapsedRealtime()
         val active = DirectionsFormat.active(d, navAtElapsedMs, now)
-        if (active != lastVisible) {
-            if (active) log("[STRIP] band shown")
-            else log("[STRIP] band hidden (" + (if (d.turn != null) "route stale" else "no route") + ")")
-            lastVisible = active
-            if (!active) lastView = null
-            onVisible(active)
+        if (!active) {
+            if (lastVisible != false) {
+                log("[STRIP] band hidden (" + (if (d.turn != null) "route stale" else "no route") + ")")
+                lastVisible = false
+                lastView = null
+                onVisible(false)
+            }
+            return
         }
-        if (!active) return
         val v = DirectionsFormat.view(d, units, stripW, stripH, navAtWallMs, java.util.TimeZone.getDefault(), is24h) ?: return
-        if (v == lastView) return
-        lastView = v
-        out(DirectionsRenderer.render(v, stripW, stripH))
+        if (v != lastView) {
+            lastView = v
+            out(DirectionsRenderer.render(v, stripW, stripH))
+        }
+        // Show only after this route's first bitmap is queued (same handler → uploaded before the reveal),
+        // so the previous route's band never flashes up.
+        if (lastVisible != true) {
+            log("[STRIP] band shown")
+            lastVisible = true
+            onVisible(true)
+        }
     }
 }
