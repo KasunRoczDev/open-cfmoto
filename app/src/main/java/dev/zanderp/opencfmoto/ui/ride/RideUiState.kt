@@ -4,6 +4,7 @@
 package dev.zanderp.opencfmoto.ui.ride
 
 import dev.zanderp.opencfmoto.Phase
+import dev.zanderp.opencfmoto.SavedBike
 import dev.zanderp.opencfmoto.ui.design.StatusKind
 
 enum class PrimaryAction { CONNECT, SCAN, STOP }
@@ -48,3 +49,6 @@ fun rideUiState(phase: Phase, detail: String, bikeName: String?, hasSavedBike: B
         mapEnabled = !busy || live,
     )
 }
+
+/** The big faded text on the hero: the rider's model, else the bike name (spec §2.2). */
+fun heroText(model: String?, bikeName: String?): String = SavedBike.normalizeModel(model) ?: bikeName.orEmpty()

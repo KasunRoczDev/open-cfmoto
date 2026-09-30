@@ -63,4 +63,16 @@ class RideUiStateTest {
         assertTrue(rideUiState(Phase.IDLE, "", "Bike", true).mapEnabled)
         assertTrue(rideUiState(Phase.MIRRORING, "", "Bike", true).mapEnabled)
     }
+
+    @Test
+    fun heroTextPrefersModel() {
+        assertEquals("150 SC", heroText(" 150 SC ", "CFMOTO4288"))
+    }
+
+    @Test
+    fun heroTextFallsBackToBikeName() {
+        assertEquals("CFMOTO4288", heroText("  ", "CFMOTO4288"))
+        assertEquals("CFMOTO4288", heroText(null, "CFMOTO4288"))
+        assertEquals("", heroText(null, null))
+    }
 }

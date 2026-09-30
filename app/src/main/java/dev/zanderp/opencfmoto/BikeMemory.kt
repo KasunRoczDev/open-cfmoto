@@ -8,8 +8,19 @@ import org.json.JSONObject
  * One remembered bike: the exact scanned QR, a friendly (user-editable) name, and an optional photo
  * (an absolute path to an image imported into the app's private storage).
  */
-data class SavedBike(val raw: String, val name: String, val photoPath: String? = null) {
+data class SavedBike(
+    val raw: String,
+    val name: String,
+    val photoPath: String? = null,
+    /** Rider-typed model shown big on the Ride hero (e.g. "150 SC"); null = show [name]. */
+    val model: String? = null,
+) {
     val qr: QrData? get() = QrData.parse(raw)
+
+    companion object {
+        /** Trimmed model text, or null when blank. */
+        fun normalizeModel(input: String?): String? = input?.trim()?.takeIf { it.isNotEmpty() }
+    }
 }
 
 /**
@@ -47,7 +58,8 @@ object BikeMemory {
                 val o = arr.optJSONObject(i) ?: continue
                 val raw = o.optString("raw"); val name = o.optString("name")
                 val photo = o.optString("photo").takeIf { it.isNotBlank() }
-                if (raw.isNotBlank()) add(SavedBike(raw, name.ifBlank { raw }, photo))
+                val model = SavedBike.normalizeModel(o.optString("model"))
+                if (raw.isNotBlank()) add(SavedBike(raw, name.ifBlank { raw }, photo, model))
             }
         }
     }
@@ -67,7 +79,7 @@ object BikeMemory {
         val name = prior?.name ?: displayName(qr)
         val existing = devices(ctx).filter { it.raw != raw }
         val list = buildList {
-            add(SavedBike(raw, name, prior?.photoPath))
+            add(prior?.copy(name = name) ?: SavedBike(raw, name))
             addAll(existing)
         }
         writeList(ctx, list)
@@ -89,6 +101,12 @@ object BikeMemory {
     /** Attach (or clear, with null) a bike's photo path. */
     fun setPhoto(ctx: Context, raw: String, path: String?) {
         writeList(ctx, devices(ctx).map { if (it.raw == raw) it.copy(photoPath = path) else it })
+    }
+
+    /** Set (or clear, with null/blank) a bike's model text. */
+    fun setModel(ctx: Context, raw: String, model: String?) {
+        val m = SavedBike.normalizeModel(model)
+        writeList(ctx, devices(ctx).map { if (it.raw == raw) it.copy(model = m) else it })
     }
 
     fun remove(ctx: Context, raw: String) {
@@ -134,6 +152,7 @@ object BikeMemory {
         for (b in list) {
             val o = JSONObject().put("raw", b.raw).put("name", b.name)
             b.photoPath?.let { o.put("photo", it) }
+            b.model?.let { o.put("model", it) }
             arr.put(o)
         }
         prefs(ctx).edit().putString(KEY_LIST, arr.toString()).apply()
