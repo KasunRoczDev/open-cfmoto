@@ -1,6 +1,10 @@
 package dev.zanderp.opencfmoto.aa
 
 import dev.zanderp.opencfmoto.NextTurn
+import dev.zanderp.opencfmoto.Directions
+import dev.zanderp.opencfmoto.Lane
+import dev.zanderp.opencfmoto.aa.proto.NavigationStatus.NavigationDestinationDistance
+import dev.zanderp.opencfmoto.aa.proto.NavigationStatus.NavigationLane
 import dev.zanderp.opencfmoto.TurnKind
 import dev.zanderp.opencfmoto.TurnSide
 import dev.zanderp.opencfmoto.aa.proto.NavigationStatus.MsgType
@@ -167,5 +171,94 @@ class NavTurnTrackerTest {
     fun typeNames() {
         assertEquals("NEXTTURNDETAILS", NavTurnTracker.typeName(MsgType.NEXTTURNDETAILS_VALUE))
         assertEquals("UNKNOWN(1234)", NavTurnTracker.typeName(1234))
+    }
+
+    private fun step(t: NavigationManeuver.NavigationType, road: String? = null, lanes: List<NavigationLane> = emptyList()) =
+        NavigationStep.newBuilder().setManeuver(NavigationManeuver.newBuilder().setType(t))
+            .apply { if (road != null) setRoad(NavigationRoad.newBuilder().setName(road)) }
+            .addAllLanes(lanes).build()
+
+    private fun lane(highlighted: Boolean, vararg shapes: NavigationLane.LaneDirection.Shape) =
+        NavigationLane.newBuilder().apply {
+            for (s in shapes) addLaneDirections(NavigationLane.LaneDirection.newBuilder().setShape(s).setIsHighlighted(highlighted))
+        }.build()
+
+    @Test
+    fun newerMessagesGiveThenLanesEtaAndRemaining() {
+        val state = NavigationState.newBuilder()
+            .addSteps(step(NavigationManeuver.NavigationType.TURN_NORMAL_RIGHT, "Galle Rd", listOf(
+                lane(false, NavigationLane.LaneDirection.Shape.NORMAL_LEFT),
+                lane(true, NavigationLane.LaneDirection.Shape.STRAIGHT, NavigationLane.LaneDirection.Shape.SLIGHT_RIGHT),
+            )))
+            .addSteps(step(NavigationManeuver.NavigationType.TURN_NORMAL_LEFT, "Duplication Rd"))
+            .build().toByteArray()
+        val pos = NavigationCurrentPosition.newBuilder()
+            .setStepDistance(NavigationStepDistance.newBuilder().setDistance(NavigationDistance.newBuilder().setMeters(350)))
+            .addDestinationDistances(
+                NavigationDestinationDistance.newBuilder()
+                    .setDistance(NavigationDistance.newBuilder().setMeters(12400))
+                    .setEstimatedTimeAtArrival("18:42")
+                    .setTimeToArrivalSeconds(1320),
+            ).build().toByteArray()
+        val t = NavTurnTracker()
+        assertTrue(t.onMessage(MsgType.INSTRUMENT_CLUSTER_NAVIGATION_STATE_VALUE, state))
+        assertTrue(t.onMessage(MsgType.INSTRUMENT_CLUSTER_NAVIGATION_CURRENT_POSITION_VALUE, pos))
+        val d = t.directions
+        assertEquals(NextTurn(TurnKind.NORMAL, TurnSide.RIGHT, distanceM = 350, road = "Galle Rd"), d.turn)
+        assertEquals(NextTurn(TurnKind.NORMAL, TurnSide.LEFT, road = "Duplication Rd"), d.then)
+        assertEquals(
+            listOf(
+                Lane(listOf(TurnKind.NORMAL to TurnSide.LEFT), highlighted = false),
+                Lane(listOf(TurnKind.STRAIGHT to TurnSide.NONE, TurnKind.SLIGHT to TurnSide.RIGHT), highlighted = true),
+            ),
+            d.lanes,
+        )
+        assertEquals("18:42", d.etaText)
+        assertEquals(1320L, d.etaSeconds)
+        assertEquals(12400, d.remainingM)
+    }
+
+    @Test
+    fun legacyMessagesGiveTurnOnlyDirections() {
+        val t = NavTurnTracker()
+        t.onMessage(MsgType.NEXTTURNDETAILS_VALUE, detail(NextTurnDetail.NextEvent.TURN, NextTurnDetail.Side.LEFT))
+        t.onMessage(MsgType.NEXTTURNDISTANCEANDTIME_VALUE, distance(200))
+        assertEquals(Directions(NextTurn(TurnKind.NORMAL, TurnSide.LEFT, distanceM = 200, road = "Main St")), t.directions)
+    }
+
+    @Test
+    fun directionsChangeAloneIsReported() {
+        val state = NavigationState.newBuilder().addSteps(step(NavigationManeuver.NavigationType.STRAIGHT)).build().toByteArray()
+        val t = NavTurnTracker()
+        t.onMessage(MsgType.INSTRUMENT_CLUSTER_NAVIGATION_STATE_VALUE, state)
+        val pos = NavigationCurrentPosition.newBuilder().addDestinationDistances(
+            NavigationDestinationDistance.newBuilder().setTimeToArrivalSeconds(600),
+        ).build().toByteArray()
+        assertTrue(t.onMessage(MsgType.INSTRUMENT_CLUSTER_NAVIGATION_CURRENT_POSITION_VALUE, pos))   // only ETA changed
+        assertEquals(600L, t.directions.etaSeconds)
+    }
+
+    @Test
+    fun stopClearsDirections() {
+        val t = NavTurnTracker()
+        t.onMessage(MsgType.NEXTTURNDETAILS_VALUE, detail(NextTurnDetail.NextEvent.TURN, NextTurnDetail.Side.LEFT))
+        t.onMessage(MsgType.INSTRUMENT_CLUSTER_STOP_VALUE, ByteArray(0))
+        assertEquals(Directions.NONE, t.directions)
+    }
+
+    @Test
+    fun laneShapesMapToArrows() {
+        val m = NavTurnTracker.Companion
+        for (s in NavigationLane.LaneDirection.Shape.values()) m.fromLaneShape(s)   // must not throw
+        assertEquals(TurnKind.SHARP to TurnSide.RIGHT, m.fromLaneShape(NavigationLane.LaneDirection.Shape.SHARP_RIGHT))
+        assertEquals(TurnKind.U_TURN to TurnSide.LEFT, m.fromLaneShape(NavigationLane.LaneDirection.Shape.U_TURN_LEFT))
+        assertEquals(TurnKind.STRAIGHT to TurnSide.NONE, m.fromLaneShape(NavigationLane.LaneDirection.Shape.UNKNOWN))
+    }
+
+    @Test
+    fun handlesOnlyNavTypes() {
+        assertTrue(NavTurnTracker.handles(MsgType.NEXTTURNDETAILS_VALUE))
+        assertTrue(NavTurnTracker.handles(MsgType.INSTRUMENT_CLUSTER_NAVIGATION_CURRENT_POSITION_VALUE))
+        assertFalse(NavTurnTracker.handles(1234))
     }
 }
