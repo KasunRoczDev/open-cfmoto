@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.net.Uri
 import android.os.Bundle
+import android.view.View
 import android.provider.Settings
 import android.widget.TextView
 import android.widget.Toast
@@ -129,6 +130,8 @@ class SetupActivity : AppCompatActivity() {
         findViewById<MaterialButton>(R.id.strip_small).setOnClickListener { setStripHeight(StripHeight.SMALL) }
         findViewById<MaterialButton>(R.id.strip_medium).setOnClickListener { setStripHeight(StripHeight.MEDIUM) }
         findViewById<MaterialButton>(R.id.strip_large).setOnClickListener { setStripHeight(StripHeight.LARGE) }
+        findViewById<MaterialButton>(R.id.strip_mode_metrics).setOnClickListener { setStripMode(StripMode.METRICS) }
+        findViewById<MaterialButton>(R.id.strip_mode_directions).setOnClickListener { setStripMode(StripMode.DIRECTIONS) }
         findViewById<MaterialButton>(R.id.strip_cell_speed).setOnClickListener { toggleStripCell(StripCell.SPEED) }
         findViewById<MaterialButton>(R.id.strip_cell_altitude).setOnClickListener { toggleStripCell(StripCell.ALTITUDE) }
         findViewById<MaterialButton>(R.id.strip_cell_heading).setOnClickListener { toggleStripCell(StripCell.HEADING) }
@@ -328,6 +331,18 @@ class SetupActivity : AppCompatActivity() {
         MetricsStripPrefs.setHeight(this, h)
         refreshOptions()
         toast(getString(R.string.setup_toast_metrics_strip, getString(h.labelRes)))
+    }
+
+    private fun setStripMode(m: StripMode) {
+        MetricsStripPrefs.setMode(this, m)
+        // Directions needs a visible band; start at Medium if the strip was Off.
+        if (m == StripMode.DIRECTIONS && MetricsStripPrefs.height(this) == StripHeight.OFF) {
+            MetricsStripPrefs.setHeight(this, StripHeight.MEDIUM)
+        }
+        refreshOptions()
+        toast(getString(R.string.setup_toast_strip_mode, getString(
+            if (m == StripMode.DIRECTIONS) R.string.pref_strip_mode_directions else R.string.pref_strip_mode_metrics,
+        )))
     }
 
     private fun toggleStripCell(cell: StripCell) {
@@ -617,12 +632,19 @@ class SetupActivity : AppCompatActivity() {
             R.id.strip_small to StripHeight.SMALL,
             R.id.strip_medium to StripHeight.MEDIUM,
             R.id.strip_large to StripHeight.LARGE)
-        highlight(MetricsStripPrefs.turnInfo(this),
+        val stripMode = MetricsStripPrefs.mode(this)
+        val directionsMode = stripMode == StripMode.DIRECTIONS
+        highlight(stripMode,
+            R.id.strip_mode_metrics to StripMode.METRICS,
+            R.id.strip_mode_directions to StripMode.DIRECTIONS)
+        // Directions requires turn info: show it as On and locked.
+        highlight(MetricsStripPrefs.turnInfo(this) || directionsMode,
             R.id.turninfo_on to true,
             R.id.turninfo_off to false)
         val stripOn = MetricsStripPrefs.height(this) != StripHeight.OFF
-        findViewById<MaterialButton>(R.id.turninfo_on).isEnabled = stripOn
-        findViewById<MaterialButton>(R.id.turninfo_off).isEnabled = stripOn
+        findViewById<MaterialButton>(R.id.turninfo_on).isEnabled = stripOn && !directionsMode
+        findViewById<MaterialButton>(R.id.turninfo_off).isEnabled = stripOn && !directionsMode
+        findViewById<View>(R.id.strip_cells_group).visibility = if (directionsMode) View.GONE else View.VISIBLE
         val shownCells = MetricsStripPrefs.cells(this)
         for ((id, cell) in listOf(
             R.id.strip_cell_speed to StripCell.SPEED,

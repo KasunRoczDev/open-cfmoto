@@ -698,4 +698,9 @@
     <string name="ui_logs_share">Share</string>
     <string name="ui_logs_clear">Clear</string>
     <string name="ui_version">OpenCfMoto %1$s</string>
+    <string name="setup_strip_mode">Strip shows</string>
+    <string name="setup_strip_mode_desc">Directions: next turn, lanes and arrival time from Google Maps — only while navigating, over the bottom of Android Auto (which keeps the full screen). Metrics: speed / altitude / heading. Applies next connect.</string>
+    <string name="pref_strip_mode_metrics">Metrics</string>
+    <string name="pref_strip_mode_directions">Directions</string>
+    <string name="setup_toast_strip_mode">Strip shows: %1$s</string>
 </resources>
