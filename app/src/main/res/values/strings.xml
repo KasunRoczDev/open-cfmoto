@@ -744,4 +744,13 @@
     <string name="pref_side_right">Right</string>
     <string name="pref_strip_narrow">Narrow</string>
     <string name="pref_strip_wide">Wide</string>
+    <string name="ui_me_forest">Forest</string>
+    <string name="ui_me_forest_desc">Trees you grew by riding smoothly</string>
+    <string name="forest_title">My forest</string>
+    <string name="forest_trees">Trees grown</string>
+    <string name="forest_growing">Growing now</string>
+    <string name="forest_growing_value">%1$s · %2$.1f / 20 km</string>
+    <string name="forest_all_time">Eco km (all time)</string>
+    <string name="forest_month">Eco this month</string>
+    <string name="forest_note">Trees grow from smooth throttle, smooth braking, steady speed and riding at 30–70 km/h, while connected with the side panel on. Rough riding pauses growth — it never takes a tree away.</string>
 </resources>

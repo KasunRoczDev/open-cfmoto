@@ -9,6 +9,7 @@ import androidx.compose.material.icons.rounded.BugReport
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.Garage
 import androidx.compose.material.icons.rounded.Info
+import androidx.compose.material.icons.rounded.Park
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.SystemUpdate
 import androidx.compose.material3.Text
@@ -24,7 +25,7 @@ import dev.zanderp.opencfmoto.ui.design.SettingRow
 
 @Composable
 fun MeTab(
-    onGarage: () -> Unit, onSettings: () -> Unit, onLogs: () -> Unit, onReport: () -> Unit,
+    onGarage: () -> Unit, onSettings: () -> Unit, onForest: () -> Unit, onLogs: () -> Unit, onReport: () -> Unit,
     onUpdate: () -> Unit, onAbout: () -> Unit, onDonate: () -> Unit,
 ) {
     val c = Ocm.colors
@@ -33,6 +34,7 @@ fun MeTab(
         OcmCard {
             SettingRow(stringResource(R.string.ui_me_garage), stringResource(R.string.ui_me_garage_desc), Icons.Rounded.Garage, onGarage)
             SettingRow(stringResource(R.string.ui_me_settings), stringResource(R.string.ui_me_settings_desc), Icons.Rounded.Settings, onSettings)
+            SettingRow(stringResource(R.string.ui_me_forest), stringResource(R.string.ui_me_forest_desc), Icons.Rounded.Park, onForest)
         }
         OcmCard {
             SettingRow(stringResource(R.string.ui_me_logs), stringResource(R.string.ui_me_logs_desc), Icons.AutoMirrored.Rounded.Article, onLogs)

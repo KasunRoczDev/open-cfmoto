@@ -79,7 +79,7 @@ fun AppShell(c: ConnectionController, searchFocusTick: Int) {
         bottomBar = {
             NavigationBar(containerColor = Ocm.colors.surface) {
                 for (t in Tabs) {
-                    val selected = route == t.route || (t.route == "me" && route == "logs")
+                    val selected = route == t.route || (t.route == "me" && (route == "logs" || route == "forest"))
                     NavigationBarItem(
                         selected = selected,
                         onClick = {
@@ -120,11 +120,12 @@ fun AppShell(c: ConnectionController, searchFocusTick: Int) {
             }
             composable("me") {
                 MeTab(
-                    onGarage = { GarageActivity.start(ctx) }, onSettings = { SetupActivity.start(ctx) },
+                    onGarage = { GarageActivity.start(ctx) }, onSettings = { SetupActivity.start(ctx) }, onForest = { nav.navigate("forest") },
                     onLogs = { nav.navigate("logs") }, onReport = c::reportProblem, onUpdate = c::checkUpdateManual,
                     onAbout = { AboutActivity.start(ctx) }, onDonate = c::donate,
                 )
             }
+            composable("forest") { dev.zanderp.opencfmoto.ui.forest.ForestScreen() }
             composable("logs") {
                 LogsScreen(
                     onShare = c::shareLog,
