@@ -260,11 +260,12 @@ object VideoPrefs {
         // Set just before this call in MainActivity.applyProfile — the same value VideoPipeline reserves.
         // Metrics mode lays AA out above the band; Directions overlays it, so AA keeps the full panel.
         val stripReq = BikeProfileHolder.stripSession.aaReservePx
+        val session = BikeProfileHolder.stripSession
         val panel = when (mode) {
             MatchAspectMode.OFF -> {
                 // OFF means "no margins" — except the metrics strip still needs AA laid out for the
                 // shorter area above the band, so use the known panel when the strip is on.
-                val detected = if (stripReq > 0) detectedPanelSize(ctx, ssid) else null
+                val detected = if (stripReq > 0 || session.side) detectedPanelSize(ctx, ssid) else null
                 if (detected == null) {
                     LogBus.log("[match-aspect] OFF — margins 0")
                     return AaMargins.NONE
@@ -282,9 +283,18 @@ object VideoPrefs {
             }
         }
         val stripPx = MetricsStripLayout.resolvePx(stripReq, panel.second)
-        val (targetW, targetH) = MetricsStripLayout.panelForAa(panel.first, panel.second, stripPx)
+        val sidePx = if (session.side) SidePanelLayout.panelPx(panel.first, session.sidePercent) else 0
+        val (targetW, targetH) = if (sidePx > 0) {
+            SidePanelLayout.aaWidth(panel.first, sidePx) to panel.second
+        } else {
+            MetricsStripLayout.panelForAa(panel.first, panel.second, stripPx)
+        }
         val margins = AaMargins.forAspect(spec, targetW, targetH)
-        val stripNote = if (stripPx > 0) " strip −${stripPx}px" else ""
+        val stripNote = when {
+            sidePx > 0 -> " side −${sidePx}px"
+            stripPx > 0 -> " strip −${stripPx}px"
+            else -> ""
+        }
         LogBus.log(
             "[match-aspect] $mode panel ${panel.first}x${panel.second}$stripNote → " +
                 "AA ${spec.width}x${spec.height} margins ${margins.marginW}x${margins.marginH}",

@@ -30,4 +30,22 @@ class StripModeTest {
         assertEquals(0, s.requestPx)
         assertEquals(0, s.aaReservePx)
     }
+
+    @Test
+    fun sideReservesWidthNotHeight() {
+        val s = StripSnapshot.of(StripHeight.MEDIUM, turnInfo = false, mode = StripMode.SIDE, sideLeft = true)
+        assertTrue(s.side)
+        assertTrue(s.turnInfo)
+        assertEquals(30, s.sidePercent)
+        assertTrue(s.sideLeft)
+        assertEquals(0, s.aaReservePx)
+        assertFalse(s.overlay)
+    }
+
+    @Test
+    fun sideOffWhenStripOff() {
+        val s = StripSnapshot.of(StripHeight.OFF, turnInfo = true, mode = StripMode.SIDE)
+        assertFalse(s.side)
+        assertFalse(s.turnInfo)
+    }
 }

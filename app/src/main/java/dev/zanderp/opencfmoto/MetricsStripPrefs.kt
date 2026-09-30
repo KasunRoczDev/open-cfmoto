@@ -14,8 +14,11 @@ enum class StripHeight(val px: Int, @StringRes val labelRes: Int) {
     LARGE(80, R.string.pref_strip_large),
 }
 
-/** What the strip shows: speed/altitude/heading (band reserved under AA) or turn-by-turn directions (overlay). */
-enum class StripMode { METRICS, DIRECTIONS }
+/**
+ * What the strip shows: speed/altitude/heading (band reserved under AA), turn-by-turn directions (overlay),
+ * or a side panel beside Android Auto (directions + eco tree).
+ */
+enum class StripMode { METRICS, DIRECTIONS, SIDE }
 
 /**
  * Strip settings frozen at Connect ([MetricsStripPrefs.snapshot] → [BikeProfileHolder.stripSession]),
@@ -27,27 +30,35 @@ data class StripSnapshot(
     val turnInfo: Boolean,
     val cells: Set<StripCell> = StripCells.ALL,
     val mode: StripMode = StripMode.METRICS,
+    val sidePercent: Int = 0,
+    val sideLeft: Boolean = false,
 ) {
     /** Directions: the band is drawn over Android Auto (which keeps the full screen) only while navigating. */
     val overlay: Boolean get() = mode == StripMode.DIRECTIONS && requestPx > 0
 
-    /** Dash pixels Android Auto must be laid out without (only Metrics mode reserves the band). */
-    val aaReservePx: Int get() = if (overlay) 0 else requestPx
+    /** Side panel: a column beside Android Auto (directions + eco tree). */
+    val side: Boolean get() = mode == StripMode.SIDE && sidePercent > 0
+
+    /** Dash rows Android Auto must be laid out without (only Metrics mode reserves the bottom band). */
+    val aaReservePx: Int get() = if (overlay || side) 0 else requestPx
 
     companion object {
         val OFF = StripSnapshot(0, false)
 
-        /** Turn info only makes sense with a visible strip; Directions requires it. */
+        /** Turn info only makes sense with a visible strip; Directions and Side panel require it. */
         fun of(
             height: StripHeight,
             turnInfo: Boolean,
             cells: Set<StripCell> = StripCells.ALL,
             mode: StripMode = StripMode.METRICS,
+            sideLeft: Boolean = false,
         ): StripSnapshot = StripSnapshot(
             requestPx = height.px,
-            turnInfo = (turnInfo || mode == StripMode.DIRECTIONS) && height != StripHeight.OFF,
+            turnInfo = (turnInfo || mode != StripMode.METRICS) && height != StripHeight.OFF,
             cells = cells,
             mode = mode,
+            sidePercent = if (mode == StripMode.SIDE) SidePanelLayout.percentFor(height) else 0,
+            sideLeft = sideLeft,
         )
     }
 }
@@ -59,6 +70,7 @@ object MetricsStripPrefs {
     private const val KEY_TURN_INFO = "metrics_strip_turn_info"
     private const val KEY_CELLS = "metrics_strip_cells"
     private const val KEY_MODE = "metrics_strip_mode"
+    private const val KEY_SIDE_LEFT = "metrics_strip_side_left"
 
     private fun prefs(ctx: Context) =
         ctx.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
@@ -96,6 +108,13 @@ object MetricsStripPrefs {
         BikeScope.putString(prefs(ctx), ctx, KEY_MODE, m.name)
     }
 
+    /** Side panel on the left (default right, where Android Auto would put its media card). */
+    fun sideLeft(ctx: Context): Boolean = BikeScope.getBoolean(prefs(ctx), ctx, KEY_SIDE_LEFT, false)
+
+    fun setSideLeft(ctx: Context, left: Boolean) {
+        BikeScope.putBoolean(prefs(ctx), ctx, KEY_SIDE_LEFT, left)
+    }
+
     /** Settings to freeze into [BikeProfileHolder.stripSession] at Connect. */
-    fun snapshot(ctx: Context): StripSnapshot = StripSnapshot.of(height(ctx), turnInfo(ctx), cells(ctx), mode(ctx))
+    fun snapshot(ctx: Context): StripSnapshot = StripSnapshot.of(height(ctx), turnInfo(ctx), cells(ctx), mode(ctx), sideLeft(ctx))
 }
