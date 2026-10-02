@@ -52,7 +52,10 @@ object MaintenanceSchedule {
 Due point for an item, given `lastServicedKm`/`lastServicedAtMs` (null before first service — see §3.2):
 - `dueKm = (lastServicedKm ?: 0.0) + kmInterval` (skip if `kmInterval == null`)
 - `dueAtMs = (lastServicedAtMs ?: baselineSetAtMs) + monthInterval` (skip if `monthInterval == null`)
-- Item is due when the estimated odometer ≥ `dueKm` **or** now ≥ `dueAtMs` (whichever first, matching the manual).
+- Item is **due** when the estimated odometer ≥ `dueKm` **or** now ≥ `dueAtMs` (whichever first, matching the
+  manual). Classified **overdue** once due; **due soon** when within **300 km** of `dueKm` or **14 days** of
+  `dueAtMs` (whichever gets there first), but not yet due; otherwise **OK**. Due-soon is a UI classification only
+  — it does not trigger a notification (§6 fires only on the due/overdue transition).
 - `oneTime` items drop off the list permanently once serviced once (no next due point computed).
 
 150SC's full item list (transcribed from the manual, §9 appendix) seeds `MaintenanceSchedule.forModel("150SC")`.
@@ -227,4 +230,6 @@ genuinely one-time at 1000 km. Implementation should use the break-in chart only
 
 No severe-duty interval halving (▲ marker), no dealer-vs-DIY distinction (■ marker), no service-cost tracking, no
 parts-ordering integration, no support for bikes other than the 150SC in this iteration (schedule list is simply
-empty for every other model until someone transcribes their manual).
+empty for every other model until someone transcribes their manual). No background notifications for bikes other
+than the currently-active one — switching the active bike in Garage is what brings its schedule into the daily
+check.
