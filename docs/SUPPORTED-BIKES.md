@@ -48,7 +48,7 @@ Riders have projected Android Auto with these (US + international as noted):
 | **450SR** (+ SR‑S / TC class) | Non‑touch CFDL16; handlebar + on-screen pad |
 | **675SR‑R** | Community-confirmed (2026-08) — SoftAP / EasyConnect QR |
 | **450CL‑C** / **CL‑C450** | Often Wi‑Fi Direct (P2P) — Setup → Wi‑Fi **Auto** or **P2P**; Discord `#450cl-c` |
-| **150SC** (scooter) | Community-confirmed; same QR / EasyConnect path |
+| **150SC** (scooter) | Confirmed (2026-10) — same CFDL16 head unit as the 675 (sdk 0.9.29.1, channel 37416, 5" non-touch ~800×386); auto-selects the **CFDL16 (675 / 150SC)** profile, no override needed |
 | **450NK** | Community-confirmed — works without T‑Box / MotoPlay subscription |
 | **675NK** | Community-confirmed — SoftAP QR; handlebar→AA needs bike Bluetooth |
 | **700MT Adventure** | Community-confirmed — showcase in Discord `#confirmed-working` |

@@ -424,12 +424,14 @@ internal object HuTimeSync {
  * CLIENT_INFO reply, no reply to unknown cmds) and is the safe default for any unrecognized bike.
  */
 object LegacyCfdl16Profile : BikeProfile {
-    override val name = "CFDL16 / legacy (BIKE A)"
+    // The 675 and the 150SC scooter share this unit (CFDL16, sdk 0.9.29.1, channel 37416, ~800×386,
+    // non-touch) — confirmed from a 150SC CLIENT_INFO on 2026-10-02 — so neither needs its own profile.
+    override val name = "CFDL16 (675 / 150SC)"
     override val requiresSockServerAuth = false
     override val supportsScreenTouch = false
     override val advertisedSupportFunction = 0
 
-    /** The 675's 5" panel is landscape ~800x386. */
+    /** The 675's / 150SC's 5" panel is landscape ~800x386. */
     override val aaVideo = AaVideoSpec(AaResolution.LANDSCAPE_800x480, dpi = 160)
 
     /** Known 675 QR modelId. Legacy is also the fallback, so this is just for a positive early match. */

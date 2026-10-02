@@ -414,7 +414,7 @@
     <string name="setup_play_store_failed">Couldn\u2019t open the Play Store</string>
     <string name="setup_android_auto_settings_failed">Couldn\u2019t open Android Auto settings</string>
     <string name="pref_profile_auto">Detect from the bike (recommended)</string>
-    <string name="pref_profile_legacy">CFDL16 / 450SR-style non-touch</string>
+    <string name="pref_profile_legacy">CFDL16 non-touch (450SR, 675, 150SC)</string>
     <string name="pref_profile_nk800">CRCP / sdk 0.9.23.x non-touch</string>
     <string name="pref_profile_nk_adv">CFDL26 touch 720×712</string>
     <string name="pref_profile_cfdl26_land">CFDL26 landscape touch</string>

@@ -73,4 +73,10 @@ class BikeProfileSelectTest {
             assertEquals(g.default, m[g])
         }
     }
+
+    @Test
+    fun cfdl16LogNameNamesThe150scAnd675() {
+        // The 150SC and 675 share this head unit (CFDL16, sdk 0.9.29.1, channel 37416): logs say so.
+        assertEquals("CFDL16 (675 / 150SC)", LegacyCfdl16Profile.name)
+    }
 }
