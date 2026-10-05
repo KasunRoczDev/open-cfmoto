@@ -161,7 +161,13 @@ fun SectionLabel(text: String) {
 }
 
 @Composable
-fun SettingRow(title: String, subtitle: String? = null, icon: ImageVector? = null, onClick: () -> Unit) {
+fun SettingRow(
+    title: String,
+    subtitle: String? = null,
+    icon: ImageVector? = null,
+    onClick: () -> Unit,
+    badge: String? = null,
+) {
     val c = Ocm.colors
     Row(
         Modifier.fillMaxWidth().heightIn(min = 64.dp).clickable(onClick = onClick).padding(vertical = 8.dp),
@@ -174,6 +180,12 @@ fun SettingRow(title: String, subtitle: String? = null, icon: ImageVector? = nul
         Column(Modifier.weight(1f)) {
             Text(title, style = OcmType.title, color = c.text)
             if (subtitle != null) Text(subtitle, style = OcmType.body, color = c.text2)
+        }
+        if (badge != null) {
+            Box(Modifier.clip(CircleShape).background(c.error).padding(horizontal = 8.dp, vertical = 2.dp)) {
+                Text(badge, style = OcmType.label, color = Color.White)
+            }
+            Spacer(Modifier.width(8.dp))
         }
         Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null, tint = c.text2)
     }

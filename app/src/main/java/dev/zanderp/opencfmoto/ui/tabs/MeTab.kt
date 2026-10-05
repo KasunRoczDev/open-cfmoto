@@ -6,6 +6,7 @@ package dev.zanderp.opencfmoto.ui.tabs
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Article
 import androidx.compose.material.icons.rounded.BugReport
+import androidx.compose.material.icons.rounded.Build
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.Garage
 import androidx.compose.material.icons.rounded.Info
@@ -17,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import dev.zanderp.opencfmoto.BuildConfig
 import dev.zanderp.opencfmoto.R
+import dev.zanderp.opencfmoto.maintenance.MaintenanceSummary
 import dev.zanderp.opencfmoto.ui.design.Ocm
 import dev.zanderp.opencfmoto.ui.design.OcmCard
 import dev.zanderp.opencfmoto.ui.design.OcmScreen
@@ -25,16 +27,27 @@ import dev.zanderp.opencfmoto.ui.design.SettingRow
 
 @Composable
 fun MeTab(
-    onGarage: () -> Unit, onSettings: () -> Unit, onForest: () -> Unit, onLogs: () -> Unit, onReport: () -> Unit,
-    onUpdate: () -> Unit, onAbout: () -> Unit, onDonate: () -> Unit,
+    onGarage: () -> Unit, onSettings: () -> Unit, onForest: () -> Unit, onMaintenance: () -> Unit,
+    maintenance: MaintenanceSummary,
+    onLogs: () -> Unit, onReport: () -> Unit, onUpdate: () -> Unit, onAbout: () -> Unit, onDonate: () -> Unit,
 ) {
     val c = Ocm.colors
+    val maintenanceSubtitle = when {
+        !maintenance.hasSchedule -> stringResource(R.string.maintenance_subtitle_no_schedule)
+        !maintenance.hasBaseline -> stringResource(R.string.maintenance_subtitle_setup)
+        maintenance.dueCount > 0 -> stringResource(R.string.maintenance_subtitle_due, maintenance.dueCount)
+        else -> stringResource(R.string.maintenance_subtitle_ok)
+    }
     OcmScreen {
         Text(stringResource(R.string.ui_tab_me), style = OcmType.screenTitle, color = c.text)
         OcmCard {
             SettingRow(stringResource(R.string.ui_me_garage), stringResource(R.string.ui_me_garage_desc), Icons.Rounded.Garage, onGarage)
             SettingRow(stringResource(R.string.ui_me_settings), stringResource(R.string.ui_me_settings_desc), Icons.Rounded.Settings, onSettings)
             SettingRow(stringResource(R.string.ui_me_forest), stringResource(R.string.ui_me_forest_desc), Icons.Rounded.Park, onForest)
+            SettingRow(
+                stringResource(R.string.ui_me_maintenance), maintenanceSubtitle, Icons.Rounded.Build, onMaintenance,
+                badge = maintenance.dueCount.takeIf { it > 0 }?.toString(),
+            )
         }
         OcmCard {
             SettingRow(stringResource(R.string.ui_me_logs), stringResource(R.string.ui_me_logs_desc), Icons.AutoMirrored.Rounded.Article, onLogs)

@@ -28,6 +28,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import dev.zanderp.opencfmoto.NavLauncher
 import dev.zanderp.opencfmoto.ui.ride.HeroData
+import dev.zanderp.opencfmoto.maintenance.MaintenanceSummary
 import dev.zanderp.opencfmoto.ui.ride.ParkHere
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -87,10 +88,12 @@ fun AppShell(c: ConnectionController, searchFocusTick: Int) {
     // model just typed in Garage shows when the rider comes back.
     var heroTick by remember { mutableIntStateOf(0) }
     var hero by remember { mutableStateOf(HeroData.EMPTY) }
+    var maintenance by remember { mutableStateOf(MaintenanceSummary.EMPTY) }
     val owner = LocalLifecycleOwner.current
     LaunchedEffect(owner, bike, heroTick) {
         owner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
             hero = withContext(Dispatchers.IO) { HeroData.load(ctx.applicationContext) }
+            maintenance = withContext(Dispatchers.IO) { MaintenanceSummary.load(ctx.applicationContext, System.currentTimeMillis()) }
         }
     }
 
@@ -101,7 +104,7 @@ fun AppShell(c: ConnectionController, searchFocusTick: Int) {
         bottomBar = {
             NavigationBar(containerColor = Ocm.colors.surface) {
                 for (t in Tabs) {
-                    val selected = route == t.route || (t.route == "me" && (route == "logs" || route == "forest"))
+                    val selected = route == t.route || (t.route == "me" && (route == "logs" || route == "forest" || route == "maintenance"))
                     NavigationBarItem(
                         selected = selected,
                         onClick = {
@@ -150,11 +153,15 @@ fun AppShell(c: ConnectionController, searchFocusTick: Int) {
             composable("me") {
                 MeTab(
                     onGarage = { GarageActivity.start(ctx) }, onSettings = { SetupActivity.start(ctx) }, onForest = { nav.navigate("forest") },
+                    onMaintenance = { nav.navigate("maintenance") }, maintenance = maintenance,
                     onLogs = { nav.navigate("logs") }, onReport = c::reportProblem, onUpdate = c::checkUpdateManual,
                     onAbout = { AboutActivity.start(ctx) }, onDonate = c::donate,
                 )
             }
             composable("forest") { dev.zanderp.opencfmoto.ui.forest.ForestScreen() }
+            composable("maintenance") {
+                dev.zanderp.opencfmoto.ui.maintenance.MaintenanceScreen(onChanged = { heroTick++ })
+            }
             composable("logs") {
                 LogsScreen(
                     onShare = c::shareLog,

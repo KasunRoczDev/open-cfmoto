@@ -768,4 +768,9 @@
     <string name="forest_all_time">Eco km (all time)</string>
     <string name="forest_month">Eco this month</string>
     <string name="forest_note">Trees grow from smooth throttle, smooth braking, steady speed and riding at 30–70 km/h, while connected with the side panel on. Rough riding pauses growth — it never takes a tree away.</string>
+    <string name="ui_me_maintenance">Maintenance</string>
+    <string name="maintenance_subtitle_no_schedule">No schedule for this bike</string>
+    <string name="maintenance_subtitle_setup">Set your odometer to start tracking</string>
+    <string name="maintenance_subtitle_due">%1$d item(s) need attention</string>
+    <string name="maintenance_subtitle_ok">Up to date</string>
 </resources>
