@@ -790,4 +790,7 @@
     <string name="maintenance_due_in_days">in %1$d days</string>
     <string name="maintenance_overdue_km">%1$d km overdue</string>
     <string name="maintenance_overdue_days">%1$d days overdue</string>
+    <string name="maintenance_notif_channel">Maintenance reminders</string>
+    <string name="maintenance_notif_title">Maintenance due</string>
+    <string name="maintenance_notif_text">%1$s is due or overdue</string>
 </resources>

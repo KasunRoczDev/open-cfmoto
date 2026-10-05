@@ -27,6 +27,7 @@ class MainActivity : AppCompatActivity() {
 
     private val controller get() = AppGraph.connection
     private val searchFocusTick = mutableIntStateOf(0)
+    private val openMaintenanceTick = mutableIntStateOf(0)
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
         if (RemotePad.consume(this, event)) return true
@@ -52,9 +53,10 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContent { OcmTheme { AppShell(controller, searchFocusTick.intValue) } }
+        setContent { OcmTheme { AppShell(controller, searchFocusTick.intValue, openMaintenanceTick.intValue) } }
         controller.attach(port)
         installTypeOnPhoneHandler()
+        takeOpenMaintenance(intent)
         val flags = takeIntentFlags(intent)
         controller.onHostCreated(
             startGpx = flags.startGpx, resume = flags.resume, btTrigger = flags.btTrigger, gpxToBike = flags.gpxToBike,
@@ -69,6 +71,7 @@ class MainActivity : AppCompatActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
+        takeOpenMaintenance(intent)
         val f = takeIntentFlags(intent)
         controller.onNewIntent(resume = f.resume, btTrigger = f.btTrigger, startGpx = f.startGpx, gpxToBike = f.gpxToBike)
     }
@@ -104,6 +107,13 @@ class MainActivity : AppCompatActivity() {
         return f
     }
 
+    /** Maintenance notification tap → open Me ▸ Maintenance (one-shot, like the other extras). */
+    private fun takeOpenMaintenance(i: Intent?) {
+        if (i?.getBooleanExtra(EXTRA_OPEN_MAINTENANCE, false) != true) return
+        i.removeExtra(EXTRA_OPEN_MAINTENANCE)
+        openMaintenanceTick.intValue += 1
+    }
+
     /** Bike Search tap → bring the app forward, open the Map tab and focus the search field. */
     private fun installTypeOnPhoneHandler() {
         DashRemote.setTypeOnPhoneHandler {
@@ -128,6 +138,7 @@ class MainActivity : AppCompatActivity() {
     companion object {
         const val EXTRA_START_GPX = "start_gpx"
         const val EXTRA_BT_TRIGGER = "bt_trigger"
+        const val EXTRA_OPEN_MAINTENANCE = "open_maintenance"
         /** When set with [EXTRA_START_GPX], join the bike even if not already live. */
         const val EXTRA_GPX_TO_BIKE = "gpx_to_bike"
     }

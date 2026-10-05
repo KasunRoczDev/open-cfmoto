@@ -72,9 +72,10 @@ private val Tabs = listOf(
     Tab("me", R.string.ui_tab_me, Icons.Rounded.Person),
 )
 
-/** @param searchFocusTick bumped by MainActivity when the bike asks to type on the phone. */
+/** @param searchFocusTick bumped by MainActivity when the bike asks to type on the phone.
+ *  @param openMaintenanceTick bumped by MainActivity when a maintenance notification is tapped. */
 @Composable
-fun AppShell(c: ConnectionController, searchFocusTick: Int) {
+fun AppShell(c: ConnectionController, searchFocusTick: Int, openMaintenanceTick: Int = 0) {
     val ctx = LocalContext.current
     val nav = rememberNavController()
     val (phase, detail) = ConnectionState.flow.collectAsStateWithLifecycle().value
@@ -98,6 +99,7 @@ fun AppShell(c: ConnectionController, searchFocusTick: Int) {
     }
 
     LaunchedEffect(searchFocusTick) { if (searchFocusTick > 0) nav.navigate("map") { launchSingleTop = true } }
+    LaunchedEffect(openMaintenanceTick) { if (openMaintenanceTick > 0) nav.navigate("maintenance") { launchSingleTop = true } }
 
     Scaffold(
         containerColor = Ocm.colors.bg,

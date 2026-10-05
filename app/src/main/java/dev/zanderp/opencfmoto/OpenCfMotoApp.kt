@@ -28,6 +28,10 @@ class OpenCfMotoApp : Application() {
         } catch (_: Exception) {
         }
         try {
+            dev.zanderp.opencfmoto.maintenance.MaintenanceCheckWorker.schedule(this)
+        } catch (_: Exception) {
+        }
+        try {
             MapLibre.getInstance(this)
             // After getInstance only — AppHttp network callbacks must not set the client first.
             AppHttp.onMapLibreReady()
