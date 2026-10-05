@@ -40,12 +40,11 @@ object MaintenanceStore {
     /** Records [itemId] serviced at [km]/[atMs] and clears its notified flag for the next cycle. */
     fun markServiced(ctx: Context, bikeRaw: String, itemId: String, km: Double, atMs: Long) {
         val current = load(ctx, bikeRaw) ?: return
-        save(ctx, bikeRaw, current.copy(items = current.items + (itemId to ItemState(km, atMs))))
+        save(ctx, bikeRaw, current.withServiced(itemId, km, atMs))
     }
 
     fun setNotified(ctx: Context, bikeRaw: String, itemId: String, notified: Boolean) {
         val current = load(ctx, bikeRaw) ?: return
-        val existing = current.items[itemId] ?: return
-        save(ctx, bikeRaw, current.copy(items = current.items + (itemId to existing.copy(notified = notified))))
+        save(ctx, bikeRaw, current.withNotified(itemId, notified))
     }
 }

@@ -12,9 +12,28 @@ data class ItemState(
     val notified: Boolean = false,
 )
 
-/** One bike's maintenance tracking: the odometer baseline and every serviced item's history. */
+/** One bike's maintenance tracking: the odometer baseline and every serviced item's history.
+ *  [notifiedUnserviced] holds ids of never-serviced items that already fired their overdue
+ *  notification (serviced items carry that flag on their own [ItemState]). */
 data class MaintenanceState(
     val baselineKm: Double,
     val baselineSetAtMs: Long,
     val items: Map<String, ItemState> = emptyMap(),
-)
+    val notifiedUnserviced: Set<String> = emptySet(),
+) {
+    fun isNotified(itemId: String): Boolean =
+        items[itemId]?.notified ?: (itemId in notifiedUnserviced)
+
+    fun withNotified(itemId: String, notified: Boolean = true): MaintenanceState {
+        val existing = items[itemId]
+        return if (existing != null) {
+            copy(items = items + (itemId to existing.copy(notified = notified)))
+        } else {
+            copy(notifiedUnserviced = if (notified) notifiedUnserviced + itemId else notifiedUnserviced - itemId)
+        }
+    }
+
+    /** Records a service, which also starts a fresh notification cycle for the item. */
+    fun withServiced(itemId: String, km: Double, atMs: Long): MaintenanceState =
+        copy(items = items + (itemId to ItemState(km, atMs)), notifiedUnserviced = notifiedUnserviced - itemId)
+}

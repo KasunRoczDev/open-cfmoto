@@ -138,4 +138,27 @@ class MaintenanceEstimateTest {
         val result = MaintenanceEstimate.itemsToNotify(listOf(due, notifiedAlready), state, estimateKm = 45_000.0, nowMs = 0L)
         assertEquals(listOf(due), result)
     }
+
+    @Test
+    fun itemsToNotifySkipsNeverServicedItemAlreadyNotified() {
+        val due = MaintenanceItem("due", "Engine", "Spark plug", "Replace", kmInterval = 10_000, monthInterval = null)
+        val state = MaintenanceState(baselineKm = 0.0, baselineSetAtMs = 0L).withNotified("due")
+        assertEquals(emptyList<MaintenanceItem>(), MaintenanceEstimate.itemsToNotify(listOf(due), state, estimateKm = 45_000.0, nowMs = 0L))
+    }
+
+    @Test
+    fun withNotifiedOnServicedItemSetsItsFlag() {
+        val state = MaintenanceState(0.0, 0L).withServiced("x", 1.0, 1L).withNotified("x")
+        assertEquals(ItemState(1.0, 1L, notified = true), state.items["x"])
+        assertEquals(emptySet<String>(), state.notifiedUnserviced)
+    }
+
+    @Test
+    fun servicingClearsNotifiedForTheNextCycle() {
+        val neverServiced = MaintenanceState(0.0, 0L).withNotified("x").withServiced("x", 45_000.0, 5L)
+        assertEquals(ItemState(45_000.0, 5L, notified = false), neverServiced.items["x"])
+        assertEquals(emptySet<String>(), neverServiced.notifiedUnserviced)
+        val serviced = MaintenanceState(0.0, 0L).withServiced("x", 1.0, 1L).withNotified("x").withServiced("x", 2.0, 2L)
+        assertEquals(ItemState(2.0, 2L, notified = false), serviced.items["x"])
+    }
 }

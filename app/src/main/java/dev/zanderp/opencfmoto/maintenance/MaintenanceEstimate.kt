@@ -61,9 +61,8 @@ object MaintenanceEstimate {
     /** Visible items that are newly overdue and haven't already fired a notification. */
     fun itemsToNotify(items: List<MaintenanceItem>, state: MaintenanceState, estimateKm: Double, nowMs: Long): List<MaintenanceItem> =
         visibleItems(items, state.items).filter { item ->
-            val itemState = state.items[item.id]
-            itemState?.notified != true &&
-                status(item, itemState, estimateKm, nowMs, state.baselineSetAtMs) == MaintenanceStatus.OVERDUE
+            !state.isNotified(item.id) &&
+                status(item, state.items[item.id], estimateKm, nowMs, state.baselineSetAtMs) == MaintenanceStatus.OVERDUE
         }
 
     private fun addMonthsUtc(fromMs: Long, months: Int): Long {

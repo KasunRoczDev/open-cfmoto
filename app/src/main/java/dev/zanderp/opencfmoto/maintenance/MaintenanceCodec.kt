@@ -3,6 +3,7 @@
 // Part of OpenCfMoto. Free software under the GNU AGPL v3 or later; see LICENSE and NOTICE.
 package dev.zanderp.opencfmoto.maintenance
 
+import org.json.JSONArray
 import org.json.JSONObject
 
 /** Pure JSON <-> [MaintenanceState] (no Android dependency, so it's unit-testable directly). */
@@ -22,6 +23,7 @@ object MaintenanceCodec {
             .put("baselineKm", state.baselineKm)
             .put("baselineSetAtMs", state.baselineSetAtMs)
             .put("items", items)
+            .put("notifiedUnserviced", JSONArray(state.notifiedUnserviced.sorted()))
             .toString()
     }
 
@@ -35,6 +37,8 @@ object MaintenanceCodec {
                 put(id, ItemState(s.getDouble("lastServicedKm"), s.getLong("lastServicedAtMs"), s.optBoolean("notified", false)))
             }
         }
-        MaintenanceState(o.getDouble("baselineKm"), o.getLong("baselineSetAtMs"), items)
+        val notifiedArr = o.optJSONArray("notifiedUnserviced") ?: JSONArray()
+        val notified = (0 until notifiedArr.length()).map { notifiedArr.getString(it) }.toSet()
+        MaintenanceState(o.getDouble("baselineKm"), o.getLong("baselineSetAtMs"), items, notified)
     }.getOrNull()
 }

@@ -24,6 +24,12 @@ class MaintenanceCodecTest {
     }
 
     @Test
+    fun roundTripsNotifiedUnservicedIds() {
+        val state = MaintenanceState(baselineKm = 100.0, baselineSetAtMs = 0L, notifiedUnserviced = setOf("engine_spark_plug", "frame"))
+        assertEquals(state, MaintenanceCodec.decode(MaintenanceCodec.encode(state)))
+    }
+
+    @Test
     fun decodeGarbageOrIncompleteJsonReturnsNull() {
         assertNull(MaintenanceCodec.decode("not json"))
         assertNull(MaintenanceCodec.decode("{}"))
