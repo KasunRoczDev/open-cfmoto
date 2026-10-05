@@ -773,4 +773,21 @@
     <string name="maintenance_subtitle_setup">Set your odometer to start tracking</string>
     <string name="maintenance_subtitle_due">%1$d item(s) need attention</string>
     <string name="maintenance_subtitle_ok">Up to date</string>
+    <string name="maintenance_title">Maintenance</string>
+    <string name="maintenance_no_schedule">No maintenance schedule for this bike yet. Set a model in Garage (e.g. \"150 SC\") to turn this on.</string>
+    <string name="maintenance_set_baseline_prompt">Type in your current odometer reading to start tracking service intervals.</string>
+    <string name="maintenance_set_odometer">Set odometer</string>
+    <string name="maintenance_odometer_label">Estimated odometer</string>
+    <string name="maintenance_odometer_value">%1$,.0f km</string>
+    <string name="maintenance_odometer_dialog_title">Set odometer</string>
+    <string name="maintenance_odometer_dialog_hint">Current reading, in km</string>
+    <string name="maintenance_mark_serviced_title">Mark as serviced?</string>
+    <string name="maintenance_mark_serviced_message">Records today\'s date and the current estimated odometer as the starting point for %1$s\'s next service.</string>
+    <string name="maintenance_status_ok">OK</string>
+    <string name="maintenance_status_due_soon">Due soon</string>
+    <string name="maintenance_status_overdue">Overdue</string>
+    <string name="maintenance_due_in_km">in %1$d km</string>
+    <string name="maintenance_due_in_days">in %1$d days</string>
+    <string name="maintenance_overdue_km">%1$d km overdue</string>
+    <string name="maintenance_overdue_days">%1$d days overdue</string>
 </resources>
