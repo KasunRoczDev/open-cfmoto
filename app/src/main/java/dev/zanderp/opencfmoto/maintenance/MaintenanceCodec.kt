@@ -22,6 +22,7 @@ object MaintenanceCodec {
         return JSONObject()
             .put("baselineKm", state.baselineKm)
             .put("baselineSetAtMs", state.baselineSetAtMs)
+            .put("trackingStartedAtMs", state.trackingStartedAtMs)
             .put("items", items)
             .put("notifiedUnserviced", JSONArray(state.notifiedUnserviced.sorted()))
             .toString()
@@ -39,6 +40,10 @@ object MaintenanceCodec {
         }
         val notifiedArr = o.optJSONArray("notifiedUnserviced") ?: JSONArray()
         val notified = (0 until notifiedArr.length()).map { notifiedArr.getString(it) }.toSet()
-        MaintenanceState(o.getDouble("baselineKm"), o.getLong("baselineSetAtMs"), items, notified)
+        val baselineSetAtMs = o.getLong("baselineSetAtMs")
+        MaintenanceState(
+            o.getDouble("baselineKm"), baselineSetAtMs, items, notified,
+            trackingStartedAtMs = o.optLong("trackingStartedAtMs", baselineSetAtMs),
+        )
     }.getOrNull()
 }

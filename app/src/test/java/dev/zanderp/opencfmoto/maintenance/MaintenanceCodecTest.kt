@@ -30,6 +30,12 @@ class MaintenanceCodecTest {
     }
 
     @Test
+    fun roundTripsTrackingStartSeparatelyFromBaseline() {
+        val state = MaintenanceState(baselineKm = 100.0, baselineSetAtMs = 0L).withBaseline(900.0, 5_000L)
+        assertEquals(state, MaintenanceCodec.decode(MaintenanceCodec.encode(state)))
+    }
+
+    @Test
     fun decodeGarbageOrIncompleteJsonReturnsNull() {
         assertNull(MaintenanceCodec.decode("not json"))
         assertNull(MaintenanceCodec.decode("{}"))

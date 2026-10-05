@@ -14,13 +14,20 @@ data class ItemState(
 
 /** One bike's maintenance tracking: the odometer baseline and every serviced item's history.
  *  [notifiedUnserviced] holds ids of never-serviced items that already fired their overdue
- *  notification (serviced items carry that flag on their own [ItemState]). */
+ *  notification (serviced items carry that flag on their own [ItemState]).
+ *  [baselineSetAtMs] moves on every re-sync (it only decides which rides count toward the estimate);
+ *  [trackingStartedAtMs] is the first baseline's time and anchors never-serviced calendar due points,
+ *  so re-syncing the odometer never pushes those back. */
 data class MaintenanceState(
     val baselineKm: Double,
     val baselineSetAtMs: Long,
     val items: Map<String, ItemState> = emptyMap(),
     val notifiedUnserviced: Set<String> = emptySet(),
+    val trackingStartedAtMs: Long = baselineSetAtMs,
 ) {
+    /** Re-syncs the odometer; service history and the tracking start are untouched. */
+    fun withBaseline(km: Double, atMs: Long): MaintenanceState = copy(baselineKm = km, baselineSetAtMs = atMs)
+
     fun isNotified(itemId: String): Boolean =
         items[itemId]?.notified ?: (itemId in notifiedUnserviced)
 

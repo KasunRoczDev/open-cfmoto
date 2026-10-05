@@ -22,7 +22,7 @@ data class MaintenanceSummary(val dueCount: Int, val hasSchedule: Boolean, val h
                 ?: return MaintenanceSummary(0, hasSchedule = true, hasBaseline = false)
             val estimate = MaintenanceEstimate.estimateKm(state, TripStore.list(ctx), bike.raw)
             val due = MaintenanceEstimate.visibleItems(items, state.items).count {
-                MaintenanceEstimate.status(it, state.items[it.id], estimate, nowMs, state.baselineSetAtMs) != MaintenanceStatus.OK
+                MaintenanceEstimate.status(it, state.items[it.id], estimate, nowMs, state.trackingStartedAtMs) != MaintenanceStatus.OK
             }
             return MaintenanceSummary(due, hasSchedule = true, hasBaseline = true)
         }

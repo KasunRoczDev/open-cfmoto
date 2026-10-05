@@ -34,7 +34,7 @@ object MaintenanceStore {
     /** Sets (or re-sets) the baseline without touching any item's service history. */
     fun setBaseline(ctx: Context, bikeRaw: String, km: Double, atMs: Long) {
         val current = load(ctx, bikeRaw) ?: MaintenanceState(km, atMs)
-        save(ctx, bikeRaw, current.copy(baselineKm = km, baselineSetAtMs = atMs))
+        save(ctx, bikeRaw, current.withBaseline(km, atMs))
     }
 
     /** Records [itemId] serviced at [km]/[atMs] and clears its notified flag for the next cycle. */

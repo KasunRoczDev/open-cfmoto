@@ -23,7 +23,7 @@ import dev.zanderp.opencfmoto.R
 import dev.zanderp.opencfmoto.TripStore
 import java.util.concurrent.TimeUnit
 
-/** Once a day: for the active bike, notify about any item that just became overdue. */
+/** Once a day: for the active bike, post one notification covering every item that just became overdue. */
 class MaintenanceCheckWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx, params) {
     override suspend fun doWork(): Result {
         runCatching { check() }.onFailure { LogBus.log("[MAINT] daily check failed: $it") }
@@ -38,27 +38,39 @@ class MaintenanceCheckWorker(ctx: Context, params: WorkerParameters) : Coroutine
         val state = MaintenanceStore.load(ctx, bike.raw) ?: return
         val now = System.currentTimeMillis()
         val estimate = MaintenanceEstimate.estimateKm(state, TripStore.list(ctx), bike.raw)
-        for (item in MaintenanceEstimate.itemsToNotify(items, state, estimate, now)) {
-            notify(ctx, item)
-            MaintenanceStore.setNotified(ctx, bike.raw, item.id, true)
-        }
+        val due = MaintenanceEstimate.itemsToNotify(items, state, estimate, now)
+        val notice = MaintenanceNotice.forItems(due) ?: return
+        notify(ctx, notice)
+        for (item in due) MaintenanceStore.setNotified(ctx, bike.raw, item.id, true)
     }
 
-    private fun notify(ctx: Context, item: MaintenanceItem) {
+    private fun notify(ctx: Context, notice: MaintenanceNotice) {
         ensureChannel(ctx)
         val openIntent = Intent(ctx, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             putExtra(MainActivity.EXTRA_OPEN_MAINTENANCE, true)
         }
-        val pending = PendingIntent.getActivity(ctx, item.id.hashCode(), openIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
-        val notification = Notification.Builder(ctx, CHANNEL_ID)
+        val pending = PendingIntent.getActivity(ctx, NOTIFICATION_ID, openIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+        val text = if (notice.count == 1) {
+            ctx.getString(R.string.maintenance_notif_text, notice.names.first())
+        } else {
+            ctx.resources.getQuantityString(R.plurals.maintenance_notif_text_many, notice.count, notice.count)
+        }
+        val builder = Notification.Builder(ctx, CHANNEL_ID)
             .setContentTitle(ctx.getString(R.string.maintenance_notif_title))
-            .setContentText(ctx.getString(R.string.maintenance_notif_text, item.name))
+            .setContentText(text)
             .setSmallIcon(android.R.drawable.ic_dialog_info)
             .setContentIntent(pending)
             .setAutoCancel(true)
-            .build()
-        NotificationManagerCompat.from(ctx).notify(item.id.hashCode(), notification)
+        if (notice.count > 1) {
+            val inbox = Notification.InboxStyle().setBigContentTitle(text)
+            notice.names.forEach { inbox.addLine(it) }
+            val more = notice.count - notice.names.size
+            if (more > 0) inbox.setSummaryText(ctx.getString(R.string.maintenance_notif_more, more))
+            builder.setStyle(inbox)
+        }
+        // One fixed id: a later run replaces the earlier summary instead of stacking another.
+        NotificationManagerCompat.from(ctx).notify(NOTIFICATION_ID, builder.build())
     }
 
     private fun ensureChannel(ctx: Context) {
@@ -72,6 +84,7 @@ class MaintenanceCheckWorker(ctx: Context, params: WorkerParameters) : Coroutine
     companion object {
         private const val CHANNEL_ID = "opencfmoto_maintenance"
         private const val WORK_NAME = "maintenance_check"
+        private const val NOTIFICATION_ID = 0x4D41
 
         /** Idempotent: KEEP means re-calling this on every app start never resets the schedule. */
         fun schedule(ctx: Context) {

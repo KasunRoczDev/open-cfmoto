@@ -65,7 +65,7 @@ class MaintenanceEstimateTest {
     fun dueAtNeverServicedCountsFromBaselineDate() {
         val item = MaintenanceItem("x", "Engine", "Air filter elements", "Clean", kmInterval = 5000, monthInterval = 12)
         val expected = addMonthsUtc(1_000_000L, 12)
-        assertEquals(expected, MaintenanceEstimate.dueAtMs(item, null, baselineSetAtMs = 1_000_000L))
+        assertEquals(expected, MaintenanceEstimate.dueAtMs(item, null, trackingStartedAtMs = 1_000_000L))
     }
 
     @Test
@@ -73,7 +73,7 @@ class MaintenanceEstimateTest {
         val item = MaintenanceItem("x", "Engine", "Air filter elements", "Clean", kmInterval = 5000, monthInterval = 12)
         val state = ItemState(lastServicedKm = 0.0, lastServicedAtMs = 2_000_000L)
         val expected = addMonthsUtc(2_000_000L, 12)
-        assertEquals(expected, MaintenanceEstimate.dueAtMs(item, state, baselineSetAtMs = 1_000_000L))
+        assertEquals(expected, MaintenanceEstimate.dueAtMs(item, state, trackingStartedAtMs = 1_000_000L))
     }
 
     @Test
@@ -81,7 +81,7 @@ class MaintenanceEstimateTest {
         val item = MaintenanceItem("x", "Engine", "Oil", "Replace", kmInterval = 3000, monthInterval = 3, firstDueKm = 1000)
         assertEquals(
             MaintenanceStatus.OVERDUE,
-            MaintenanceEstimate.status(item, null, estimateKm = 1000.0, nowMs = 0L, baselineSetAtMs = 1_000_000_000_000L),
+            MaintenanceEstimate.status(item, null, estimateKm = 1000.0, nowMs = 0L, trackingStartedAtMs = 1_000_000_000_000L),
         )
     }
 
@@ -91,15 +91,15 @@ class MaintenanceEstimateTest {
         val dueAt = addMonthsUtc(0L, 24)
         assertEquals(
             MaintenanceStatus.OVERDUE,
-            MaintenanceEstimate.status(item, null, estimateKm = 0.0, nowMs = dueAt + 86_400_000L, baselineSetAtMs = 0L),
+            MaintenanceEstimate.status(item, null, estimateKm = 0.0, nowMs = dueAt + 86_400_000L, trackingStartedAtMs = 0L),
         )
     }
 
     @Test
     fun statusDueSoonWithinThreeHundredKm() {
         val item = MaintenanceItem("x", "Engine", "Oil filter", "Replace", kmInterval = 3000, monthInterval = null)
-        assertEquals(MaintenanceStatus.DUE_SOON, MaintenanceEstimate.status(item, null, estimateKm = 2750.0, nowMs = 0L, baselineSetAtMs = 0L))
-        assertEquals(MaintenanceStatus.OK, MaintenanceEstimate.status(item, null, estimateKm = 2600.0, nowMs = 0L, baselineSetAtMs = 0L))
+        assertEquals(MaintenanceStatus.DUE_SOON, MaintenanceEstimate.status(item, null, estimateKm = 2750.0, nowMs = 0L, trackingStartedAtMs = 0L))
+        assertEquals(MaintenanceStatus.OK, MaintenanceEstimate.status(item, null, estimateKm = 2600.0, nowMs = 0L, trackingStartedAtMs = 0L))
     }
 
     @Test
@@ -114,8 +114,8 @@ class MaintenanceEstimateTest {
     fun remainingDaysIsDuePointMinusNow() {
         val item = MaintenanceItem("x", "Brake", "Brake fluid", "Replace", kmInterval = null, monthInterval = 1)
         val dueAt = addMonthsUtc(0L, 1)
-        assertEquals(0L, MaintenanceEstimate.remainingDays(item, null, baselineSetAtMs = 0L, nowMs = dueAt)!!)
-        assertEquals(-1L, MaintenanceEstimate.remainingDays(item, null, baselineSetAtMs = 0L, nowMs = dueAt + 86_400_000L + 1)!!)
+        assertEquals(0L, MaintenanceEstimate.remainingDays(item, null, trackingStartedAtMs = 0L, nowMs = dueAt)!!)
+        assertEquals(-1L, MaintenanceEstimate.remainingDays(item, null, trackingStartedAtMs = 0L, nowMs = dueAt + 86_400_000L + 1)!!)
     }
 
     @Test
@@ -160,5 +160,37 @@ class MaintenanceEstimateTest {
         assertEquals(emptySet<String>(), neverServiced.notifiedUnserviced)
         val serviced = MaintenanceState(0.0, 0L).withServiced("x", 1.0, 1L).withNotified("x").withServiced("x", 2.0, 2L)
         assertEquals(ItemState(2.0, 2L, notified = false), serviced.items["x"])
+    }
+
+    @Test
+    fun reBaselineKeepsNeverServicedCalendarDueFromTrackingStart() {
+        val brakeFluid = MaintenanceItem("bf", "Brake", "Brake fluid", "Replace", kmInterval = null, monthInterval = 24)
+        val rebaselined = MaintenanceState(baselineKm = 100.0, baselineSetAtMs = 0L).withBaseline(5_000.0, addMonthsUtc(0L, 12))
+        assertEquals(0L, rebaselined.trackingStartedAtMs)
+        val now = addMonthsUtc(0L, 24) + 86_400_000L
+        assertEquals(listOf(brakeFluid), MaintenanceEstimate.itemsToNotify(listOf(brakeFluid), rebaselined, estimateKm = 5_000.0, nowMs = now))
+    }
+
+    @Test
+    fun withBaselineMovesOnlyTheOdometerBaseline() {
+        val before = MaintenanceState(100.0, 0L).withServiced("oil", 50.0, 1L).withNotified("spark")
+        val after = before.withBaseline(900.0, 7L)
+        assertEquals(900.0, after.baselineKm, 1e-9)
+        assertEquals(7L, after.baselineSetAtMs)
+        assertEquals(before.items, after.items)
+        assertEquals(before.notifiedUnserviced, after.notifiedUnserviced)
+    }
+
+    @Test
+    fun noticeIsNullWhenNothingIsNewlyOverdue() {
+        assertNull(MaintenanceNotice.forItems(emptyList()))
+    }
+
+    @Test
+    fun noticeSummarizesEveryItemInOneNotification() {
+        val items = (1..37).map { MaintenanceItem("i$it", "Engine", "Item $it", "Inspect", kmInterval = 1000, monthInterval = null) }
+        val notice = MaintenanceNotice.forItems(items)!!
+        assertEquals(37, notice.count)
+        assertEquals(listOf("Item 1", "Item 2", "Item 3", "Item 4", "Item 5"), notice.names)
     }
 }

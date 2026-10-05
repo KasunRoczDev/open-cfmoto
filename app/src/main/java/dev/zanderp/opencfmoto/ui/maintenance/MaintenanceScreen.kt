@@ -34,6 +34,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import dev.zanderp.opencfmoto.BikeMemory
 import dev.zanderp.opencfmoto.R
 import dev.zanderp.opencfmoto.SavedBike
@@ -62,21 +65,28 @@ fun MaintenanceScreen(onChanged: () -> Unit) {
     val ctx = LocalContext.current
     val bike: SavedBike? = remember { BikeMemory.selected(ctx) }
     val items: List<MaintenanceItem> = remember(bike) { MaintenanceSchedule.forModel(bike?.model) }
-    val now = remember { System.currentTimeMillis() }
+    var now by remember { mutableStateOf(System.currentTimeMillis()) }
 
     var reloadTick by remember { mutableIntStateOf(0) }
     var state by remember { mutableStateOf<MaintenanceState?>(null) }
     var estimateKm by remember { mutableStateOf(0.0) }
     var loaded by remember { mutableStateOf(false) }
 
-    LaunchedEffect(bike, reloadTick) {
-        if (bike == null) { loaded = true; return@LaunchedEffect }
-        withContext(Dispatchers.IO) {
-            val s = MaintenanceStore.load(ctx.applicationContext, bike.raw)
+    // Reload every time the screen comes back (a ride may have been saved while the phone was pocketed),
+    // so the estimate, statuses and "now" are never stale when the rider re-syncs or marks something serviced.
+    val owner = LocalLifecycleOwner.current
+    LaunchedEffect(owner, bike, reloadTick) {
+        owner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            if (bike == null) { loaded = true; return@repeatOnLifecycle }
+            val (s, est) = withContext(Dispatchers.IO) {
+                val s = MaintenanceStore.load(ctx.applicationContext, bike.raw)
+                s to (if (s != null) MaintenanceEstimate.estimateKm(s, TripStore.list(ctx.applicationContext), bike.raw) else 0.0)
+            }
             state = s
-            estimateKm = if (s != null) MaintenanceEstimate.estimateKm(s, TripStore.list(ctx.applicationContext), bike.raw) else 0.0
+            estimateKm = est
+            now = System.currentTimeMillis()
+            loaded = true
         }
-        loaded = true
     }
 
     // Android 13+: ask once, the first time this screen is opened, so an overdue notification can show.
@@ -117,7 +127,7 @@ fun MaintenanceScreen(onChanged: () -> Unit) {
                     SectionLabel(category)
                     OcmCard {
                         val sorted = categoryItems.sortedBy {
-                            statusRank(MaintenanceEstimate.status(it, currentState.items[it.id], estimateKm, now, currentState.baselineSetAtMs))
+                            statusRank(MaintenanceEstimate.status(it, currentState.items[it.id], estimateKm, now, currentState.trackingStartedAtMs))
                         }
                         for (item in sorted) {
                             ItemRow(item, currentState, estimateKm, now, onClick = { serviceTarget = item })
@@ -134,7 +144,7 @@ fun MaintenanceScreen(onChanged: () -> Unit) {
             onDismiss = { showBaselineDialog = false },
             onConfirm = { km ->
                 if (bike != null) {
-                    MaintenanceStore.setBaseline(ctx.applicationContext, bike.raw, km, now)
+                    MaintenanceStore.setBaseline(ctx.applicationContext, bike.raw, km, System.currentTimeMillis())
                     reloadTick++
                     onChanged()
                 }
@@ -148,7 +158,7 @@ fun MaintenanceScreen(onChanged: () -> Unit) {
             onDismiss = { serviceTarget = null },
             onConfirm = {
                 if (bike != null) {
-                    MaintenanceStore.markServiced(ctx.applicationContext, bike.raw, item.id, estimateKm, now)
+                    MaintenanceStore.markServiced(ctx.applicationContext, bike.raw, item.id, estimateKm, System.currentTimeMillis())
                     reloadTick++
                     onChanged()
                 }
@@ -167,13 +177,13 @@ private fun statusRank(status: MaintenanceStatus): Int = when (status) {
 @Composable
 private fun ItemRow(item: MaintenanceItem, state: MaintenanceState, estimateKm: Double, nowMs: Long, onClick: () -> Unit) {
     val itemState = state.items[item.id]
-    val status = MaintenanceEstimate.status(item, itemState, estimateKm, nowMs, state.baselineSetAtMs)
+    val status = MaintenanceEstimate.status(item, itemState, estimateKm, nowMs, state.trackingStartedAtMs)
     val (kind, label) = when (status) {
         MaintenanceStatus.OK -> StatusKind.LIVE to stringResource(R.string.maintenance_status_ok)
         MaintenanceStatus.DUE_SOON -> StatusKind.BUSY to stringResource(R.string.maintenance_status_due_soon)
         MaintenanceStatus.OVERDUE -> StatusKind.ERROR to stringResource(R.string.maintenance_status_overdue)
     }
-    val detail = dueDetailText(item, itemState, estimateKm, nowMs, state.baselineSetAtMs)
+    val detail = dueDetailText(item, itemState, estimateKm, nowMs, state.trackingStartedAtMs)
     Column(Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 8.dp)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
@@ -187,9 +197,9 @@ private fun ItemRow(item: MaintenanceItem, state: MaintenanceState, estimateKm: 
 }
 
 @Composable
-private fun dueDetailText(item: MaintenanceItem, itemState: ItemState?, estimateKm: Double, nowMs: Long, baselineSetAtMs: Long): String? {
+private fun dueDetailText(item: MaintenanceItem, itemState: ItemState?, estimateKm: Double, nowMs: Long, trackingStartedAtMs: Long): String? {
     val remKm = MaintenanceEstimate.remainingKm(item, itemState, estimateKm)
-    val remDays = MaintenanceEstimate.remainingDays(item, itemState, baselineSetAtMs, nowMs)
+    val remDays = MaintenanceEstimate.remainingDays(item, itemState, trackingStartedAtMs, nowMs)
     // Show the axis that's closest to due relative to its due-soon window, so the text explains the pill
     // (e.g. 250 km left on a 2-year item reads "in 250 km", not "in 600 days"). Items always have one axis.
     val pick = listOfNotNull(

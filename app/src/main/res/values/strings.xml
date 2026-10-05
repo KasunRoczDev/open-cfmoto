@@ -793,4 +793,9 @@
     <string name="maintenance_notif_channel">Maintenance reminders</string>
     <string name="maintenance_notif_title">Maintenance due</string>
     <string name="maintenance_notif_text">%1$s is due or overdue</string>
+    <plurals name="maintenance_notif_text_many">
+        <item quantity="one">%1$d item is due or overdue</item>
+        <item quantity="other">%1$d items are due or overdue</item>
+    </plurals>
+    <string name="maintenance_notif_more">+%1$d more</string>
 </resources>

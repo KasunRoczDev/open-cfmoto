@@ -29,10 +29,11 @@ object MaintenanceEstimate {
         return if (last != null) last + interval else (item.firstDueKm ?: interval).toDouble()
     }
 
-    /** Next calendar due-point, or null when the item has no month interval. */
-    fun dueAtMs(item: MaintenanceItem, itemState: ItemState?, baselineSetAtMs: Long): Long? {
+    /** Next calendar due-point, or null when the item has no month interval. A never-serviced item counts
+     *  from [trackingStartedAtMs] (the first baseline), so later odometer re-syncs don't move it. */
+    fun dueAtMs(item: MaintenanceItem, itemState: ItemState?, trackingStartedAtMs: Long): Long? {
         val interval = item.monthInterval ?: return null
-        val from = itemState?.lastServicedAtMs ?: baselineSetAtMs
+        val from = itemState?.lastServicedAtMs ?: trackingStartedAtMs
         return addMonthsUtc(from, interval)
     }
 
@@ -41,12 +42,12 @@ object MaintenanceEstimate {
         dueKm(item, itemState)?.let { it - estimateKm }
 
     /** Days left until due (negative = overdue), or null when the item has no month interval. */
-    fun remainingDays(item: MaintenanceItem, itemState: ItemState?, baselineSetAtMs: Long, nowMs: Long): Long? =
-        dueAtMs(item, itemState, baselineSetAtMs)?.let { (it - nowMs) / DAY_MS }
+    fun remainingDays(item: MaintenanceItem, itemState: ItemState?, trackingStartedAtMs: Long, nowMs: Long): Long? =
+        dueAtMs(item, itemState, trackingStartedAtMs)?.let { (it - nowMs) / DAY_MS }
 
-    fun status(item: MaintenanceItem, itemState: ItemState?, estimateKm: Double, nowMs: Long, baselineSetAtMs: Long): MaintenanceStatus {
+    fun status(item: MaintenanceItem, itemState: ItemState?, estimateKm: Double, nowMs: Long, trackingStartedAtMs: Long): MaintenanceStatus {
         val dueKm = dueKm(item, itemState)
-        val dueAt = dueAtMs(item, itemState, baselineSetAtMs)
+        val dueAt = dueAtMs(item, itemState, trackingStartedAtMs)
         val overdue = (dueKm != null && estimateKm >= dueKm) || (dueAt != null && nowMs >= dueAt)
         if (overdue) return MaintenanceStatus.OVERDUE
         val soonByKm = dueKm != null && estimateKm >= dueKm - DUE_SOON_KM
@@ -62,7 +63,7 @@ object MaintenanceEstimate {
     fun itemsToNotify(items: List<MaintenanceItem>, state: MaintenanceState, estimateKm: Double, nowMs: Long): List<MaintenanceItem> =
         visibleItems(items, state.items).filter { item ->
             !state.isNotified(item.id) &&
-                status(item, state.items[item.id], estimateKm, nowMs, state.baselineSetAtMs) == MaintenanceStatus.OVERDUE
+                status(item, state.items[item.id], estimateKm, nowMs, state.trackingStartedAtMs) == MaintenanceStatus.OVERDUE
         }
 
     private fun addMonthsUtc(fromMs: Long, months: Int): Long {
