@@ -21,6 +21,9 @@ data class Trip(
     val movingTimeMs: Long,
     val maxSpeedMs: Float,
     val points: List<TrackPoint>,
+    /** The bike selected in Garage when this ride was recorded; null for rides saved before this
+     *  field existed, or when no bike was selected. */
+    val bikeRaw: String? = null,
 ) {
     val distanceKm: Double get() = distanceMeters / 1000.0
     val maxKmh: Int get() = (maxSpeedMs * 3.6f).toInt()

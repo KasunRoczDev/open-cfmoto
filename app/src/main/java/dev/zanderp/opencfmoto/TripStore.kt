@@ -27,6 +27,7 @@ object TripStore {
             .put("distanceMeters", trip.distanceMeters)
             .put("movingTimeMs", trip.movingTimeMs)
             .put("maxSpeedMs", trip.maxSpeedMs.toDouble())
+        trip.bikeRaw?.let { obj.put("bikeRaw", it) }
         val pts = JSONArray()
         for (p in trip.points) {
             pts.put(JSONArray().put(p.lat).put(p.lon).put(p.time).put(p.speedMs.toDouble()))
@@ -73,6 +74,7 @@ object TripStore {
             movingTimeMs = o.optLong("movingTimeMs"),
             maxSpeedMs = o.optDouble("maxSpeedMs").toFloat(),
             points = points,
+            bikeRaw = o.optString("bikeRaw").takeIf { it.isNotBlank() },
         )
     }.getOrNull()
 }

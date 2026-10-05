@@ -168,6 +168,7 @@ class TripRecorder(private val appContext: Context) : LocationListener {
             movingTimeMs = movingTimeMs,
             maxSpeedMs = maxSpeedMs,
             points = ArrayList(points),
+            bikeRaw = BikeMemory.selected(appContext)?.raw,
         )
         TripStore.save(appContext, trip)
         LogBus.log("[trip] saved ride ${trip.distanceText()} in ${trip.durationText()}")
