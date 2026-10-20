@@ -31,6 +31,7 @@ object FuelStore {
 
     private fun write(ctx: Context, bikeRaw: String, entries: List<FuelEntry>) {
         runCatching { file(ctx, bikeRaw).writeText(FuelCodec.encode(entries.sortedBy { it.atMs })) }
+        dev.zanderp.opencfmoto.widget.RideWidget.requestUpdate(ctx)
     }
 
     /** The selected bike's fuel status (reads trips from disk — call off the main thread). */

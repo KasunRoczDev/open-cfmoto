@@ -143,6 +143,16 @@
                 <action android:name="android.bluetooth.device.action.ACL_CONNECTED" />
             </intent-filter>
         </receiver>
+        <receiver
+            android:name=".widget.RideWidget"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/ride_widget_info" />
+        </receiver>
         <service
             android:name=".BikeRideService"
             android:exported="false"

@@ -29,6 +29,7 @@ object MaintenanceStore {
 
     fun save(ctx: Context, bikeRaw: String, state: MaintenanceState) {
         runCatching { file(ctx, bikeRaw).writeText(MaintenanceCodec.encode(state)) }
+        dev.zanderp.opencfmoto.widget.RideWidget.requestUpdate(ctx)
     }
 
     /** Sets (or re-sets) the baseline without touching any item's service history. */

@@ -786,6 +786,17 @@
     <string name="forest_note">Trees grow from smooth throttle, smooth braking, steady speed and riding at 30–70 km/h, while connected with the side panel on. Rough riding pauses growth — it never takes a tree away.</string>
     <string name="ui_me_maintenance">Maintenance</string>
     <string name="ui_me_fuel">Fuel</string>
+    <string name="widget_description">Fuel range, last ride and next service</string>
+    <string name="widget_range">Range</string>
+    <string name="widget_last_ride">Last ride</string>
+    <string name="widget_service">Next service</string>
+    <string name="widget_service_setup">Set odometer in app</string>
+    <string name="widget_service_km">%1$s in %2$d km</string>
+    <string name="widget_service_days">%1$s in %2$d days</string>
+    <plurals name="widget_service_overdue">
+        <item quantity="one">%d item overdue</item>
+        <item quantity="other">%d items overdue</item>
+    </plurals>
     <string name="ui_trips_report">Weekly report</string>
     <string name="ui_trips_report_desc">Distance, eco riding, fuel and your best ride — week by week</string>
     <string name="report_title">Weekly report</string>

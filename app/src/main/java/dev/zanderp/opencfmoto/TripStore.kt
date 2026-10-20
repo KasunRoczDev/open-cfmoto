@@ -34,6 +34,7 @@ object TripStore {
         }
         obj.put("points", pts)
         runCatching { File(dir(ctx), "${trip.id}.json").writeText(obj.toString()) }
+        dev.zanderp.opencfmoto.widget.RideWidget.requestUpdate(ctx)
     }
 
     /** All saved trips, most recent first. */
