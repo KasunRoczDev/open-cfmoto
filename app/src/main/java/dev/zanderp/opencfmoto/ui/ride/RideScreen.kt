@@ -3,6 +3,7 @@
 // Part of OpenCfMoto. Free software under the GNU AGPL v3 or later; see LICENSE and NOTICE.
 package dev.zanderp.opencfmoto.ui.ride
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -37,6 +38,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -79,7 +81,7 @@ fun RideScreen(
                 style = OcmType.body, color = c.text2, maxLines = 1,
             )
         }
-        Hero(heroText(hero.model, s.bikeName), hero.photoPath)
+        Hero(heroText(hero.model, s.bikeName), hero.model, hero.photoPath)
         PrimaryButton(
             text = when (s.primary) {
                 PrimaryAction.STOP -> stringResource(R.string.main_stop)
@@ -107,9 +109,46 @@ fun RideScreen(
     }
 }
 
-/** Big faded model name behind the rider's photo (or a neutral bike drawing). */
+/**
+ * Big faded model name behind the bike: the bundled studio render when we ship one for the model
+ * (like the official app's vehicle page), else the rider's photo, else a neutral bike drawing.
+ */
 @Composable
-private fun Hero(text: String, photoPath: String?) {
+private fun Hero(text: String, model: String?, photoPath: String?) {
+    val render = stockBikeRender(model)
+    if (render != null) RenderHero(text, render) else PhotoHero(text, photoPath)
+}
+
+/** Official-app look: the model stacked huge and faded top-left, the render standing over it. */
+@Composable
+private fun RenderHero(text: String, @DrawableRes render: Int) {
+    val c = Ocm.colors
+    val faded = c.text.copy(alpha = 0.12f)
+    Box(Modifier.fillMaxWidth().height(260.dp)) {
+        val lines = heroLines(text)
+        if (lines != null) {
+            Column(Modifier.align(Alignment.TopStart)) {
+                Text(lines.first, style = OcmType.heroBackdrop, color = faded, maxLines = 1)
+                Text(lines.second, style = OcmType.heroBackdrop, color = faded, maxLines = 1)
+            }
+        } else {
+            BasicText(
+                text,
+                modifier = Modifier.fillMaxWidth().align(Alignment.TopStart),
+                style = OcmType.heroModel.copy(color = faded),
+                maxLines = 1,
+                autoSize = TextAutoSize.StepBased(minFontSize = 28.sp, maxFontSize = 72.sp),
+            )
+        }
+        Image(
+            painterResource(render), contentDescription = text, contentScale = ContentScale.Fit,
+            modifier = Modifier.align(Alignment.BottomEnd).fillMaxWidth(0.88f),
+        )
+    }
+}
+
+@Composable
+private fun PhotoHero(text: String, photoPath: String?) {
     val c = Ocm.colors
     val photo by produceState<ImageBitmap?>(null, photoPath) {
         value = photoPath?.let { p -> withContext(Dispatchers.IO) { decodeHeroPhoto(p)?.asImageBitmap() } }

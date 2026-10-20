@@ -48,6 +48,8 @@ object Ocm {
 /** Type scale (spec §3.2). */
 object OcmType {
     val heroModel = TextStyle(fontSize = 72.sp, fontWeight = FontWeight.ExtraBold, letterSpacing = (-2).sp, lineHeight = 70.sp)
+    /** The stacked model lines behind a stock bike render (official-app style). */
+    val heroBackdrop = TextStyle(fontSize = 108.sp, fontWeight = FontWeight.Black, letterSpacing = (-3).sp, lineHeight = 100.sp)
     val screenTitle = TextStyle(fontSize = 24.sp, fontWeight = FontWeight.SemiBold)
     val title = TextStyle(fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
     val body = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Normal, lineHeight = 21.sp)
