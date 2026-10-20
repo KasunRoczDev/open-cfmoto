@@ -63,6 +63,18 @@ object MetricsStrip {
     /** Range when this session started (loaded off-thread); the live value subtracts [sessionKm]. */
     @Volatile private var fuelRangeAtStartKm: Double? = null
     @Volatile private var sessionKm = 0.0
+    // Weather line (SIDE mode): fetched off-thread, at most every WEATHER_EVERY_MS or WEATHER_MOVE_M.
+    @Volatile private var weatherOn = false
+    @Volatile private var weather: dev.zanderp.opencfmoto.weather.WeatherHint? = null
+    @Volatile private var weatherAtMs = 0L
+    @Volatile private var weatherFetching = false
+    private var lastWeatherTryMs = 0L                 // main-looper (GPS) thread only
+    private var weatherLat = Double.NaN               // main-looper (GPS) thread only
+    private var weatherLon = Double.NaN
+    private const val WEATHER_EVERY_MS = 10 * 60_000L
+    private const val WEATHER_RETRY_MS = 2 * 60_000L
+    private const val WEATHER_MOVE_M = 5_000f
+    private const val WEATHER_STALE_MS = 30 * 60_000L
     @Volatile private var noGps = false
     private var lastEcoSaveMs = 0L                   // main-looper (GPS) thread only
     private var lastSide: SidePanelView? = null      // metrics-strip thread only
@@ -97,6 +109,12 @@ object MetricsStrip {
             ecoHint = null
             fuelRangeAtStartKm = null
             sessionKm = 0.0
+            weatherOn = AppSettings.weatherOnDash(app)
+            weather = null
+            weatherAtMs = 0L
+            lastWeatherTryMs = 0L
+            weatherLat = Double.NaN
+            weatherLon = Double.NaN
             lastEcoSaveMs = SystemClock.elapsedRealtime()
         }
         lastSide = null
@@ -185,6 +203,7 @@ object MetricsStrip {
             ecoPercent = eco.ecoPercent
             ecoHint = ecoBand.hint(if (loc.hasSpeed()) loc.speed else null, ecoHint)
             sessionKm = eco.movingMeters / 1000.0
+            maybeFetchWeather(loc)
             val month = EcoForest.monthKey(System.currentTimeMillis(), java.util.TimeZone.getDefault())
             val (next, done) = forest.add(step.ecoMeters, step.movingMeters, month)
             forest = next
@@ -254,6 +273,41 @@ object MetricsStrip {
         }
     }
 
+    /** Rain now / soon / up the road, from Open-Meteo. Main-looper (GPS) thread; the request runs on its own thread. */
+    private fun maybeFetchWeather(loc: Location) {
+        if (!weatherOn || weatherFetching) return
+        val now = SystemClock.elapsedRealtime()
+        val moved = if (weatherLat.isNaN()) Float.MAX_VALUE
+            else FloatArray(1).also { Location.distanceBetween(weatherLat, weatherLon, loc.latitude, loc.longitude, it) }[0]
+        if (lastWeatherTryMs != 0L && now - lastWeatherTryMs < WEATHER_EVERY_MS && moved < WEATHER_MOVE_M) return
+        lastWeatherTryMs = now
+        weatherLat = loc.latitude
+        weatherLon = loc.longitude
+        val here = loc.latitude to loc.longitude
+        // Only look up the road when actually riding somewhere — a parked bike's bearing is noise.
+        val ahead = if (loc.hasBearing() && loc.hasSpeed() && loc.speed > 3f) {
+            dev.zanderp.opencfmoto.weather.RainAhead.aheadOf(loc.latitude, loc.longitude, loc.bearing.toDouble())
+        } else null
+        weatherFetching = true
+        kotlin.concurrent.thread(name = "strip-weather", isDaemon = true) {
+            try {
+                val url = dev.zanderp.opencfmoto.weather.OpenMeteo.url(listOfNotNull(here, ahead))
+                val pts = dev.zanderp.opencfmoto.weather.OpenMeteo.parse(AppHttp.getText(url))
+                val hint = dev.zanderp.opencfmoto.weather.RainAhead.decide(pts.first(), pts.getOrNull(1), System.currentTimeMillis())
+                weather = hint
+                weatherAtMs = SystemClock.elapsedRealtime()
+                log("[WEATHER] " + dev.zanderp.opencfmoto.weather.RainAhead.text(hint).ifEmpty { "no data" })
+                val ex = synchronized(this) { executor }
+                try { ex?.execute { refresh() } } catch (_: RejectedExecutionException) {}
+            } catch (e: Exception) {
+                log("[WEATHER] fetch failed: $e")
+                lastWeatherTryMs = SystemClock.elapsedRealtime() - WEATHER_EVERY_MS + WEATHER_RETRY_MS   // retry sooner
+            } finally {
+                weatherFetching = false
+            }
+        }
+    }
+
     /** "⛽ ~185 km" / "⛽ ~115 mi" — whole units, so the panel redraws only when the number changes. */
     internal fun fuelText(rangeKm: Double, units: MapUnits): String =
         if (units == MapUnits.IMPERIAL) "⛽ ~${(rangeKm / 1.609344).toInt()} mi" else "⛽ ~${rangeKm.toInt()} km"
@@ -263,6 +317,10 @@ object MetricsStrip {
         rangeKm < dev.zanderp.opencfmoto.fuel.FuelEstimate.LOW_RANGE_KM -> FuelLevel.LOW
         else -> FuelLevel.OK
     }
+
+    /** The last weather, unless it's too old to trust. */
+    private fun freshWeather(): dev.zanderp.opencfmoto.weather.WeatherHint? =
+        weather?.takeIf { SystemClock.elapsedRealtime() - weatherAtMs < WEATHER_STALE_MS }
 
     private fun refreshSide(out: (Bitmap) -> Unit) {
         val d = directions
@@ -284,6 +342,8 @@ object MetricsStrip {
             ecoHint = ecoHint,
             fuelText = fuelRangeAtStartKm?.let { start -> fuelText((start - sessionKm).coerceAtLeast(0.0), units) },
             fuelLevel = fuelRangeAtStartKm?.let { start -> fuelLevel((start - sessionKm).coerceAtLeast(0.0)) } ?: FuelLevel.OK,
+            weatherText = freshWeather()?.let { dev.zanderp.opencfmoto.weather.RainAhead.text(it) }?.ifEmpty { null },
+            weatherRain = freshWeather()?.kind?.let { it != dev.zanderp.opencfmoto.weather.WeatherKind.DRY } ?: false,
         )
         if (v == lastSide) return
         lastSide = v

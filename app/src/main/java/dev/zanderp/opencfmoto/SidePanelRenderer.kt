@@ -31,6 +31,10 @@ data class SidePanelView(
     val fuelText: String? = null,
     /** How worried to be about [fuelText]. */
     val fuelLevel: FuelLevel = FuelLevel.OK,
+    /** "🌧 Rain in 35 min" / "☁ 31°"; null when off or not fetched yet. */
+    val weatherText: String? = null,
+    /** Rain now, soon or ahead — drawn in blue to stand out. */
+    val weatherRain: Boolean = false,
 )
 
 enum class FuelLevel { OK, LOW, CRITICAL }
@@ -46,6 +50,7 @@ object SidePanelRenderer {
     private const val ECO = 0xFF34D399.toInt()
     private const val EASE_OFF = 0xFFFBBF24.toInt()
     private const val FUEL_CRITICAL = 0xFFF87171.toInt()
+    private const val RAIN = 0xFF60A5FA.toInt()
 
     private val big = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.WHITE; typeface = Typeface.DEFAULT_BOLD }
     private val small = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = GREY }
@@ -132,6 +137,16 @@ object SidePanelRenderer {
         if (!v.noGps) drawHint(c, v, x, top + size * 0.98f, w - x - pad)
         val fuelY = top + size * 0.98f + small.textSize * 1.4f
         if (fuelY <= bottom) drawFuel(c, v, x, fuelY, w - x - pad)
+        val weatherY = fuelY + (if (v.fuelText != null) small.textSize * 1.4f else 0f)
+        if (weatherY <= bottom) drawWeather(c, v, x, weatherY, w - x - pad)
+    }
+
+    private fun drawWeather(c: Canvas, v: SidePanelView, x: Float, baseline: Float, width: Float) {
+        val text = v.weatherText ?: return
+        val was = small.color
+        small.color = if (v.weatherRain) RAIN else GREY
+        c.drawText(MetricsStripRenderer.fit(text, small, width), x, baseline, small)
+        small.color = was
     }
 
     /** "⛽ ~185 km": grey normally, amber when low, red when nearly empty. Skipped with no estimate. */
@@ -161,7 +176,9 @@ object SidePanelRenderer {
     }
 
     private fun drawEcoFull(c: Canvas, v: SidePanelView, w: Int, h: Int, pad: Float) {
-        val size = minOf(w - 2 * pad, h * 0.5f)
+        // Each extra line (fuel, weather) borrows a little of the tree so the panel still fits.
+        val extraLines = listOfNotNull(v.fuelText, v.weatherText).size
+        val size = minOf(w - 2 * pad, h * (0.5f - 0.05f * extraLines))
         TreeDrawing.draw(c, v.stage, w / 2f, pad + size, size)
         var y = pad + size + pad
         small.textSize = SidePanelLayout.textPx(w, h, 0.045f, 0.075f)
@@ -190,6 +207,10 @@ object SidePanelRenderer {
         if (v.fuelText != null) {
             y += small.textSize * 1.6f
             drawFuel(c, v, w / 2f, y, w - 2 * pad)
+        }
+        if (v.weatherText != null) {
+            y += small.textSize * 1.6f
+            drawWeather(c, v, w / 2f, y, w - 2 * pad)
         }
         big.textAlign = Paint.Align.LEFT
         small.textAlign = Paint.Align.LEFT

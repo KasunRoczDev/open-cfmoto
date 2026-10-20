@@ -797,6 +797,8 @@
         <item quantity="one">%d item overdue</item>
         <item quantity="other">%d items overdue</item>
     </plurals>
+    <string name="setup_weather">Rain alerts on the dash</string>
+    <string name="setup_weather_desc">Shows “Rain in 20 min”, “Rain ahead” or the temperature in the side panel. Sends your location, rounded to about 1 km, to the free Open-Meteo weather service every 10 minutes while riding.</string>
     <string name="ui_trips_report">Weekly report</string>
     <string name="ui_trips_report_desc">Distance, eco riding, fuel and your best ride — week by week</string>
     <string name="report_title">Weekly report</string>

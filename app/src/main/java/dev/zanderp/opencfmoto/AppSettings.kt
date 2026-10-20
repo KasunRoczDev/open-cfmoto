@@ -41,6 +41,7 @@ object AppSettings {
     private const val KEY_BT_RIDE_MAC = "bt_ride_mac"
     private const val KEY_BT_RIDE_NAME = "bt_ride_name"
     private const val KEY_LAST_BACKUP_MS = "last_full_backup_ms"
+    private const val KEY_WEATHER = "weather_on_dash"
 
     private fun prefs(ctx: Context) =
         ctx.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
@@ -194,6 +195,10 @@ object AppSettings {
             .putString(KEY_BT_RIDE_NAME, name?.ifBlank { null })
             .apply()
     }
+
+    /** Rain / temperature line on the dash side panel (Open-Meteo, location rounded to ~1 km). Default on. */
+    fun weatherOnDash(ctx: Context): Boolean = prefs(ctx).getBoolean(KEY_WEATHER, true)
+    fun setWeatherOnDash(ctx: Context, on: Boolean) = prefs(ctx).edit().putBoolean(KEY_WEATHER, on).apply()
 
     /** When the rider last saved a full backup (Me ▸ Backup & restore); null = never. */
     fun lastBackupMs(ctx: Context): Long? = prefs(ctx).getLong(KEY_LAST_BACKUP_MS, 0L).takeIf { it > 0 }

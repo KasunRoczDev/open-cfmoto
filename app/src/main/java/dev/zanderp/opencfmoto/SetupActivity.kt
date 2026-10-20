@@ -144,6 +144,8 @@ class SetupActivity : AppCompatActivity() {
         findViewById<MaterialButton>(R.id.strip_mode_side).setOnClickListener { setStripMode(StripMode.SIDE) }
         findViewById<MaterialButton>(R.id.strip_side_left).setOnClickListener { setSideLeft(true) }
         findViewById<MaterialButton>(R.id.strip_side_right).setOnClickListener { setSideLeft(false) }
+        findViewById<MaterialButton>(R.id.weather_on).setOnClickListener { AppSettings.setWeatherOnDash(this, true); refreshOptions() }
+        findViewById<MaterialButton>(R.id.weather_off).setOnClickListener { AppSettings.setWeatherOnDash(this, false); refreshOptions() }
         findViewById<MaterialButton>(R.id.strip_cell_speed).setOnClickListener { toggleStripCell(StripCell.SPEED) }
         findViewById<MaterialButton>(R.id.strip_cell_altitude).setOnClickListener { toggleStripCell(StripCell.ALTITUDE) }
         findViewById<MaterialButton>(R.id.strip_cell_heading).setOnClickListener { toggleStripCell(StripCell.HEADING) }
@@ -801,6 +803,9 @@ class SetupActivity : AppCompatActivity() {
         highlight(AppSettings.keepWifiAfterDisconnect(this),
             R.id.keepwifi_on to true,
             R.id.keepwifi_off to false)
+        highlight(AppSettings.weatherOnDash(this),
+            R.id.weather_on to true,
+            R.id.weather_off to false)
         highlight(AppSettings.logTrips(this),
             R.id.logtrips_on to true,
             R.id.logtrips_off to false)

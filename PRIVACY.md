@@ -83,6 +83,23 @@ control it:
 
 ---
 
+## Weather on the dash (optional)
+
+When **Rain alerts on the dash** is on (Setup ▸ side panel, on by default) and
+the side panel is showing, the app asks the free [Open-Meteo](https://open-meteo.com)
+weather service for current conditions and the next two hours of rain, about
+every 10 minutes (or every 5 km) while riding.
+
+| Sent | Not sent |
+| --- | --- |
+| Your position **rounded to 2 decimals (~1 km)**, plus one point ~10 km ahead in your direction of travel | Your exact position, route or trip history |
+| The app's User-Agent (app name and version) | Any account, bike or phone identifier |
+
+Open-Meteo's own privacy policy applies to the request. Turn the toggle **Off**
+to stop all weather requests.
+
+---
+
 ## Anonymous telemetry (optional)
 
 When **Anonymous usage & crash reports** is on (Setup → Privacy):
