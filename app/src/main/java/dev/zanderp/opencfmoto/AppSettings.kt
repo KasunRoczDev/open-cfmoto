@@ -40,6 +40,7 @@ object AppSettings {
     private const val KEY_BT_RIDE_LOG = "bt_ride_log"
     private const val KEY_BT_RIDE_MAC = "bt_ride_mac"
     private const val KEY_BT_RIDE_NAME = "bt_ride_name"
+    private const val KEY_LAST_BACKUP_MS = "last_full_backup_ms"
 
     private fun prefs(ctx: Context) =
         ctx.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
@@ -193,6 +194,10 @@ object AppSettings {
             .putString(KEY_BT_RIDE_NAME, name?.ifBlank { null })
             .apply()
     }
+
+    /** When the rider last saved a full backup (Me ▸ Backup & restore); null = never. */
+    fun lastBackupMs(ctx: Context): Long? = prefs(ctx).getLong(KEY_LAST_BACKUP_MS, 0L).takeIf { it > 0 }
+    fun setLastBackupMs(ctx: Context, ms: Long) = prefs(ctx).edit().putLong(KEY_LAST_BACKUP_MS, ms).apply()
 
     fun applyToHolder(ctx: Context) {
         BikeProfileHolder.forceNonTouch = forceNonTouch(ctx)

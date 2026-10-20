@@ -110,7 +110,7 @@ fun AppShell(c: ConnectionController, searchFocusTick: Int, openMaintenanceTick:
         bottomBar = {
             NavigationBar(containerColor = Ocm.colors.surface) {
                 for (t in Tabs) {
-                    val selected = route == t.route || (t.route == "me" && (route == "logs" || route == "forest" || route == "maintenance" || route == "fuel"))
+                    val selected = route == t.route || (t.route == "me" && (route == "logs" || route == "forest" || route == "maintenance" || route == "fuel" || route == "backup"))
                     NavigationBarItem(
                         selected = selected,
                         onClick = {
@@ -161,6 +161,12 @@ fun AppShell(c: ConnectionController, searchFocusTick: Int, openMaintenanceTick:
                     onGarage = { GarageActivity.start(ctx) }, onSettings = { SetupActivity.start(ctx) }, onForest = { nav.navigate("forest") },
                     onMaintenance = { nav.navigate("maintenance") }, maintenance = maintenance,
                     onFuel = { nav.navigate("fuel") }, fuelRangeKm = fuelRangeKm,
+                    onBackup = { nav.navigate("backup") },
+                    lastBackupText = remember(route) {
+                        dev.zanderp.opencfmoto.AppSettings.lastBackupMs(ctx)?.let {
+                            java.text.DateFormat.getDateInstance(java.text.DateFormat.MEDIUM).format(java.util.Date(it))
+                        }
+                    },
                     onLogs = { nav.navigate("logs") }, onReport = c::reportProblem, onUpdate = c::checkUpdateManual,
                     onAbout = { AboutActivity.start(ctx) }, onDonate = c::donate,
                 )
@@ -172,6 +178,7 @@ fun AppShell(c: ConnectionController, searchFocusTick: Int, openMaintenanceTick:
             composable("fuel") {
                 dev.zanderp.opencfmoto.ui.fuel.FuelScreen(onChanged = { heroTick++ })
             }
+            composable("backup") { dev.zanderp.opencfmoto.ui.backup.BackupScreen() }
             composable("logs") {
                 LogsScreen(
                     onShare = c::shareLog,
