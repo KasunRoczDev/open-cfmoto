@@ -13,9 +13,10 @@ data class EcoStep(val ecoMeters: Double, val movingMeters: Double)
 
 /**
  * Live eco-riding decision per GPS fix (spec §2.2). Pure — unit-tested. One instance per ride/session.
- * A second is eco when moving, gentle (|a| < 1.5 m/s²), steady (swing < 10 km/h over 10 s) and in 30–70 km/h.
+ * A second is eco when moving, gentle (|a| < 1.5 m/s²), steady (swing < 10 km/h over 10 s) and inside [band]
+ * (the bike model's [EcoBand]; 30–70 km/h when we have none).
  */
-class EcoScorer {
+class EcoScorer(private val band: EcoBand = EcoBands.DEFAULT) {
     var ecoMeters = 0.0
         private set
     var movingMeters = 0.0
@@ -51,7 +52,7 @@ class EcoScorer {
         val moving = speedMs >= MOVING_MS
         if (!moving) return EcoStep(0.0, 0.0)
         movingMeters += dist
-        val eco = abs(acc) < MAX_ACC && swing < MAX_SWING_MS && speedMs >= BAND_LOW_MS - EPS && speedMs <= BAND_HIGH_MS + EPS
+        val eco = abs(acc) < MAX_ACC && swing < MAX_SWING_MS && speedMs >= band.lowMs - EPS && speedMs <= band.highMs + EPS
         if (!eco) return EcoStep(0.0, dist)
         ecoMeters += dist
         return EcoStep(dist, dist)
@@ -61,8 +62,6 @@ class EcoScorer {
         const val MOVING_MS = 3f / 3.6f
         const val MAX_ACC = 1.5
         const val MAX_SWING_MS = 10f / 3.6f
-        const val BAND_LOW_MS = 30f / 3.6f
-        const val BAND_HIGH_MS = 70f / 3.6f
         const val WINDOW_MS = 10_000L
         const val GAP_S = 5.0
         const val MIN_DT_S = 1.0

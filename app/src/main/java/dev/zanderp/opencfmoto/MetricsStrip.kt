@@ -58,6 +58,8 @@ object MetricsStrip {
     @Volatile private var forest = EcoForest()
     private var eco = EcoScorer()                    // main-looper (GPS) thread only
     @Volatile private var ecoPercent: Int? = null
+    @Volatile private var ecoBand = EcoBands.DEFAULT
+    @Volatile private var ecoHint: EcoHint? = null
     @Volatile private var noGps = false
     private var lastEcoSaveMs = 0L                   // main-looper (GPS) thread only
     private var lastSide: SidePanelView? = null      // metrics-strip thread only
@@ -86,8 +88,10 @@ object MetricsStrip {
         appCtx = app
         if (mode == StripMode.SIDE) {
             forest = EcoStore.load(app)
-            eco = EcoScorer()
+            ecoBand = EcoBands.forModel(BikeMemory.selected(app)?.model)
+            eco = EcoScorer(ecoBand)
             ecoPercent = null
+            ecoHint = null
             lastEcoSaveMs = SystemClock.elapsedRealtime()
         }
         lastSide = null
@@ -162,6 +166,7 @@ object MetricsStrip {
             // No speed in this fix → skip it (NaN), never score it as a stop.
             val step = eco.onFix(if (loc.hasSpeed()) loc.speed else Float.NaN, now)
             ecoPercent = eco.ecoPercent
+            ecoHint = ecoBand.hint(if (loc.hasSpeed()) loc.speed else null, ecoHint)
             val month = EcoForest.monthKey(System.currentTimeMillis(), java.util.TimeZone.getDefault())
             val (next, done) = forest.add(step.ecoMeters, step.movingMeters, month)
             forest = next
@@ -245,6 +250,10 @@ object MetricsStrip {
             ecoPercent = ecoPercent,
             treeNumber = f.trees + 1,
             noGps = noGps,
+            ecoBand = ecoBand.speedLabel(units),
+            ecoMax = ecoBand.maxLabel(units),
+            ecoRpm = ecoBand.rpmLabel(),
+            ecoHint = ecoHint,
         )
         if (v == lastSide) return
         lastSide = v

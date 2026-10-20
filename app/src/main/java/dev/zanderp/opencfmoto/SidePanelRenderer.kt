@@ -19,6 +19,14 @@ data class SidePanelView(
     val ecoPercent: Int?,
     val treeNumber: Int,
     val noGps: Boolean,
+    /** The model's eco speed band, e.g. "40–60 km/h". */
+    val ecoBand: String,
+    /** The band's top speed, e.g. "60 km/h" (the "Ease off" line). */
+    val ecoMax: String,
+    /** Spec-derived engine-speed reference for that band, e.g. "~5–6.5k rpm"; null when unknown. */
+    val ecoRpm: String?,
+    /** Live speed against the band; null when stopped or no speed. */
+    val ecoHint: EcoHint?,
 )
 
 /**
@@ -30,6 +38,7 @@ object SidePanelRenderer {
     private const val DIM = 0xFF555555.toInt()
     private const val TRACK = 0xFF1A1A1A.toInt()
     private const val ECO = 0xFF34D399.toInt()
+    private const val EASE_OFF = 0xFFFBBF24.toInt()
 
     private val big = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.WHITE; typeface = Typeface.DEFAULT_BOLD }
     private val small = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = GREY }
@@ -113,6 +122,20 @@ object SidePanelRenderer {
         val label = if (v.noGps) "No GPS" else "Eco ${v.ecoPercent?.let { "$it%" } ?: "—"} · ${v.stage}/5"
         c.drawText(MetricsStripRenderer.fit(label, small, w - x - pad), x, top + size * 0.4f, small)
         drawBar(c, x, top + size * 0.6f, w - x - pad, size * 0.1f, v.progress)
+        if (!v.noGps) drawHint(c, v, x, top + size * 0.98f, w - x - pad)
+    }
+
+    /** The live eco-speed coaching line: green inside the band, amber "Ease off" above it, grey otherwise. */
+    private fun drawHint(c: Canvas, v: SidePanelView, x: Float, baseline: Float, width: Float) {
+        val (text, color) = when (v.ecoHint) {
+            EcoHint.IN_BAND -> "✓ ${v.ecoBand}" to ECO
+            EcoHint.ABOVE -> "Ease off ≤${v.ecoMax}" to EASE_OFF
+            EcoHint.BELOW, null -> "Eco ${v.ecoBand}" to GREY
+        }
+        val was = small.color
+        small.color = color
+        c.drawText(MetricsStripRenderer.fit(text, small, width), x, baseline, small)
+        small.color = was
     }
 
     private fun drawEcoFull(c: Canvas, v: SidePanelView, w: Int, h: Int, pad: Float) {
@@ -134,6 +157,14 @@ object SidePanelRenderer {
             MetricsStripRenderer.fit(String.format(Locale.US, "%.1f / 20 eco km · tree %d", v.ecoKm, v.treeNumber), small, w - 2 * pad),
             w / 2f, y, small,
         )
+        if (!v.noGps) {
+            y += small.textSize * 1.8f
+            drawHint(c, v, w / 2f, y, w - 2 * pad)
+            v.ecoRpm?.let {
+                y += small.textSize * 1.4f
+                c.drawText(MetricsStripRenderer.fit("Engine $it", small, w - 2 * pad), w / 2f, y, small)
+            }
+        }
         big.textAlign = Paint.Align.LEFT
         small.textAlign = Paint.Align.LEFT
     }
