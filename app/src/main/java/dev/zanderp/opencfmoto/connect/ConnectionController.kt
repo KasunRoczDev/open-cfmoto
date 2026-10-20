@@ -493,10 +493,6 @@ class ConnectionController(private val engine: ConnectionEngine) {
         }
     }
 
-    fun donate() {
-        if (!engine.openUrl(AboutActivity.URL_KOFI)) engine.toast(engine.string(R.string.main_donate_failed))
-    }
-
     // ---------------------------------------------------------------- mirror / map / search
 
     /** Mirror: arm screen capture and link as mirror (ignores duplicate taps while frames flow). */

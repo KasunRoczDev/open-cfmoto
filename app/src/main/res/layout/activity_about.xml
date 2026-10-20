@@ -70,7 +70,7 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Community + donate — first actions after the brand block -->
+        <!-- Community — first action after the brand block -->
         <com.google.android.material.card.MaterialCardView
             style="@style/Card.OpenCfMoto"
             android:layout_width="match_parent"
@@ -110,18 +110,8 @@
                         style="@style/Widget.OpenCfMoto.Button.Tonal"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="6dp"
                         android:layout_weight="1"
                         android:text="@string/about_discord" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btn_about_kofi"
-                        style="@style/Widget.OpenCfMoto.Button.Connect"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="6dp"
-                        android:layout_weight="1"
-                        android:text="@string/about_donate" />
                 </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>

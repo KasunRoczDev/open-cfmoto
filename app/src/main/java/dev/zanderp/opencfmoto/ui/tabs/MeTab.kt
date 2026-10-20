@@ -8,7 +8,6 @@ import androidx.compose.material.icons.automirrored.rounded.Article
 import androidx.compose.material.icons.rounded.Backup
 import androidx.compose.material.icons.rounded.BugReport
 import androidx.compose.material.icons.rounded.Build
-import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.Garage
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.LocalGasStation
@@ -33,7 +32,7 @@ fun MeTab(
     maintenance: MaintenanceSummary,
     onFuel: () -> Unit, fuelRangeKm: Double?,
     onBackup: () -> Unit, lastBackupText: String?,
-    onLogs: () -> Unit, onReport: () -> Unit, onUpdate: () -> Unit, onAbout: () -> Unit, onDonate: () -> Unit,
+    onLogs: () -> Unit, onReport: () -> Unit, onUpdate: () -> Unit, onAbout: () -> Unit,
 ) {
     val c = Ocm.colors
     val maintenanceSubtitle = when {
@@ -69,9 +68,7 @@ fun MeTab(
             SettingRow(stringResource(R.string.ui_me_update), icon = Icons.Rounded.SystemUpdate, onClick = onUpdate)
         }
         OcmCard {
-            SettingRow(stringResource(R.string.ui_me_about), icon = Icons.Rounded.Info, onClick = onAbout)
-            SettingRow(stringResource(R.string.ui_me_donate), icon = Icons.Rounded.Favorite, onClick = onDonate)
-        }
+            SettingRow(stringResource(R.string.ui_me_about), icon = Icons.Rounded.Info, onClick = onAbout)        }
         Text(stringResource(R.string.ui_version, BuildConfig.VERSION_NAME), style = OcmType.body, color = c.text2)
     }
 }

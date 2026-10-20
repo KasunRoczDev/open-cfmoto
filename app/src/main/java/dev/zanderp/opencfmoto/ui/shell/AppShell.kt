@@ -168,7 +168,7 @@ fun AppShell(c: ConnectionController, searchFocusTick: Int, openMaintenanceTick:
                         }
                     },
                     onLogs = { nav.navigate("logs") }, onReport = c::reportProblem, onUpdate = c::checkUpdateManual,
-                    onAbout = { AboutActivity.start(ctx) }, onDonate = c::donate,
+                    onAbout = { AboutActivity.start(ctx) },
                 )
             }
             composable("forest") { dev.zanderp.opencfmoto.ui.forest.ForestScreen() }
