@@ -27,7 +27,13 @@ data class SidePanelView(
     val ecoRpm: String?,
     /** Live speed against the band; null when stopped or no speed. */
     val ecoHint: EcoHint?,
+    /** "⛽ ~185 km"; null when there's no range estimate (no full fill-up logged / unknown tank). */
+    val fuelText: String? = null,
+    /** How worried to be about [fuelText]. */
+    val fuelLevel: FuelLevel = FuelLevel.OK,
 )
+
+enum class FuelLevel { OK, LOW, CRITICAL }
 
 /**
  * Draws the side panel: directions block on top while a route is active, eco tree block below (or the whole
@@ -39,6 +45,7 @@ object SidePanelRenderer {
     private const val TRACK = 0xFF1A1A1A.toInt()
     private const val ECO = 0xFF34D399.toInt()
     private const val EASE_OFF = 0xFFFBBF24.toInt()
+    private const val FUEL_CRITICAL = 0xFFF87171.toInt()
 
     private val big = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.WHITE; typeface = Typeface.DEFAULT_BOLD }
     private val small = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = GREY }
@@ -123,6 +130,21 @@ object SidePanelRenderer {
         c.drawText(MetricsStripRenderer.fit(label, small, w - x - pad), x, top + size * 0.4f, small)
         drawBar(c, x, top + size * 0.6f, w - x - pad, size * 0.1f, v.progress)
         if (!v.noGps) drawHint(c, v, x, top + size * 0.98f, w - x - pad)
+        val fuelY = top + size * 0.98f + small.textSize * 1.4f
+        if (fuelY <= bottom) drawFuel(c, v, x, fuelY, w - x - pad)
+    }
+
+    /** "⛽ ~185 km": grey normally, amber when low, red when nearly empty. Skipped with no estimate. */
+    private fun drawFuel(c: Canvas, v: SidePanelView, x: Float, baseline: Float, width: Float) {
+        val text = v.fuelText ?: return
+        val was = small.color
+        small.color = when (v.fuelLevel) {
+            FuelLevel.OK -> GREY
+            FuelLevel.LOW -> EASE_OFF
+            FuelLevel.CRITICAL -> FUEL_CRITICAL
+        }
+        c.drawText(MetricsStripRenderer.fit(text, small, width), x, baseline, small)
+        small.color = was
     }
 
     /** The live eco-speed coaching line: green inside the band, amber "Ease off" above it, grey otherwise. */
@@ -164,6 +186,10 @@ object SidePanelRenderer {
                 y += small.textSize * 1.4f
                 c.drawText(MetricsStripRenderer.fit("Engine $it", small, w - 2 * pad), w / 2f, y, small)
             }
+        }
+        if (v.fuelText != null) {
+            y += small.textSize * 1.6f
+            drawFuel(c, v, w / 2f, y, w - 2 * pad)
         }
         big.textAlign = Paint.Align.LEFT
         small.textAlign = Paint.Align.LEFT

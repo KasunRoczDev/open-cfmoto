@@ -60,6 +60,9 @@ object MetricsStrip {
     @Volatile private var ecoPercent: Int? = null
     @Volatile private var ecoBand = EcoBands.DEFAULT
     @Volatile private var ecoHint: EcoHint? = null
+    /** Range when this session started (loaded off-thread); the live value subtracts [sessionKm]. */
+    @Volatile private var fuelRangeAtStartKm: Double? = null
+    @Volatile private var sessionKm = 0.0
     @Volatile private var noGps = false
     private var lastEcoSaveMs = 0L                   // main-looper (GPS) thread only
     private var lastSide: SidePanelView? = null      // metrics-strip thread only
@@ -92,6 +95,8 @@ object MetricsStrip {
             eco = EcoScorer(ecoBand)
             ecoPercent = null
             ecoHint = null
+            fuelRangeAtStartKm = null
+            sessionKm = 0.0
             lastEcoSaveMs = SystemClock.elapsedRealtime()
         }
         lastSide = null
@@ -105,6 +110,18 @@ object MetricsStrip {
             Thread(r, "metrics-strip").apply { isDaemon = true }
         }
         executor = ex
+        if (mode == StripMode.SIDE) {
+            // Reads every saved ride from disk — keep it off the caller's thread.
+            ex.execute {
+                fuelRangeAtStartKm = try {
+                    dev.zanderp.opencfmoto.fuel.FuelStore.statusForSelected(app, System.currentTimeMillis()).rangeKm
+                } catch (e: Exception) {
+                    log("[STRIP] fuel range unavailable: $e")
+                    null
+                }
+                fuelRangeAtStartKm?.let { log("[FUEL] range at start ~${it.toInt()} km") }
+            }
+        }
         ex.scheduleWithFixedDelay({ refresh() }, 0L, TICK_MS, TimeUnit.MILLISECONDS)
         if (mode == StripMode.METRICS || mode == StripMode.SIDE) {
             val src = MetricsSource(app) { loc -> onFix(loc) }
@@ -167,6 +184,7 @@ object MetricsStrip {
             val step = eco.onFix(if (loc.hasSpeed()) loc.speed else Float.NaN, now)
             ecoPercent = eco.ecoPercent
             ecoHint = ecoBand.hint(if (loc.hasSpeed()) loc.speed else null, ecoHint)
+            sessionKm = eco.movingMeters / 1000.0
             val month = EcoForest.monthKey(System.currentTimeMillis(), java.util.TimeZone.getDefault())
             val (next, done) = forest.add(step.ecoMeters, step.movingMeters, month)
             forest = next
@@ -236,6 +254,16 @@ object MetricsStrip {
         }
     }
 
+    /** "⛽ ~185 km" / "⛽ ~115 mi" — whole units, so the panel redraws only when the number changes. */
+    internal fun fuelText(rangeKm: Double, units: MapUnits): String =
+        if (units == MapUnits.IMPERIAL) "⛽ ~${(rangeKm / 1.609344).toInt()} mi" else "⛽ ~${rangeKm.toInt()} km"
+
+    internal fun fuelLevel(rangeKm: Double): FuelLevel = when {
+        rangeKm < dev.zanderp.opencfmoto.fuel.FuelEstimate.CRITICAL_RANGE_KM -> FuelLevel.CRITICAL
+        rangeKm < dev.zanderp.opencfmoto.fuel.FuelEstimate.LOW_RANGE_KM -> FuelLevel.LOW
+        else -> FuelLevel.OK
+    }
+
     private fun refreshSide(out: (Bitmap) -> Unit) {
         val d = directions
         val active = DirectionsFormat.active(d, navAtElapsedMs, SystemClock.elapsedRealtime())
@@ -254,6 +282,8 @@ object MetricsStrip {
             ecoMax = ecoBand.maxLabel(units),
             ecoRpm = ecoBand.rpmLabel(),
             ecoHint = ecoHint,
+            fuelText = fuelRangeAtStartKm?.let { start -> fuelText((start - sessionKm).coerceAtLeast(0.0), units) },
+            fuelLevel = fuelRangeAtStartKm?.let { start -> fuelLevel((start - sessionKm).coerceAtLeast(0.0)) } ?: FuelLevel.OK,
         )
         if (v == lastSide) return
         lastSide = v

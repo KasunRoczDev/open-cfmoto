@@ -10,6 +10,7 @@ import androidx.compose.material.icons.rounded.Build
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.Garage
 import androidx.compose.material.icons.rounded.Info
+import androidx.compose.material.icons.rounded.LocalGasStation
 import androidx.compose.material.icons.rounded.Park
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.SystemUpdate
@@ -29,6 +30,7 @@ import dev.zanderp.opencfmoto.ui.design.SettingRow
 fun MeTab(
     onGarage: () -> Unit, onSettings: () -> Unit, onForest: () -> Unit, onMaintenance: () -> Unit,
     maintenance: MaintenanceSummary,
+    onFuel: () -> Unit, fuelRangeKm: Double?,
     onLogs: () -> Unit, onReport: () -> Unit, onUpdate: () -> Unit, onAbout: () -> Unit, onDonate: () -> Unit,
 ) {
     val c = Ocm.colors
@@ -47,6 +49,11 @@ fun MeTab(
             SettingRow(
                 stringResource(R.string.ui_me_maintenance), maintenanceSubtitle, Icons.Rounded.Build, onMaintenance,
                 badge = maintenance.dueCount.takeIf { it > 0 }?.toString(),
+            )
+            SettingRow(
+                stringResource(R.string.ui_me_fuel),
+                fuelRangeKm?.let { stringResource(R.string.fuel_subtitle_range, it.toInt()) } ?: stringResource(R.string.fuel_subtitle_setup),
+                Icons.Rounded.LocalGasStation, onFuel,
             )
         }
         OcmCard {

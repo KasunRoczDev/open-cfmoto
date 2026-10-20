@@ -90,11 +90,15 @@ fun AppShell(c: ConnectionController, searchFocusTick: Int, openMaintenanceTick:
     var heroTick by remember { mutableIntStateOf(0) }
     var hero by remember { mutableStateOf(HeroData.EMPTY) }
     var maintenance by remember { mutableStateOf(MaintenanceSummary.EMPTY) }
+    var fuelRangeKm by remember { mutableStateOf<Double?>(null) }
     val owner = LocalLifecycleOwner.current
     LaunchedEffect(owner, bike, heroTick) {
         owner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
             hero = withContext(Dispatchers.IO) { HeroData.load(ctx.applicationContext) }
             maintenance = withContext(Dispatchers.IO) { MaintenanceSummary.load(ctx.applicationContext, System.currentTimeMillis()) }
+            fuelRangeKm = withContext(Dispatchers.IO) {
+                dev.zanderp.opencfmoto.fuel.FuelStore.statusForSelected(ctx.applicationContext, System.currentTimeMillis()).rangeKm
+            }
         }
     }
 
@@ -106,7 +110,7 @@ fun AppShell(c: ConnectionController, searchFocusTick: Int, openMaintenanceTick:
         bottomBar = {
             NavigationBar(containerColor = Ocm.colors.surface) {
                 for (t in Tabs) {
-                    val selected = route == t.route || (t.route == "me" && (route == "logs" || route == "forest" || route == "maintenance"))
+                    val selected = route == t.route || (t.route == "me" && (route == "logs" || route == "forest" || route == "maintenance" || route == "fuel"))
                     NavigationBarItem(
                         selected = selected,
                         onClick = {
@@ -156,6 +160,7 @@ fun AppShell(c: ConnectionController, searchFocusTick: Int, openMaintenanceTick:
                 MeTab(
                     onGarage = { GarageActivity.start(ctx) }, onSettings = { SetupActivity.start(ctx) }, onForest = { nav.navigate("forest") },
                     onMaintenance = { nav.navigate("maintenance") }, maintenance = maintenance,
+                    onFuel = { nav.navigate("fuel") }, fuelRangeKm = fuelRangeKm,
                     onLogs = { nav.navigate("logs") }, onReport = c::reportProblem, onUpdate = c::checkUpdateManual,
                     onAbout = { AboutActivity.start(ctx) }, onDonate = c::donate,
                 )
@@ -163,6 +168,9 @@ fun AppShell(c: ConnectionController, searchFocusTick: Int, openMaintenanceTick:
             composable("forest") { dev.zanderp.opencfmoto.ui.forest.ForestScreen() }
             composable("maintenance") {
                 dev.zanderp.opencfmoto.ui.maintenance.MaintenanceScreen(onChanged = { heroTick++ })
+            }
+            composable("fuel") {
+                dev.zanderp.opencfmoto.ui.fuel.FuelScreen(onChanged = { heroTick++ })
             }
             composable("logs") {
                 LogsScreen(
