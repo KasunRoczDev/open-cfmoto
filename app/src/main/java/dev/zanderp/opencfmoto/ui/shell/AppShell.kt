@@ -75,7 +75,7 @@ private val Tabs = listOf(
 /** @param searchFocusTick bumped by MainActivity when the bike asks to type on the phone.
  *  @param openMaintenanceTick bumped by MainActivity when a maintenance notification is tapped. */
 @Composable
-fun AppShell(c: ConnectionController, searchFocusTick: Int, openMaintenanceTick: Int = 0) {
+fun AppShell(c: ConnectionController, searchFocusTick: Int, openMaintenanceTick: Int = 0, openReportTick: Int = 0) {
     val ctx = LocalContext.current
     val nav = rememberNavController()
     val (phase, detail) = ConnectionState.flow.collectAsStateWithLifecycle().value
@@ -104,13 +104,14 @@ fun AppShell(c: ConnectionController, searchFocusTick: Int, openMaintenanceTick:
 
     LaunchedEffect(searchFocusTick) { if (searchFocusTick > 0) nav.navigate("map") { launchSingleTop = true } }
     LaunchedEffect(openMaintenanceTick) { if (openMaintenanceTick > 0) nav.navigate("maintenance") { launchSingleTop = true } }
+    LaunchedEffect(openReportTick) { if (openReportTick > 0) nav.navigate("report") { launchSingleTop = true } }
 
     Scaffold(
         containerColor = Ocm.colors.bg,
         bottomBar = {
             NavigationBar(containerColor = Ocm.colors.surface) {
                 for (t in Tabs) {
-                    val selected = route == t.route || (t.route == "me" && (route == "logs" || route == "forest" || route == "maintenance" || route == "fuel" || route == "backup"))
+                    val selected = route == t.route || (t.route == "trips" && route == "report") || (t.route == "me" && (route == "logs" || route == "forest" || route == "maintenance" || route == "fuel" || route == "backup"))
                     NavigationBarItem(
                         selected = selected,
                         onClick = {
@@ -154,7 +155,7 @@ fun AppShell(c: ConnectionController, searchFocusTick: Int, openMaintenanceTick:
                 MapTab(searchFocusTick, openMapEnabled = ride.mapEnabled, onOpenMap = c::onMapPressed, onSearch = c::navigateToTyped, onSearchTextChanged = c::onSearchTextChanged)
             }
             composable("trips") {
-                TripsTab(onSavedRides = { TripsListActivity.start(ctx) }, onTripComputer = { TripActivity.start(ctx) })
+                TripsTab(onSavedRides = { TripsListActivity.start(ctx) }, onTripComputer = { TripActivity.start(ctx) }, onWeeklyReport = { nav.navigate("report") })
             }
             composable("me") {
                 MeTab(
@@ -178,6 +179,7 @@ fun AppShell(c: ConnectionController, searchFocusTick: Int, openMaintenanceTick:
             composable("fuel") {
                 dev.zanderp.opencfmoto.ui.fuel.FuelScreen(onChanged = { heroTick++ })
             }
+            composable("report") { dev.zanderp.opencfmoto.ui.report.WeeklyReportScreen() }
             composable("backup") { dev.zanderp.opencfmoto.ui.backup.BackupScreen() }
             composable("logs") {
                 LogsScreen(

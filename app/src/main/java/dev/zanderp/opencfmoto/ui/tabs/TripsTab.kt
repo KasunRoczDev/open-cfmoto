@@ -13,13 +13,17 @@ import dev.zanderp.opencfmoto.ui.design.OcmScreen
 import dev.zanderp.opencfmoto.ui.design.OcmType
 
 @Composable
-fun TripsTab(onSavedRides: () -> Unit, onTripComputer: () -> Unit) {
+fun TripsTab(onSavedRides: () -> Unit, onTripComputer: () -> Unit, onWeeklyReport: () -> Unit) {
     val c = Ocm.colors
     OcmScreen {
         Text(stringResource(R.string.ui_tab_trips), style = OcmType.screenTitle, color = c.text)
         OcmCard(onClick = onSavedRides) {
             Text(stringResource(R.string.ui_trips_saved), style = OcmType.title, color = c.text)
             Text(stringResource(R.string.ui_trips_saved_desc), style = OcmType.body, color = c.text2)
+        }
+        OcmCard(onClick = onWeeklyReport) {
+            Text(stringResource(R.string.ui_trips_report), style = OcmType.title, color = c.text)
+            Text(stringResource(R.string.ui_trips_report_desc), style = OcmType.body, color = c.text2)
         }
         OcmCard(onClick = onTripComputer) {
             Text(stringResource(R.string.ui_trips_computer), style = OcmType.title, color = c.text)
