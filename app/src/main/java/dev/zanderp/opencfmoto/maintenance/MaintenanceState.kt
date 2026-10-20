@@ -12,6 +12,18 @@ data class ItemState(
     val notified: Boolean = false,
 )
 
+/**
+ * One service done to one item — the history entry behind [ItemState]. [photos] are file names in
+ * `filesDir/maintenance_photos/` (receipts, the job card…).
+ */
+data class ServiceRecord(
+    val id: String,
+    val itemId: String,
+    val km: Double,
+    val atMs: Long,
+    val photos: List<String> = emptyList(),
+)
+
 /** One bike's maintenance tracking: the odometer baseline and every serviced item's history.
  *  [notifiedUnserviced] holds ids of never-serviced items that already fired their overdue
  *  notification (serviced items carry that flag on their own [ItemState]).
@@ -24,7 +36,19 @@ data class MaintenanceState(
     val items: Map<String, ItemState> = emptyMap(),
     val notifiedUnserviced: Set<String> = emptySet(),
     val trackingStartedAtMs: Long = baselineSetAtMs,
+    /** Every service recorded since history was added, oldest first. */
+    val history: List<ServiceRecord> = emptyList(),
 ) {
+    /** [itemId]'s services, newest first. */
+    fun historyFor(itemId: String): List<ServiceRecord> = history.filter { it.itemId == itemId }.sortedByDescending { it.atMs }
+
+    /** Adds receipt photos to an existing record (no-op for an unknown [recordId]). */
+    fun withRecordPhotos(recordId: String, add: List<String>): MaintenanceState =
+        copy(history = history.map { if (it.id == recordId) it.copy(photos = it.photos + add) else it })
+
+    fun withoutRecordPhoto(recordId: String, photo: String): MaintenanceState =
+        copy(history = history.map { if (it.id == recordId) it.copy(photos = it.photos - photo) else it })
+
     /** Re-syncs the odometer; service history and the tracking start are untouched. */
     fun withBaseline(km: Double, atMs: Long): MaintenanceState = copy(baselineKm = km, baselineSetAtMs = atMs)
 
@@ -40,7 +64,15 @@ data class MaintenanceState(
         }
     }
 
-    /** Records a service, which also starts a fresh notification cycle for the item. */
-    fun withServiced(itemId: String, km: Double, atMs: Long): MaintenanceState =
-        copy(items = items + (itemId to ItemState(km, atMs)), notifiedUnserviced = notifiedUnserviced - itemId)
+    /** Records a service (with its history entry), which also starts a fresh notification cycle for the item. */
+    fun withServiced(itemId: String, km: Double, atMs: Long, photos: List<String> = emptyList()): MaintenanceState =
+        copy(
+            items = items + (itemId to ItemState(km, atMs)),
+            notifiedUnserviced = notifiedUnserviced - itemId,
+            history = history + ServiceRecord(recordId(itemId, atMs), itemId, km, atMs, photos),
+        )
+
+    companion object {
+        fun recordId(itemId: String, atMs: Long) = "$itemId-$atMs"
+    }
 }

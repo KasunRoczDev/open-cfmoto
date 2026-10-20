@@ -37,10 +37,22 @@ object MaintenanceStore {
         save(ctx, bikeRaw, current.withBaseline(km, atMs))
     }
 
-    /** Records [itemId] serviced at [km]/[atMs] and clears its notified flag for the next cycle. */
-    fun markServiced(ctx: Context, bikeRaw: String, itemId: String, km: Double, atMs: Long) {
+    /** Records [itemId] serviced at [km]/[atMs] (with receipt [photos]) and clears its notified flag for the next cycle. */
+    fun markServiced(ctx: Context, bikeRaw: String, itemId: String, km: Double, atMs: Long, photos: List<String> = emptyList()) {
         val current = load(ctx, bikeRaw) ?: return
-        save(ctx, bikeRaw, current.withServiced(itemId, km, atMs))
+        save(ctx, bikeRaw, current.withServiced(itemId, km, atMs, photos))
+    }
+
+    fun addRecordPhotos(ctx: Context, bikeRaw: String, recordId: String, photos: List<String>) {
+        val current = load(ctx, bikeRaw) ?: return
+        save(ctx, bikeRaw, current.withRecordPhotos(recordId, photos))
+    }
+
+    /** Detaches [photo] from its record and deletes the file. */
+    fun removeRecordPhoto(ctx: Context, bikeRaw: String, recordId: String, photo: String) {
+        val current = load(ctx, bikeRaw) ?: return
+        save(ctx, bikeRaw, current.withoutRecordPhoto(recordId, photo))
+        ServicePhotos.file(ctx, photo).delete()
     }
 
     fun setNotified(ctx: Context, bikeRaw: String, itemId: String, notified: Boolean) {

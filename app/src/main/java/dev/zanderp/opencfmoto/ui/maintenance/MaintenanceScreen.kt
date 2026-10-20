@@ -5,14 +5,41 @@ package dev.zanderp.opencfmoto.ui.maintenance
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.produceState
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import androidx.core.content.FileProvider
+import dev.zanderp.opencfmoto.maintenance.ServicePhotos
+import dev.zanderp.opencfmoto.maintenance.ServiceRecord
+import dev.zanderp.opencfmoto.ui.ride.decodeHeroPhoto
+import kotlinx.coroutines.launch
+import java.io.File
+import java.text.DateFormat
+import java.util.Date
+import java.util.Locale
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Speed
@@ -100,7 +127,52 @@ fun MaintenanceScreen(onChanged: () -> Unit) {
     }
 
     var showBaselineDialog by remember { mutableStateOf(false) }
+    var detailTarget by remember { mutableStateOf<MaintenanceItem?>(null) }
     var serviceTarget by remember { mutableStateOf<MaintenanceItem?>(null) }
+    var viewing by remember { mutableStateOf<Pair<String, String>?>(null) }   // record id to photo name
+
+    // Photos land either on the service being recorded (pending) or on an existing record.
+    var pendingPhotos by remember { mutableStateOf(emptyList<String>()) }
+    var photoForRecord by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
+    fun onPhoto(uri: Uri, temp: File? = null) {
+        val recordId = photoForRecord
+        scope.launch {
+            val name = withContext(Dispatchers.IO) { ServicePhotos.import(ctx.applicationContext, uri).also { temp?.delete() } }
+            if (name == null) return@launch
+            if (recordId == null) pendingPhotos = pendingPhotos + name
+            else if (bike != null) {
+                withContext(Dispatchers.IO) { MaintenanceStore.addRecordPhotos(ctx.applicationContext, bike.raw, recordId, listOf(name)) }
+                reloadTick++
+            }
+        }
+    }
+    val pickPhoto = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri -> uri?.let { onPhoto(it) } }
+    var cameraFile by remember { mutableStateOf<File?>(null) }
+    val takePhoto = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok ->
+        val f = cameraFile
+        if (ok && f != null) onPhoto(FileProvider.getUriForFile(ctx, "${ctx.packageName}.fileprovider", f), temp = f) else f?.delete()
+    }
+    fun launchCamera() {
+        val f = File(File(ctx.cacheDir, "service-camera").apply { mkdirs() }, "cap-${System.currentTimeMillis()}.jpg")
+        cameraFile = f
+        takePhoto.launch(FileProvider.getUriForFile(ctx, "${ctx.packageName}.fileprovider", f))
+    }
+    val cameraPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (granted) launchCamera() else Toast.makeText(ctx, R.string.maintenance_camera_denied, Toast.LENGTH_LONG).show()
+    }
+    val photoActions = PhotoActions(
+        take = { recordId ->
+            photoForRecord = recordId
+            if (ContextCompat.checkSelfPermission(ctx, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) launchCamera()
+            else cameraPermission.launch(Manifest.permission.CAMERA)
+        },
+        choose = { recordId ->
+            photoForRecord = recordId
+            pickPhoto.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+        },
+        view = { recordId, photo -> viewing = recordId to photo },
+    )
 
     OcmScreen {
         Text(stringResource(R.string.maintenance_title), style = OcmType.screenTitle, color = Ocm.colors.text)
@@ -130,7 +202,16 @@ fun MaintenanceScreen(onChanged: () -> Unit) {
                             statusRank(MaintenanceEstimate.status(it, currentState.items[it.id], estimateKm, now, currentState.trackingStartedAtMs))
                         }
                         for (item in sorted) {
-                            ItemRow(item, currentState, estimateKm, now, onClick = { serviceTarget = item })
+                            ItemRow(item, currentState, estimateKm, now, onClick = { detailTarget = item })
+                        }
+                    }
+                }
+                if (currentState.history.isNotEmpty()) {
+                    SectionLabel(stringResource(R.string.maintenance_history))
+                    OcmCard {
+                        val names = items.associate { it.id to it.name }
+                        for (r in currentState.history.sortedByDescending { it.atMs }) {
+                            RecordRow(r, title = names[r.itemId] ?: r.itemId, photoActions)
                         }
                     }
                 }
@@ -152,21 +233,154 @@ fun MaintenanceScreen(onChanged: () -> Unit) {
             },
         )
     }
+    detailTarget?.let { item ->
+        val s = state
+        if (s != null) {
+            ItemDetailDialog(
+                item, s, photoActions,
+                onMarkServiced = { detailTarget = null; pendingPhotos = emptyList(); serviceTarget = item },
+                onDismiss = { detailTarget = null },
+            )
+        }
+    }
     serviceTarget?.let { item ->
         ServiceConfirmDialog(
             item = item,
-            onDismiss = { serviceTarget = null },
+            photos = pendingPhotos,
+            photoActions = photoActions,
+            onDismiss = {
+                // Cancelled: the photos taken for it belong to nothing — drop them.
+                pendingPhotos.forEach { ServicePhotos.file(ctx, it).delete() }
+                pendingPhotos = emptyList()
+                serviceTarget = null
+            },
             onConfirm = {
                 if (bike != null) {
-                    MaintenanceStore.markServiced(ctx.applicationContext, bike.raw, item.id, estimateKm, System.currentTimeMillis())
+                    MaintenanceStore.markServiced(ctx.applicationContext, bike.raw, item.id, estimateKm, System.currentTimeMillis(), pendingPhotos)
                     reloadTick++
                     onChanged()
                 }
+                pendingPhotos = emptyList()
                 serviceTarget = null
             },
         )
     }
+    viewing?.let { (recordId, photo) ->
+        PhotoViewer(
+            photo,
+            onDismiss = { viewing = null },
+            onRemove = {
+                when {
+                    recordId.isEmpty() -> {   // a pending photo on the service being recorded
+                        pendingPhotos = pendingPhotos - photo
+                        ServicePhotos.file(ctx, photo).delete()
+                    }
+                    bike != null -> {
+                        MaintenanceStore.removeRecordPhoto(ctx.applicationContext, bike.raw, recordId, photo)
+                        reloadTick++
+                    }
+                }
+                viewing = null
+            },
+        )
+    }
 }
+
+/** Photo entry points; a null record id means "the service being recorded right now". */
+private class PhotoActions(
+    val take: (recordId: String?) -> Unit,
+    val choose: (recordId: String?) -> Unit,
+    val view: (recordId: String, photo: String) -> Unit,
+)
+
+@Composable
+private fun ItemDetailDialog(
+    item: MaintenanceItem,
+    state: MaintenanceState,
+    photoActions: PhotoActions,
+    onMarkServiced: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val last = state.items[item.id]
+    val records = state.historyFor(item.id)
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(item.name) },
+        text = {
+            Column(Modifier.verticalScroll(rememberScrollState())) {
+                Text(item.action, style = OcmType.body, color = Ocm.colors.text2)
+                Text(
+                    if (last != null) stringResource(R.string.maintenance_last_serviced, dayText(last.lastServicedAtMs), last.lastServicedKm.toInt())
+                    else stringResource(R.string.maintenance_never_serviced),
+                    style = OcmType.body, color = Ocm.colors.text, modifier = Modifier.padding(top = 8.dp),
+                )
+                Text(stringResource(R.string.maintenance_history), style = OcmType.label, color = Ocm.colors.text2, modifier = Modifier.padding(top = 12.dp))
+                if (records.isEmpty()) Text(stringResource(R.string.maintenance_history_none), style = OcmType.body, color = Ocm.colors.text2)
+                for (r in records) RecordRow(r, title = null, photoActions)
+            }
+        },
+        confirmButton = { TextButton(onClick = onMarkServiced) { Text(stringResource(R.string.maintenance_mark_serviced)) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.maintenance_close)) } },
+    )
+}
+
+/** One service: date · km, its photos, and a way to add more. [title] names the item (history list only). */
+@Composable
+private fun RecordRow(r: ServiceRecord, title: String?, photoActions: PhotoActions) {
+    Column(Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
+        if (title != null) Text(title, style = OcmType.title, color = Ocm.colors.text)
+        Text(stringResource(R.string.maintenance_record, dayText(r.atMs), r.km.toInt()), style = OcmType.body, color = Ocm.colors.text2)
+        PhotoStrip(r.photos, onView = { photoActions.view(r.id, it) })
+        Row {
+            TextButton(onClick = { photoActions.take(r.id) }) { Text(stringResource(R.string.maintenance_take_photo)) }
+            TextButton(onClick = { photoActions.choose(r.id) }) { Text(stringResource(R.string.maintenance_choose_photo)) }
+        }
+    }
+}
+
+@Composable
+private fun PhotoStrip(photos: List<String>, onView: (String) -> Unit) {
+    if (photos.isEmpty()) return
+    Row(Modifier.horizontalScroll(rememberScrollState()).padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        for (p in photos) PhotoThumb(p, onClick = { onView(p) })
+    }
+}
+
+@Composable
+private fun PhotoThumb(name: String, onClick: () -> Unit) {
+    val ctx = LocalContext.current
+    val bmp by produceState<ImageBitmap?>(null, name) {
+        value = withContext(Dispatchers.IO) { decodeHeroPhoto(ServicePhotos.file(ctx, name).path, 256)?.asImageBitmap() }
+    }
+    val b = bmp
+    if (b != null) {
+        Image(
+            b, contentDescription = null, contentScale = ContentScale.Crop,
+            modifier = Modifier.size(72.dp).clip(RoundedCornerShape(10.dp)).clickable(onClick = onClick),
+        )
+    } else {
+        Box(Modifier.size(72.dp).clip(RoundedCornerShape(10.dp)).background(Ocm.colors.surface))
+    }
+}
+
+@Composable
+private fun PhotoViewer(name: String, onDismiss: () -> Unit, onRemove: () -> Unit) {
+    val ctx = LocalContext.current
+    val bmp by produceState<ImageBitmap?>(null, name) {
+        value = withContext(Dispatchers.IO) { decodeHeroPhoto(ServicePhotos.file(ctx, name).path, 1600)?.asImageBitmap() }
+    }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        text = {
+            bmp?.let { Image(it, contentDescription = null, contentScale = ContentScale.Fit, modifier = Modifier.fillMaxWidth()) }
+        },
+        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.maintenance_close)) } },
+        dismissButton = { TextButton(onClick = onRemove) { Text(stringResource(R.string.maintenance_remove_photo)) } },
+    )
+}
+
+private fun dayText(ms: Long): String =
+    DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.getDefault()).format(Date(ms))
 
 private fun statusRank(status: MaintenanceStatus): Int = when (status) {
     MaintenanceStatus.OVERDUE -> 0
@@ -239,12 +453,28 @@ private fun BaselineDialog(initialKm: Double, onDismiss: () -> Unit, onConfirm: 
 }
 
 @Composable
-private fun ServiceConfirmDialog(item: MaintenanceItem, onDismiss: () -> Unit, onConfirm: () -> Unit) {
+private fun ServiceConfirmDialog(
+    item: MaintenanceItem,
+    photos: List<String>,
+    photoActions: PhotoActions,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.maintenance_mark_serviced_title)) },
-        text = { Text(stringResource(R.string.maintenance_mark_serviced_message, item.name)) },
-        confirmButton = { TextButton(onClick = onConfirm) { Text(stringResource(R.string.maintenance_status_ok)) } },
+        text = {
+            Column {
+                Text(stringResource(R.string.maintenance_mark_serviced_message, item.name))
+                Text(stringResource(R.string.maintenance_receipts), style = OcmType.label, color = Ocm.colors.text2, modifier = Modifier.padding(top = 12.dp))
+                PhotoStrip(photos, onView = { photoActions.view("", it) })
+                Row {
+                    TextButton(onClick = { photoActions.take(null) }) { Text(stringResource(R.string.maintenance_take_photo)) }
+                    TextButton(onClick = { photoActions.choose(null) }) { Text(stringResource(R.string.maintenance_choose_photo)) }
+                }
+            }
+        },
+        confirmButton = { TextButton(onClick = onConfirm) { Text(stringResource(R.string.maintenance_mark_serviced)) } },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.dash_cancel)) } },
     )
 }

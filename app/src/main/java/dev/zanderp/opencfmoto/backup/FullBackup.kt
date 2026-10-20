@@ -27,7 +27,7 @@ object FullBackup {
     private const val MANIFEST = "manifest.json"
 
     /** `filesDir` sub-folders that hold rider data (map tile caches and logs stay out). */
-    val FILE_DIRS = listOf("trips", "maintenance", "fuel", "bike_photos")
+    val FILE_DIRS = listOf("trips", "maintenance", "maintenance_photos", "fuel", "bike_photos")
 
     /** Third-party or per-install prefs that must not travel between installs. */
     val SKIP_PREFS = setOf(
