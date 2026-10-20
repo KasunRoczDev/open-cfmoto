@@ -626,6 +626,18 @@ class AndroidAutoService : Service() {
                 } catch (e: Exception) {
                     LogBus.log("[AA] drop re-trigger failed: $e")
                 }
+            } else if (BikeLink.takeAaRestartAfterDrop()) {
+                LogBus.log("[AA] dropped after video was live — restarting Android Auto")
+                AaVideoBridge.onSteadyVideo = {
+                    AaVideoBridge.onSteadyVideo = null
+                    LogBus.log("→ Android Auto video is live (after drop)")
+                    BikeLink.markAaVideoSteady()
+                }
+                try {
+                    dev.zanderp.opencfmoto.aa.AaSelfMode.trigger(this, log = LogBus::log)
+                } catch (e: Exception) {
+                    LogBus.log("[AA] restart after drop failed: $e")
+                }
             }
             return
         }

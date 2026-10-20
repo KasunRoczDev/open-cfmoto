@@ -38,6 +38,14 @@ object BikeLink {
     @Volatile private var p2pBindIp: Inet4Address? = null
     @Volatile private var p2pGatewayIp: Inet4Address? = null
     @Volatile private var aaDropRetried = false
+    @Volatile private var aaRestartsAfterDrop = 0
+
+    /** Android Auto restarts allowed per hand-off after it dies with video already live. */
+    const val MAX_AA_RESTARTS = 3
+
+    /** Pure: restart AA after a drop only if it had reached steady video, within the budget. */
+    fun shouldRestartAfterDrop(wasSteady: Boolean, restartsSoFar: Int): Boolean =
+        wasSteady && restartsSoFar < MAX_AA_RESTARTS
 
     /** Reset the gate at the start of a fresh Android Auto connection attempt. */
     @Synchronized
@@ -50,6 +58,7 @@ object BikeLink {
         p2pBindIp = null
         p2pGatewayIp = null
         aaDropRetried = false
+        aaRestartsAfterDrop = 0
         AaVideoBridge.aaSessionSeen = false
         // Leave the bike Network held, but unpin the process so AA can use 127.0.0.1.
         appContext?.let { BikeWifi.unbindProcess(context = it) }
@@ -60,6 +69,21 @@ object BikeLink {
     fun takeAaDropRetry(): Boolean {
         if (aaDropRetried || aaVideoSteady) return false
         aaDropRetried = true
+        return true
+    }
+
+    /**
+     * AA died after its video was already live (not a user Exit). Nothing brings it back on its own,
+     * and leaving [aaVideoSteady] set let a returning bike Wi-Fi link the dash to a dead session — the
+     * dash then shows a map with no Google Maps guidance. Clear the gate so the bike link waits for
+     * a real session again, and tell the caller to re-trigger AA (true) — at most [MAX_AA_RESTARTS]
+     * times per hand-off so a crashing AA can't loop forever.
+     */
+    @Synchronized
+    fun takeAaRestartAfterDrop(): Boolean {
+        if (!shouldRestartAfterDrop(aaVideoSteady, aaRestartsAfterDrop)) return false
+        aaRestartsAfterDrop++
+        aaVideoSteady = false
         return true
     }
 
