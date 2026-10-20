@@ -46,13 +46,16 @@ import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 
-/** Trips ▸ Weekly report: distance, eco %, fuel and the best ride, week by week. */
+/**
+ * Trips ▸ Weekly report: distance, eco %, fuel and the best ride, week by week.
+ * [weeksBack] = which week to open on (0 = this week; the Monday notification opens last week).
+ */
 @Composable
-fun WeeklyReportScreen() {
+fun WeeklyReportScreen(weeksBack: Int = 0) {
     val ctx = LocalContext.current
     val zone = remember { TimeZone.getDefault() }
     val thisWeek = remember { WeeklyReport.weekStart(System.currentTimeMillis(), zone) }
-    var week by remember { mutableLongStateOf(thisWeek) }
+    var week by remember { mutableLongStateOf(WeeklyReport.shiftWeeks(thisWeek, -weeksBack, zone)) }
     var report by remember { mutableStateOf<WeekReport?>(null) }
     LaunchedEffect(week) {
         report = null

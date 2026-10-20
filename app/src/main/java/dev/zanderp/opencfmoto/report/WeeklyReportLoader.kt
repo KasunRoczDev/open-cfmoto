@@ -24,7 +24,10 @@ import dev.zanderp.opencfmoto.TripStore
 import dev.zanderp.opencfmoto.fuel.FuelEstimate
 import dev.zanderp.opencfmoto.fuel.FuelSpecs
 import dev.zanderp.opencfmoto.fuel.FuelStore
+import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 import java.util.TimeZone
 import java.util.concurrent.TimeUnit
 
@@ -44,44 +47,61 @@ object WeeklyReportLoader {
 /** Monday morning: "Last week: 82 km · 5 rides · eco 64%" — skipped when there was no riding. */
 class WeeklyReportWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx, params) {
     override suspend fun doWork(): Result {
-        runCatching { post() }.onFailure { LogBus.log("[REPORT] weekly notification failed: $it") }
+        runCatching { postSummary(applicationContext) }.onFailure { LogBus.log("[REPORT] weekly notification failed: $it") }
         return Result.success()
-    }
-
-    private fun post() {
-        val ctx = applicationContext
-        val zone = TimeZone.getDefault()
-        val lastWeek = WeeklyReport.shiftWeeks(WeeklyReport.weekStart(System.currentTimeMillis(), zone), -1, zone)
-        val r = WeeklyReportLoader.load(ctx, lastWeek)
-        if (r.rides.isEmpty()) return
-        val nm = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        nm.createNotificationChannel(NotificationChannel(CHANNEL_ID, ctx.getString(R.string.report_notif_channel), NotificationManager.IMPORTANCE_LOW))
-        val open = PendingIntent.getActivity(
-            ctx, NOTIFICATION_ID,
-            Intent(ctx, MainActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-                putExtra(MainActivity.EXTRA_OPEN_REPORT, true)
-            },
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
-        )
-        val text = buildString {
-            append(ctx.getString(R.string.report_notif_text, r.km.toInt(), r.rides.size))
-            r.ecoPercent?.let { append(ctx.getString(R.string.report_notif_eco, it)) }
-        }
-        val n = Notification.Builder(ctx, CHANNEL_ID)
-            .setContentTitle(ctx.getString(R.string.report_notif_title))
-            .setContentText(text)
-            .setSmallIcon(android.R.drawable.ic_menu_mylocation)
-            .setContentIntent(open)
-            .setAutoCancel(true)
-            .build()
-        NotificationManagerCompat.from(ctx).notify(NOTIFICATION_ID, n)
     }
 
     companion object {
         private const val CHANNEL_ID = "opencfmoto_weekly_report"
         private const val WORK_NAME = "weekly_report"
         private const val NOTIFICATION_ID = 0x5752
+
+        /** Posts last week's summary; false (nothing posted) when there was no riding. Blocking. */
+        fun postSummary(ctx: Context): Boolean {
+            val zone = TimeZone.getDefault()
+            val lastWeek = WeeklyReport.shiftWeeks(WeeklyReport.weekStart(System.currentTimeMillis(), zone), -1, zone)
+            val r = WeeklyReportLoader.load(ctx, lastWeek)
+            if (r.rides.isEmpty()) return false
+            val nm = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            nm.createNotificationChannel(NotificationChannel(CHANNEL_ID, ctx.getString(R.string.report_notif_channel), NotificationManager.IMPORTANCE_LOW))
+            val open = PendingIntent.getActivity(
+                ctx, NOTIFICATION_ID,
+                Intent(ctx, MainActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    putExtra(MainActivity.EXTRA_OPEN_REPORT, true)
+                },
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+            )
+            val text = buildString {
+                append(ctx.getString(R.string.report_notif_text, r.km.toInt(), r.rides.size))
+                r.ecoPercent?.let { append(ctx.getString(R.string.report_notif_eco, it)) }
+            }
+            // Expanded: the best ride too, so the summary reads like a report rather than a counter.
+            val big = buildString {
+                append(text)
+                r.best?.let { b ->
+                    append('\n')
+                    append(
+                        ctx.getString(
+                            R.string.report_notif_best,
+                            SimpleDateFormat("EEE d MMM", Locale.getDefault()).format(Date(b.startMs)),
+                            String.format(Locale.getDefault(), "%.1f", b.km),
+                        ),
+                    )
+                    b.ecoPercent?.let { append(ctx.getString(R.string.report_notif_eco, it)) }
+                }
+            }
+            val n = Notification.Builder(ctx, CHANNEL_ID)
+                .setContentTitle(ctx.getString(R.string.report_notif_title))
+                .setContentText(text)
+                .setStyle(Notification.BigTextStyle().bigText(big))
+                .setSmallIcon(android.R.drawable.ic_menu_mylocation)
+                .setContentIntent(open)
+                .setAutoCancel(true)
+                .build()
+            NotificationManagerCompat.from(ctx).notify(NOTIFICATION_ID, n)
+            return true
+        }
 
         /** Weekly, first run next Monday ~09:00. KEEP: re-calling on every app start never resets it. */
         fun schedule(ctx: Context) {

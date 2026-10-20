@@ -38,6 +38,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -104,14 +106,14 @@ fun AppShell(c: ConnectionController, searchFocusTick: Int, openMaintenanceTick:
 
     LaunchedEffect(searchFocusTick) { if (searchFocusTick > 0) nav.navigate("map") { launchSingleTop = true } }
     LaunchedEffect(openMaintenanceTick) { if (openMaintenanceTick > 0) nav.navigate("maintenance") { launchSingleTop = true } }
-    LaunchedEffect(openReportTick) { if (openReportTick > 0) nav.navigate("report") { launchSingleTop = true } }
+    LaunchedEffect(openReportTick) { if (openReportTick > 0) nav.navigate("report?back=1") { launchSingleTop = true } }   // the notification is about last week
 
     Scaffold(
         containerColor = Ocm.colors.bg,
         bottomBar = {
             NavigationBar(containerColor = Ocm.colors.surface) {
                 for (t in Tabs) {
-                    val selected = route == t.route || (t.route == "trips" && route == "report") || (t.route == "me" && (route == "logs" || route == "forest" || route == "maintenance" || route == "fuel" || route == "backup"))
+                    val selected = route == t.route || (t.route == "trips" && route?.startsWith("report") == true) || (t.route == "me" && (route == "logs" || route == "forest" || route == "maintenance" || route == "fuel" || route == "backup"))
                     NavigationBarItem(
                         selected = selected,
                         onClick = {
@@ -179,7 +181,9 @@ fun AppShell(c: ConnectionController, searchFocusTick: Int, openMaintenanceTick:
             composable("fuel") {
                 dev.zanderp.opencfmoto.ui.fuel.FuelScreen(onChanged = { heroTick++ })
             }
-            composable("report") { dev.zanderp.opencfmoto.ui.report.WeeklyReportScreen() }
+            composable("report?back={back}", arguments = listOf(navArgument("back") { type = NavType.IntType; defaultValue = 0 })) { entry ->
+                dev.zanderp.opencfmoto.ui.report.WeeklyReportScreen(weeksBack = entry.arguments?.getInt("back") ?: 0)
+            }
             composable("backup") { dev.zanderp.opencfmoto.ui.backup.BackupScreen() }
             composable("logs") {
                 LogsScreen(

@@ -823,6 +823,7 @@
     <string name="report_notif_title">Your riding last week</string>
     <string name="report_notif_text">%1$d km · %2$d rides</string>
     <string name="report_notif_eco"> · eco %1$d%%</string>
+    <string name="report_notif_best">Best ride: %1$s · %2$s km</string>
     <string name="ui_me_backup">Backup &amp; restore</string>
     <string name="ui_me_backup_never">Not backed up yet — save your rides to a file</string>
     <string name="ui_me_backup_last">Last saved %1$s</string>
