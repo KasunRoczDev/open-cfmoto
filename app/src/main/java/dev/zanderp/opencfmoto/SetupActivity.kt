@@ -58,6 +58,15 @@ class SetupActivity : AppCompatActivity() {
         importSettingsFromUri(uri)
     }
 
+    private val btRideFineLocation = registerForActivityResult(ActivityResultContracts.RequestPermission()) { ok ->
+        if (ok) askBackgroundLocation() else toast(getString(R.string.setup_bt_ride_location_first))
+    }
+
+    private val btRideBackgroundLocation = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
+        refreshOptions()
+        if (AppSettings.btRideLog(this)) toastBtRideOn()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_setup)
@@ -202,6 +211,9 @@ class SetupActivity : AppCompatActivity() {
         findViewById<MaterialButton>(R.id.keepwifi_off).setOnClickListener { setKeepWifi(false) }
         findViewById<MaterialButton>(R.id.logtrips_on).setOnClickListener { setLogTrips(true) }
         findViewById<MaterialButton>(R.id.logtrips_off).setOnClickListener { setLogTrips(false) }
+        findViewById<MaterialButton>(R.id.btride_on).setOnClickListener { setBtRide(true) }
+        findViewById<MaterialButton>(R.id.btride_off).setOnClickListener { setBtRide(false) }
+        findViewById<MaterialButton>(R.id.btn_bt_ride_device).setOnClickListener { pickBtRideDevice(enableAfter = false) }
         findViewById<MaterialButton>(R.id.nontouch_on).setOnClickListener { setForceNonTouch(true) }
         findViewById<MaterialButton>(R.id.nontouch_off).setOnClickListener { setForceNonTouch(false) }
         findViewById<MaterialButton>(R.id.forcetouch_on).setOnClickListener { setForceTouch(true) }
@@ -514,6 +526,65 @@ class SetupActivity : AppCompatActivity() {
         Toast.makeText(this, "Trip logging ${if (on) "on" else "off"}", Toast.LENGTH_SHORT).show()
     }
 
+    /** On: find the bike's Bluetooth (or ask), then make sure GPS may run while the app is closed. */
+    private fun setBtRide(on: Boolean) {
+        if (!on) {
+            AppSettings.setBtRideLog(this, false)
+            refreshOptions()
+            toast(getString(R.string.setup_bt_ride_off))
+            return
+        }
+        if (AppSettings.btRideMac(this) == null) {
+            val bike = BikeMemory.selected(this)
+            val pick = BikeBtRide.autoPick(
+                BluetoothHelper.bondedDevices(this),
+                listOf(bike?.name, bike?.qr?.ssid, bike?.qr?.name),
+            )
+            if (pick == null) {
+                pickBtRideDevice(enableAfter = true)
+                return
+            }
+            AppSettings.setBtRideDevice(this, pick.first, pick.second)
+        }
+        AppSettings.setBtRideLog(this, true)
+        refreshOptions()
+        askBackgroundLocation()
+    }
+
+    private fun askBackgroundLocation() {
+        when {
+            BikeRideService.hasBackgroundLocation(this) -> toastBtRideOn()
+            checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) !=
+                android.content.pm.PackageManager.PERMISSION_GRANTED ->
+                btRideFineLocation.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
+            else -> AlertDialog.Builder(this)
+                .setTitle(R.string.setup_bt_ride_bg_title)
+                .setMessage(R.string.setup_bt_ride_bg_msg)
+                .setPositiveButton(android.R.string.ok) { _, _ ->
+                    btRideBackgroundLocation.launch(android.Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+                }
+                .setNegativeButton(android.R.string.cancel) { _, _ -> refreshOptions() }
+                .show()
+        }
+    }
+
+    private fun toastBtRideOn() =
+        toast(getString(R.string.setup_bt_ride_on, AppSettings.btRideName(this) ?: getString(R.string.setup_bt_ride_the_bike)))
+
+    private fun pickBtRideDevice(enableAfter: Boolean) {
+        val bonded = BluetoothHelper.bondedDevices(this)
+        AlertDialog.Builder(this)
+            .setTitle(R.string.setup_bt_ride_pick)
+            .setItems(bonded.map { (mac, name) -> "$name ($mac)" }.toTypedArray()) { _, which ->
+                val (mac, name) = bonded[which]
+                AppSettings.setBtRideDevice(this, mac, name)
+                refreshOptions()
+                if (enableAfter) setBtRide(true)
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
     private fun setForceNonTouch(on: Boolean) {
         AppSettings.setForceNonTouch(this, on)
         refreshOptions()
@@ -733,6 +804,18 @@ class SetupActivity : AppCompatActivity() {
         highlight(AppSettings.logTrips(this),
             R.id.logtrips_on to true,
             R.id.logtrips_off to false)
+        val btRideOn = AppSettings.btRideLog(this)
+        highlight(btRideOn,
+            R.id.btride_on to true,
+            R.id.btride_off to false)
+        val btRideName = AppSettings.btRideName(this)
+        val btRideDesc = getString(R.string.setup_bt_ride_desc, btRideName ?: getString(R.string.setup_bt_ride_the_bike))
+        findViewById<TextView>(R.id.bt_ride_desc).text =
+            if (btRideOn && !BikeRideService.hasBackgroundLocation(this)) btRideDesc + "\n" + getString(R.string.setup_bt_ride_needs_bg)
+            else btRideDesc
+        findViewById<MaterialButton>(R.id.btn_bt_ride_device).text =
+            if (btRideName != null) getString(R.string.setup_bt_ride_device, btRideName)
+            else getString(R.string.setup_bt_ride_device_none)
         highlight(AppSettings.forceNonTouch(this),
             R.id.nontouch_on to true,
             R.id.nontouch_off to false)

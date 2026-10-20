@@ -17,7 +17,7 @@ class BtConnectTrigger : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action != BluetoothDevice.ACTION_ACL_CONNECTED) return
         val want = AppSettings.btTriggerMac(context) ?: return
-        val device = deviceFrom(intent) ?: return
+        val device = bluetoothDeviceFrom(intent) ?: return
         val mac = try {
             device.address
         } catch (_: SecurityException) {
@@ -41,11 +41,13 @@ class BtConnectTrigger : BroadcastReceiver() {
         }
     }
 
-    private fun deviceFrom(intent: Intent): BluetoothDevice? =
-        if (Build.VERSION.SDK_INT >= 33) {
-            intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE, BluetoothDevice::class.java)
-        } else {
-            @Suppress("DEPRECATION")
-            intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
-        }
 }
+
+/** The device an ACL broadcast is about (shared with [BikeBtRideReceiver]). */
+internal fun bluetoothDeviceFrom(intent: Intent): BluetoothDevice? =
+    if (Build.VERSION.SDK_INT >= 33) {
+        intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE, BluetoothDevice::class.java)
+    } else {
+        @Suppress("DEPRECATION")
+        intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+    }

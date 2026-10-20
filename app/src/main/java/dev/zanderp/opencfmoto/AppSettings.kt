@@ -37,6 +37,9 @@ object AppSettings {
     private const val KEY_KEEP_WIFI = "keep_wifi_after_disconnect"
     private const val KEY_BT_TRIGGER_MAC = "bt_trigger_mac"
     private const val KEY_BT_TRIGGER_NAME = "bt_trigger_name"
+    private const val KEY_BT_RIDE_LOG = "bt_ride_log"
+    private const val KEY_BT_RIDE_MAC = "bt_ride_mac"
+    private const val KEY_BT_RIDE_NAME = "bt_ride_name"
 
     private fun prefs(ctx: Context) =
         ctx.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
@@ -165,6 +168,29 @@ object AppSettings {
         prefs(ctx).edit()
             .putString(KEY_BT_TRIGGER_MAC, mac?.ifBlank { null })
             .putString(KEY_BT_TRIGGER_NAME, name?.ifBlank { null })
+            .apply()
+    }
+
+    /**
+     * Log a ride whenever the bike's own Bluetooth (calls / music) is connected, even with no
+     * projection — see [BikeRideService]. Off by default; needs "Allow all the time" location.
+     * The device is device-specific, so like the BT trigger it's not in [SettingsBackup].
+     */
+    fun btRideLog(ctx: Context): Boolean = prefs(ctx).getBoolean(KEY_BT_RIDE_LOG, false)
+
+    fun btRideMac(ctx: Context): String? =
+        prefs(ctx).getString(KEY_BT_RIDE_MAC, null)?.takeIf { it.isNotBlank() }
+
+    fun btRideName(ctx: Context): String? =
+        prefs(ctx).getString(KEY_BT_RIDE_NAME, null)?.takeIf { it.isNotBlank() }
+
+    fun setBtRideLog(ctx: Context, on: Boolean) =
+        prefs(ctx).edit().putBoolean(KEY_BT_RIDE_LOG, on).apply()
+
+    fun setBtRideDevice(ctx: Context, mac: String?, name: String?) {
+        prefs(ctx).edit()
+            .putString(KEY_BT_RIDE_MAC, mac?.ifBlank { null })
+            .putString(KEY_BT_RIDE_NAME, name?.ifBlank { null })
             .apply()
     }
 
