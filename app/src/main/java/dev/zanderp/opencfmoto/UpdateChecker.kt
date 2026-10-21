@@ -15,9 +15,10 @@ import java.net.URL
  */
 object UpdateChecker {
 
-    const val REPO = "zanderp/open-cfmoto"
+    /** Set at build time (-PupdateRepo); the upstream repo by default. */
+    val REPO: String = BuildConfig.UPDATE_REPO
 
-    private const val API = "https://api.github.com/repos/$REPO/releases/latest"
+    private val API = "https://api.github.com/repos/$REPO/releases/latest"
     private const val PREF = "updates"
     private const val KEY_LAST_CHECK = "lastCheckMs"
     private const val KEY_SKIPPED = "skippedVersion"

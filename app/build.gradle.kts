@@ -20,8 +20,8 @@ android {
         applicationId = "dev.zanderp.opencfmoto"
         minSdk = 29
         targetSdk = 36
-        versionCode = 77
-        versionName = "2.0.18"
+        versionCode = 79
+        versionName = "2.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -39,6 +39,11 @@ android {
             ?: System.getenv("TELEMETRY_URL")
             ?: "https://opencfmoto-telemetry.hello-3d9.workers.dev"
         buildConfigField("String", "TELEMETRY_URL", "\"$telemetryUrl\"")
+
+        // GitHub repo "owner/name" the in-app update check reads releases from. Forks shipping their
+        // own builds pass -PupdateRepo=owner/name so their riders aren't sent to another fork's APK.
+        val updateRepo = (project.findProperty("updateRepo") as String?)?.trim()?.ifEmpty { null } ?: "zanderp/open-cfmoto"
+        buildConfigField("String", "UPDATE_REPO", "\"$updateRepo\"")
 
         // Short git hash for Share Logs triage (configuration-cache safe).
         val gitHash = providers.exec {

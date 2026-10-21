@@ -1,47 +1,53 @@
 <div align="center">
 
-# 🏍️ OpenCfMoto
+# 🏍️ OpenCfMoto — Rider Extras
 
-### Wireless Android Auto on Carbit / EasyConnect dashes (CFMoto MotoPlay and siblings) — no root, no PC.
+### Wireless Android Auto on Carbit / EasyConnect dashes (CFMoto MotoPlay and siblings) — plus fuel range, rain alerts, ride reports and bike care. No root, no PC.
 
 **CFMoto** · **Voge** · **Moto Morini** · **Morbidelli** · **Zontes** · **Benelli** · **QJ Motor** ·
 **Rieju** · **UM** · **Wmoto** · **Longjia** · **GOES** / **Gladiator** · and other brands with a pairing QR
 
-[Supported bikes](docs/SUPPORTED-BIKES.md) · [Dash showcase](docs/SHOWCASE.md) — real Android Auto photos from the community
+[![Download APK](https://img.shields.io/badge/Download-OpenCfMoto%202.1.0-2ea44f?style=for-the-badge&logo=android&logoColor=white)](https://github.com/KasunRoczDev/open-cfmoto/releases/latest/download/OpenCfMoto.apk)
+[![Latest release](https://img.shields.io/github/v/release/KasunRoczDev/open-cfmoto?style=for-the-badge&label=Release)](https://github.com/KasunRoczDev/open-cfmoto/releases/latest)
+[![Android 10+](https://img.shields.io/badge/Android-10%2B-3DDC84?style=for-the-badge&logo=android&logoColor=white)](#-what-you-need)
+[![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue?style=for-the-badge)](LICENSE)
+[![Join the Discord](https://img.shields.io/badge/Discord-Community-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/KNTjJhmFZ6)
 
-Put **Google Maps / Waze** on your bike's dash over Wi-Fi, drive it from the touchscreen, and log
-every ride — all from an Android phone in your pocket.
-
-<br/>
-
-[![Join the Discord](https://img.shields.io/badge/Discord-Join%20the%20community-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/KNTjJhmFZ6)
-[![Downloads](https://img.shields.io/github/downloads/zanderp/open-cfmoto/total?style=for-the-badge&label=Downloads)](https://github.com/zanderp/open-cfmoto/releases)
-[![Ko-fi](https://img.shields.io/badge/Ko--fi-Support%20the%20project-ff5e5b?style=for-the-badge&logo=ko-fi&logoColor=white)](https://ko-fi.com/alexandrupopa)
-
-**💬 Questions, logs, or a new bike to add? [Join the Open CFMoto Discord](https://discord.gg/KNTjJhmFZ6).**
+Put **Google Maps / Waze** on your bike's dash over Wi‑Fi, drive it from the touchscreen or handlebar,
+and let the app look after the rest — **range, rain, rides and service** — from a phone in your pocket.
 
 <br/>
 
-<img src="docs/screenshots/01_main.png" width="220" alt="Home screen"/>&nbsp;
-<img src="docs/screenshots/14_map_hub.png" width="220" alt="Map hub"/>&nbsp;
-<img src="docs/screenshots/08_trips.png" width="220" alt="Saved trips by day"/>
+<table>
+  <tr>
+    <td align="center"><img src="docs/screenshots/01_main.png" width="180" alt="Ride screen with the bike render"/><br/><sub><b>My moto</b></sub></td>
+    <td align="center"><img src="docs/screenshots/20_fuel.png" width="180" alt="Fuel log and range"/><br/><sub><b>Fuel &amp; range</b></sub></td>
+    <td align="center"><img src="docs/screenshots/21_weekly_report.png" width="180" alt="Weekly ride report"/><br/><sub><b>Weekly report</b></sub></td>
+    <td align="center"><img src="docs/screenshots/22_maintenance.png" width="180" alt="Maintenance tracker"/><br/><sub><b>Maintenance</b></sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/screenshots/23_service_photos.png" width="180" alt="Mark serviced with receipt photos"/><br/><sub><b>Service photos</b></sub></td>
+    <td align="center"><img src="docs/screenshots/24_backup.png" width="180" alt="Backup and restore"/><br/><sub><b>Backup &amp; restore</b></sub></td>
+    <td align="center"><img src="docs/screenshots/14_map_hub.png" width="180" alt="Map hub"/><br/><sub><b>Map / GPX</b></sub></td>
+    <td align="center"><img src="docs/screenshots/19_me.png" width="180" alt="Me tab"/><br/><sub><b>Me</b></sub></td>
+  </tr>
+</table>
 
-<br/><br/>
+<br/>
 
 ### 🎥 Live demo — Android Auto on a CFMoto dash
 
 <img src="docs/media/hud-demo.gif" width="560" alt="Android Auto on the CFMoto MotoPlay dashboard"/>
 
-**▶ [Watch the full demo](docs/media/hud-demo.mp4)** — Google Maps navigation + media, driven from the
-dash touchscreen.
-
-<br/>
-
-### 📸 See it on more bikes — [Dash showcase](docs/SHOWCASE.md)
-
-CFMoto · Voge · Morini · Morbidelli · QJ Motor · Rieju · UM · Wmoto · GOES and more — community photos of Android Auto on the dash.
+**▶ [Watch the full demo](docs/media/hud-demo.mp4)** · 📸 **[Dash showcase](docs/SHOWCASE.md)** — community photos on CFMoto, Voge, Morini, QJ and more · 🏍️ **[Supported bikes](docs/SUPPORTED-BIKES.md)**
 
 </div>
+
+> 🧩 **This is the _Rider Extras_ build** by [KasunRoczDev](https://github.com/KasunRoczDev), based on
+> **[OpenCfMoto](https://github.com/zanderp/open-cfmoto)** by Alexandru and its contributors. Same
+> connection core, with extra rider features on top (see [What's new in 2.1](#-whats-new-in-21--rider-extras)).
+> It's signed with a different key than the original releases, so **uninstall the original app first**
+> if you're switching (save a backup with *Me ▸ Backup & restore* before you do).
 
 ---
 
@@ -63,10 +69,113 @@ CFMoto · Voge · Morini · Morbidelli · QJ Motor · Rieju · UM · Wmoto · GO
 
 ---
 
+## 📑 Contents
+
+[What's new in 2.1](#-whats-new-in-21--rider-extras) · [Features](#-features) · [What you need](#-what-you-need) ·
+[Supported bikes](#%EF%B8%8F-supported-bikes) · [Getting started](#-getting-started) · [Feature guide](#-feature-guide) ·
+[Map / GPX](#%EF%B8%8F-map--gpx-adventure-nav) · [Troubleshooting](#-troubleshooting) · [Building](#%EF%B8%8F-building-from-source) ·
+[Privacy](#-privacy) · [License](#-license)
+
+---
+
+## 🆕 What's new in 2.1 — Rider Extras
+
+<table>
+<tr>
+<td width="50%" valign="top">
+
+### ⛽ Fuel log & range on the dash
+Log fill-ups (litres, cost, full tank or partial) in **Me ▸ Fuel**. The app measures your real **km/L**
+between full tanks, falls back to the model spec until then (150SC: 8.5 L, ~2.6 L/100 km), and shows
+**cost per km** and monthly spend. The dash side panel shows **⛽ ~185 km**, counting down live —
+amber under 50 km, red under 20 km.
+
+</td>
+<td width="50%" valign="top">
+
+### 🌧️ Rain alerts on the dash
+The side panel tells you **🌧 Rain in 35 min**, **🌦 Drizzle**, **🌧 Rain ahead** (a point ~10 km up
+the road) or just **☁ 31°**. The data comes from the free Open-Meteo service, refreshed every 10 min or 5 km over
+cellular. Your position is rounded to ~1 km; turn it off in Setup.
+
+</td>
+</tr>
+<tr>
+<td valign="top">
+
+### 🌿 Eco speed coach
+A per-model **eco speed band** (150SC: 40–60 km/h, ~5–6.5k rpm, below its torque peak) on the side
+panel during navigation: ✓ green inside the band, amber **Ease off** above it. The Forest's eco score
+uses the same band.
+
+</td>
+<td valign="top">
+
+### 📈 Weekly ride report
+**Trips ▸ Weekly report**: distance with a day-by-day chart, rides and riding time, change vs last week,
+**eco %** (replayed from each ride's GPS track), fuel used and its cost, and your **best ride**. Every
+Monday morning a notification sums up last week. Tap it to open that week.
+
+</td>
+</tr>
+<tr>
+<td valign="top">
+
+### 🔧 Maintenance with service photos
+Your model's service schedule (150SC from the owner's manual) against an estimated odometer — due-soon
+and overdue items, a daily overdue notification, and now a **service history**: every *Mark serviced*
+keeps the date, km and **receipt photos** (take or choose; add more later).
+
+</td>
+<td valign="top">
+
+### 🔵 Log rides over the bike's Bluetooth
+Optional: whenever the bike's own Bluetooth (calls / music) connects, a ride is logged with no projection
+needed, phone in your pocket. A 2-minute grace keeps short dropouts in one ride. Needs location
+*Allow all the time*.
+
+</td>
+</tr>
+<tr>
+<td valign="top">
+
+### 🗂️ Full backup & restore
+**Me ▸ Backup & restore** saves every ride, the fuel log, maintenance (with photos), bike photos and all
+settings into **one zip** you can keep in Google Drive. Restore checks the whole file first, merges rides
+and restarts the app.
+
+</td>
+<td valign="top">
+
+### 🧩 Home-screen widget · 🏍 bike render · 🛟 steadier link
+A 4×1 widget with **range · last ride · next service**. The Ride screen shows a clean **studio render**
+of your model (150SC Gem Black). And if Android Auto drops mid-ride, the app now **restarts it**
+instead of linking the dash to a dead session (map with no directions).
+
+</td>
+</tr>
+</table>
+
+<p align="center">
+<img src="docs/screenshots/26_side_panel.png" width="200" alt="Dash side panel: eco tree, eco band, fuel range and rain alert"/>&nbsp;&nbsp;
+<img src="docs/screenshots/25_widget.png" width="420" alt="Home-screen widget: range, last ride, next service"/>
+<br/><sub>Dash side panel (eco band · fuel range · rain) and the home-screen widget</sub>
+</p>
+
+---
+
 ## ✨ Features
 
 | | |
 | --- | --- |
+| ⛽ **Fuel log & range** | Fill-ups, measured km/L, cost per km, monthly spend, and **⛽ ~185 km** live on the dash. |
+| 🌧️ **Rain alerts** | Rain now, in N min or up the road, or the temperature, on the dash side panel (Open-Meteo). |
+| 🌿 **Eco speed coach** | Per-model eco band with a live ✓ / *Ease off* hint beside the turn-by-turn directions. |
+| 📈 **Weekly ride report** | Distance, eco %, fuel cost and best ride per week, plus a Monday summary notification. |
+| 🔧 **Maintenance & service history** | Model schedule vs estimated odometer, overdue alerts, and receipt photos per service. |
+| 🔵 **Bluetooth ride logging** | Logs a ride whenever the bike's Bluetooth is connected, with no projection needed. |
+| 🗂️ **Backup & restore** | Everything in one zip; restore merges rides and replaces the rest. |
+| 🧩 **Home-screen widget** | Range · last ride · next service at a glance. |
 | 🗺️ **Android Auto on the dash** | Relays Google Maps / Waze / any AA app to the MotoPlay screen over Wi‑Fi. |
 | 👆 **Multi-touch** | Two-finger pinch-to-zoom and full tap/scroll straight from the dash touchscreen (ghost-touch filter for noisy digitizers). |
 | 📺 **Dash view** | Big home-screen button — watch and drive the live dash from the phone (touch, pad, fullscreen). |
@@ -87,7 +196,7 @@ CFMoto · Voge · Morini · Morbidelli · QJ Motor · Rieju · UM · Wmoto · GO
 | 🌗 **Map dark mode** | Day / Night / Auto — from Setup, Controls, or Dash view; applies live. |
 | 🔋 **Battery & power tuning** | Smooth / Balanced / Saver + **Auto** (adapts to heat & Wi‑Fi). |
 | 🛟 **Auto-recovery & seamless resume** | Stalled/dropped dash reconnects; long stop parks AA and re-projects when the bike returns. |
-| 🔄 **In-app updates** | Optional nag when a newer GitHub Release is available (Download / Skip / Later). |
+| 🔄 **In-app updates** | Optional nag when a newer GitHub Release of this build is available (Download / Skip / Later). |
 | 🧰 **Diagnostics & problem report** | Live logs (secrets redacted by default), Share Logs, and Setup → **Report a problem**. |
 | 📤 **Share / import bike tuning** | Export profile, resolution, fit, margins & button map as JSON (no passwords / personal prefs) — share on Discord, Import on another phone. |
 | 📶 **Wi‑Fi-off alert** | If phone Wi‑Fi is off when connecting, a dialog offers **Wi‑Fi settings** (one tap). |
@@ -106,7 +215,7 @@ CFMoto · Voge · Morini · Morbidelli · QJ Motor · Rieju · UM · Wmoto · GO
   use **Controls** + handlebar buttons. Unknown dashes are learned after the first connect.
 - **An Android phone**, Android **10 or newer**.
 - **Google Android Auto** (see [step 3](#3-android-auto-setup); 17.4+ also needs **Start head unit server**).
-- **OpenCfMoto** from [Releases](https://github.com/zanderp/open-cfmoto/releases/latest) (sideload).
+- **OpenCfMoto** from [Releases](https://github.com/KasunRoczDev/open-cfmoto/releases/latest) (sideload).
 - A **mobile-data plan** is recommended: the phone joins the bike's Wi‑Fi, so maps/traffic use cellular.
 
 No root, no VPN, no PC required to ride.
@@ -128,10 +237,13 @@ required. US CRCP and international dashes both work. OpenCfMoto projects **wire
 <img src="docs/screenshots/12_supported_bikes.png" width="240" alt="In-app supported bikes list"/>
 </p>
 
+<details>
+<summary><b>Confirmed models, in-progress dashes and the full CFMoto list</b></summary>
+
 ### Confirmed with OpenCfMoto
 
 Community-confirmed Android Auto on the dash (Discord `#confirmed-working` + brand rooms). Pairing QR
-required. Latest ride build is **2.0.18**.
+required. Confirmed on upstream **2.0.18**; 2.1.0 keeps the same connection core.
 
 **CFMoto**
 - **1000MT‑X** · **800MT‑X** · **800MT Explore** / Explore GT · **Ibex 800** (US)
@@ -187,6 +299,8 @@ Touring · 450SR World Champion Edition · 700CL‑X · PAPIO.
 
 Report a working bike that isn’t listed in **[Discord](https://discord.gg/KNTjJhmFZ6)**.
 
+</details>
+
 ---
 
 ## 🚀 Getting started
@@ -201,11 +315,11 @@ its **pairing QR code** — the same QR the official brand / Carbit companion ap
 The app isn't on the Play Store — you sideload the APK.
 
 1. Download the latest **`OpenCfMoto.apk`** from the
-   **[Releases page](https://github.com/zanderp/open-cfmoto/releases/latest)**
-   (direct link: <https://github.com/zanderp/open-cfmoto/releases/latest/download/OpenCfMoto.apk>).
+   **[Releases page](https://github.com/KasunRoczDev/open-cfmoto/releases/latest)**
+   (direct link: <https://github.com/KasunRoczDev/open-cfmoto/releases/latest/download/OpenCfMoto.apk>).
    If Android says the package is **not compatible** (32-bit Android — e.g. Galaxy A13 5G /
    SM-A136B), use
-   [OpenCfMoto.armv7.apk](https://github.com/zanderp/open-cfmoto/releases/latest/download/OpenCfMoto.armv7.apk)
+   [OpenCfMoto.armv7.apk](https://github.com/KasunRoczDev/open-cfmoto/releases/latest/download/OpenCfMoto.armv7.apk)
    instead. Most phones from the last few years want the default 64-bit APK.
 2. Tap it in a file manager / your browser downloads to install; allow installation from your
    browser/file manager when Android prompts about "unknown sources".
@@ -403,6 +517,10 @@ keys on the 800MT 5-way — into those gestures.
    Leave *untested* and we’ll auto-mark absent after ~90 s of streaming with no ▲/▼ events.
 5. Ride — **singles fire immediately** (snappy); a second tap in the double-tap window still runs ×2.
 
+
+<details>
+<summary><b>Which left switch do you have? Cluster presets, gesture tables, timing &amp; Logs</b></summary>
+
 #### Which left switch do you have?
 
 CFMOTO ships more than one left pod. **Doubles and long-press are not equal across them** — pick the
@@ -566,6 +684,8 @@ on-screen pad. Turn the switch **OFF** only if you want the physical bars to con
 If Spotify (or another player) steals the buttons mid-ride: press **★** to **pause** the song so
 OpenCfMoto can reclaim the bars for navigation, then start music again when you want.
 
+</details>
+
 ### 📺 Dash view (watch & control from the phone)
 
 Tap **Dash view** on the home screen (next to **Controls**) to see the **live dashboard inside the
@@ -594,7 +714,7 @@ before you ride — then pocket it. On touch dashes you can **drive it with your
 - **Setup → Check for update** — looks at GitHub Releases; the app also nags at most once a day when
   a newer build exists (optional Download / Skip / Later). Bike Wi‑Fi has no internet, so checks run
   on cellular/home Wi‑Fi.
-- **About** (home header or Setup) — copyright, credits, **Discord**, and **Donate** (Ko‑fi).
+- **About** (home header or Setup) — copyright, credits and **Discord**.
 
 <br clear="all"/>
 
@@ -644,6 +764,9 @@ OpenCfMoto routes and **Connect** for Maps/Waze Android Auto.
 
 ## 🔘 Button reference
 
+<details>
+<summary><b>Every button on the home, Me and Trips screens</b></summary>
+
 | Button | What it does |
 | --- | --- |
 | **Connect / Stop** | Connect starts Android Auto on the dash; becomes **Stop** while linking or projecting. |
@@ -655,7 +778,11 @@ OpenCfMoto routes and **Connect** for Maps/Waze Android Auto.
 | **Garage** | Manage bikes — select, rename, photo, add/remove (per-bike settings). |
 | **Trip** | GPS trip computer + saved rides and route maps. |
 | **Logs** | Show/hide diagnostics (Share / Clear). |
-| **About** | Copyright, credits, Discord, Donate. |
+| **About** | Copyright, credits, Discord. |
+| **Me ▸ Fuel · Maintenance · Backup** | Fuel log & range, service schedule & history, full backup / restore. |
+| **Trips ▸ Weekly report** | Week-by-week distance, eco %, fuel and best ride. |
+
+</details>
 
 ---
 
@@ -678,7 +805,7 @@ OpenCfMoto routes and **Connect** for Maps/Waze Android Auto.
 | Dash stays **black** after connecting | Tap **Stop**, then **Connect** / **Scan bike** again. Make sure the dash is on its phone-connection screen. |
 | **No Wi‑Fi dialog** appears | Confirm the Location permission is granted; move the phone next to the bike; tap **Stop** and retry. Some phones show the dialog behind Android Auto — swipe back to OpenCfMoto. |
 | **Android Auto never starts** | On AA 17.4+: open Android Auto → tap Version 10× → ⋮ → **Start head unit server**, then Connect. Also re-check [step 3](#3-android-auto-setup) (developer mode + unknown sources). Do **not** uninstall Android Auto updates. |
-| Install says **not compatible** with this phone | Default Latest is **64-bit only**. Use [OpenCfMoto.armv7.apk](https://github.com/zanderp/open-cfmoto/releases/latest/download/OpenCfMoto.armv7.apk) on 32-bit Android (Galaxy A13 5G / SM-A136B and similar). |
+| Install says **not compatible** with this phone | Default Latest is **64-bit only**. Use [OpenCfMoto.armv7.apk](https://github.com/KasunRoczDev/open-cfmoto/releases/latest/download/OpenCfMoto.armv7.apk) on 32-bit Android (Galaxy A13 5G / SM-A136B and similar). |
 | **Auto-connect doesn't fire** | Ensure *Auto-connect* is On, the bike is paired, and its Wi‑Fi is in range; open the app or return to it to retry. |
 | Picture is **stretched / letterboxed** on an unknown bike | Reconnect once so it learns the dash shape, or set the orientation/size manually in Setup. |
 | Dash **froze** and didn't recover | With *Auto-recovery* on it should reconnect itself; otherwise tap **Stop** then **Connect**. |
@@ -697,9 +824,8 @@ notes across bikes/phones, share captures that help add new dash profiles, and h
 
 <div align="center">
 
-[![Join the Discord](https://img.shields.io/badge/Discord-Join%20the%20community-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/KNTjJhmFZ6)
 
-[![Ko-fi](https://img.shields.io/badge/Ko--fi-Support%20the%20project-ff5e5b?style=for-the-badge&logo=ko-fi&logoColor=white)](https://ko-fi.com/alexandrupopa)
+[![Join the Discord](https://img.shields.io/badge/Discord-Join%20the%20community-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/KNTjJhmFZ6)
 
 </div>
 
@@ -717,6 +843,9 @@ notes across bikes/phones, share captures that help add new dash profiles, and h
 
 ## 🛠️ Building from source
 
+<details>
+<summary><b>Build it yourself with Android Studio or Gradle</b></summary>
+
 Most riders can just install the release APK. To build it yourself:
 
 1. Install **Android Studio** (bundles the JDK + Android SDK).
@@ -730,6 +859,18 @@ Most riders can just install the release APK. To build it yourself:
 
 Requires JDK 11+ (Android Studio's bundled JBR works). The build uses the Gradle configuration cache
 for fast incremental rebuilds.
+
+**Release APK (what's on the Releases page):**
+
+```bash
+./gradlew :app:assembleRelease -PupdateRepo=KasunRoczDev/open-cfmoto
+./gradlew :app:assembleRelease -PupdateRepo=KasunRoczDev/open-cfmoto -Pabi=armeabi-v7a   # 32-bit phones
+```
+
+`-PupdateRepo=owner/name` points the in-app update check at your fork's releases (default: the
+upstream repo). Release builds are R8-shrunk, one ABI each.
+
+</details>
 
 ---
 
@@ -757,7 +898,10 @@ and built the Android Auto plumbing before us. Huge thanks to:
 - **[headunit-revived](https://github.com/andreknieriem/headunit-revived)** by *andreknieriem* — the
   Android Auto (AAP) receiver foundation.
 
-Maintained by **Alexandru** ([alexandru.rocks](https://alexandru.rocks)) — see **About** in the app.
+**Rider Extras** (fuel & range, rain alerts, eco coach, weekly report, service history, Bluetooth ride
+logging, backup, widget) by **[KasunRoczDev](https://github.com/KasunRoczDev)**.
+
+OpenCfMoto is maintained by **Alexandru** ([alexandru.rocks](https://alexandru.rocks)) — see **About** in the app.
 Thank you to everyone who shared logs, captures, and bike reports. Technical notes live in
 [`docs/`](docs/).
 
@@ -804,7 +948,8 @@ ship today). On **Android 13+** you can also set a language just for this app:
 
 OpenCfMoto is **local-first**: no account, no ads. Bike profiles, trip logs, and full diagnostics
 stay on your phone. Optional **anonymous** install pings + crash reports (random UUID only) can be
-turned off under Setup → Privacy — details in **[PRIVACY.md](PRIVACY.md)**.
+turned off under Setup → Privacy. **Rain alerts** send a position rounded to ~1 km to Open-Meteo and
+can be turned off too. Details are in **[PRIVACY.md](PRIVACY.md)**.
 
 <div align="center">
 
