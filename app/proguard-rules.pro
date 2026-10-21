@@ -28,3 +28,8 @@
 # OpenCfMoto entry points + BuildConfig.
 -keep class dev.zanderp.opencfmoto.MainActivity { *; }
 -keep class dev.zanderp.opencfmoto.** { *; }
+
+# WorkManager (maintenance reminders, weekly report) builds its Room database reflectively via
+# WorkDatabase_Impl's no-arg constructor; without this R8 strips it and release builds crash at launch.
+-keep class * extends androidx.room.RoomDatabase { <init>(); }
+-keep class androidx.work.impl.WorkDatabase_Impl { *; }
