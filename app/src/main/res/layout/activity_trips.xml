@@ -21,7 +21,7 @@
             android:layout_height="26dp"
             android:contentDescription="@string/trips_trips"
             android:src="@drawable/ic_speed"
-            android:tint="@color/brand_orange" />
+            android:tint="@color/accent" />
 
         <TextView
             android:layout_width="0dp"
@@ -99,9 +99,9 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:text="@string/trips_today"
-        android:textColor="@color/brand_orange"
+        android:textColor="@color/accent"
         android:visibility="gone"
-        app:rippleColor="@color/brand_orange" />
+        app:rippleColor="@color/accent" />
 
     <TextView
         android:id="@+id/trips_empty"

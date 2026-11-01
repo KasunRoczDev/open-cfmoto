@@ -27,6 +27,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material.icons.rounded.ErrorOutline
+import androidx.compose.material.icons.rounded.LinkOff
+import androidx.compose.material.icons.rounded.Sync
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -40,8 +44,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import dev.zanderp.opencfmoto.R
 
 enum class StatusKind { IDLE, BUSY, LIVE, ERROR }
 
@@ -56,8 +65,8 @@ fun OcmScreen(modifier: Modifier = Modifier, content: @Composable ColumnScope.()
         Modifier.fillMaxSize().background(Brush.verticalGradient(0f to c.bgTop, 0.45f to c.bg, 1f to c.bg)),
     ) {
         Column(
-            modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp, vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = OcmSpace.m, vertical = OcmSpace.m),
+            verticalArrangement = Arrangement.spacedBy(OcmSpace.m),
             content = content,
         )
     }
@@ -89,22 +98,39 @@ fun PrimaryButton(
     }
 }
 
+/** Status colour for [kind]; never the only cue — pair it with [statusIcon] and a label. */
 @Composable
-fun StatusChip(text: String, kind: StatusKind) {
+fun statusColor(kind: StatusKind): Color {
     val c = Ocm.colors
-    val color = when (kind) {
+    return when (kind) {
         StatusKind.IDLE -> c.idle
         StatusKind.BUSY -> c.busy
         StatusKind.LIVE -> c.live
         StatusKind.ERROR -> c.error
     }
+}
+
+fun statusIcon(kind: StatusKind): ImageVector = when (kind) {
+    StatusKind.IDLE -> Icons.Rounded.LinkOff
+    StatusKind.BUSY -> Icons.Rounded.Sync
+    StatusKind.LIVE -> Icons.Rounded.CheckCircle
+    StatusKind.ERROR -> Icons.Rounded.ErrorOutline
+}
+
+/** Connection status: icon + label (body text colour, so it stays readable) on a status-tinted pill. */
+@Composable
+fun StatusChip(text: String, kind: StatusKind) {
+    val c = Ocm.colors
+    val color = statusColor(kind)
     Row(
-        Modifier.clip(RoundedCornerShape(14.dp)).background(color.copy(alpha = 0.16f)).padding(horizontal = 11.dp, vertical = 5.dp),
+        Modifier.clip(RoundedCornerShape(14.dp)).background(color.copy(alpha = 0.16f))
+            .padding(horizontal = 10.dp, vertical = 6.dp)
+            .semantics(mergeDescendants = true) {},
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(Modifier.size(8.dp).clip(CircleShape).background(color))
+        Icon(statusIcon(kind), contentDescription = null, tint = color, modifier = Modifier.size(16.dp))
         Spacer(Modifier.width(6.dp))
-        Text(text, style = OcmType.label.copy(letterSpacing = androidx.compose.ui.unit.TextUnit.Unspecified), color = color)
+        Text(text, style = OcmType.label.copy(letterSpacing = androidx.compose.ui.unit.TextUnit.Unspecified), color = c.text)
     }
 }
 
@@ -123,14 +149,14 @@ fun ActionTile(
             .clip(TileShape)
             .background(c.surface)
             .border(1.dp, c.outline, TileShape)
-            .clickable(enabled = enabled, onClick = onClick)
+            .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
             .alpha(if (enabled) 1f else 0.4f)
-            .padding(10.dp),
+            .padding(OcmSpace.s),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
         Icon(icon, contentDescription = null, tint = c.accent, modifier = Modifier.size(26.dp))
-        Spacer(Modifier.heightIn(min = 6.dp))
+        Spacer(Modifier.heightIn(min = OcmSpace.s))
         Text(label, style = OcmType.body, color = c.text, textAlign = TextAlign.Center, maxLines = 2)
     }
 }
@@ -148,16 +174,19 @@ fun OcmCard(
             .clip(CardShape)
             .background(c.surface)
             .border(1.dp, c.outline, CardShape)
-            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
-            .padding(horizontal = 16.dp, vertical = 14.dp),
-        verticalArrangement = Arrangement.spacedBy(6.dp),
+            .then(if (onClick != null) Modifier.clickable(role = Role.Button, onClick = onClick) else Modifier)
+            .padding(OcmSpace.m),
+        verticalArrangement = Arrangement.spacedBy(OcmSpace.xs),
         content = content,
     )
 }
 
 @Composable
 fun SectionLabel(text: String) {
-    Text(text.uppercase(), style = OcmType.label, color = Ocm.colors.text2, modifier = Modifier.padding(top = 8.dp))
+    Text(
+        text.uppercase(), style = OcmType.label, color = Ocm.colors.text2,
+        modifier = Modifier.padding(top = OcmSpace.s).semantics { heading() },
+    )
 }
 
 @Composable
@@ -170,12 +199,12 @@ fun SettingRow(
 ) {
     val c = Ocm.colors
     Row(
-        Modifier.fillMaxWidth().heightIn(min = 64.dp).clickable(onClick = onClick).padding(vertical = 8.dp),
+        Modifier.fillMaxWidth().heightIn(min = 64.dp).clickable(role = Role.Button, onClick = onClick).padding(vertical = OcmSpace.s),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (icon != null) {
             Icon(icon, contentDescription = null, tint = c.accent)
-            Spacer(Modifier.width(14.dp))
+            Spacer(Modifier.width(OcmSpace.m))
         }
         Column(Modifier.weight(1f)) {
             Text(title, style = OcmType.title, color = c.text)
@@ -222,9 +251,60 @@ fun OcmTopBar(title: String, onBack: () -> Unit, actions: @Composable RowScope.(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         IconButton(onClick = onBack, modifier = Modifier.size(56.dp)) {
-            Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = null, tint = c.text)
+            Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = stringResource(R.string.ui_back), tint = c.text)
         }
         Text(title, style = OcmType.screenTitle, color = c.text, modifier = Modifier.weight(1f), maxLines = 1)
         actions()
+    }
+}
+
+/**
+ * Navigation card: leading icon in an accent well, title + description, chevron. One button for
+ * TalkBack. Used for the Trips destinations.
+ */
+@Composable
+fun NavCard(title: String, description: String, icon: ImageVector, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val c = Ocm.colors
+    Row(
+        modifier
+            .fillMaxWidth()
+            .heightIn(min = 80.dp)
+            .clip(CardShape)
+            .background(c.surface)
+            .border(1.dp, c.outline, CardShape)
+            .clickable(role = Role.Button, onClick = onClick)
+            .padding(OcmSpace.m),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            Modifier.size(OcmSpace.touch).clip(RoundedCornerShape(14.dp)).background(c.accent.copy(alpha = 0.14f)),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(icon, contentDescription = null, tint = c.accent)
+        }
+        Spacer(Modifier.width(OcmSpace.m))
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(title, style = OcmType.title, color = c.text)
+            Text(description, style = OcmType.body, color = c.text2)
+        }
+        Spacer(Modifier.width(OcmSpace.s))
+        Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null, tint = c.text2)
+    }
+}
+
+/** Inline notice with a status icon — the Ride screen's error / progress line under the main button. */
+@Composable
+fun Notice(text: String, kind: StatusKind, modifier: Modifier = Modifier) {
+    val c = Ocm.colors
+    val color = statusColor(kind)
+    Row(
+        modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(color.copy(alpha = 0.12f))
+            .padding(horizontal = OcmSpace.m, vertical = 12.dp)
+            .semantics(mergeDescendants = true) {},
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(statusIcon(kind), contentDescription = null, tint = color, modifier = Modifier.size(20.dp))
+        Spacer(Modifier.width(12.dp))
+        Text(text, style = OcmType.body, color = c.text)
     }
 }

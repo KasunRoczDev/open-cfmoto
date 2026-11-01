@@ -36,11 +36,10 @@
                 android:paddingVertical="8dp">
 
                 <ImageView
-                    android:layout_width="56dp"
-                    android:layout_height="56dp"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
                     android:contentDescription="@string/app_name"
-                    android:src="@drawable/ic_ride"
-                    android:tint="@color/brand_orange" />
+                    android:src="@drawable/ic_ocm_mark" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -67,6 +66,15 @@
                     android:text="@string/about_wireless_android_auto_for_carbit_easyconnect_das"
                     android:textColor="@color/text_secondary"
                     android:textSize="14sp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center"
+                    android:text="@string/ui_community_note"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 

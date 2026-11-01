@@ -1,0 +1,19 @@
+<!-- OpenCfMoto mark — original artwork for the OpenCfMoto community project (AGPL-3.0-or-later).
+     Gauge ring ("O" for Open) + needle + two wireless arcs to the dash. Not derived from any OEM logo.
+     108×108 = Android adaptive-icon canvas; the mark sits inside the 66 dp safe circle. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108" width="432" height="432">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#162230"/>
+      <stop offset="1" stop-color="#0B1016"/>
+    </linearGradient>
+  </defs>
+  <rect width="108" height="108" fill="url(#bg)"/>
+  <g transform="translate(-3.5 3.5)" fill="none" stroke-linecap="round">
+    <path d="M37.979,70.021A17,17 0 1,1 62.021,70.021" stroke="#F4F7FA" stroke-width="6"/>
+    <path d="M50,58L57.778,50.222" stroke="#27C1D3" stroke-width="5"/>
+    <circle cx="50" cy="58" r="4.5" fill="#27C1D3"/>
+    <path d="M55.406,32.569A26,26 0 0,1 75.431,52.594" stroke="#27C1D3" stroke-width="4.5"/>
+    <path d="M56.965,25.233A33.5,33.5 0 0,1 82.767,51.035" stroke="#27C1D3" stroke-width="4.5"/>
+  </g>
+</svg>

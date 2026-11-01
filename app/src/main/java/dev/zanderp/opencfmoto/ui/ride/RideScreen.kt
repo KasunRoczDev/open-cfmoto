@@ -22,12 +22,15 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CastConnected
 import androidx.compose.material.icons.rounded.Gamepad
 import androidx.compose.material.icons.rounded.LocalParking
+import androidx.compose.material.icons.rounded.Map
 import androidx.compose.material.icons.rounded.PowerSettingsNew
 import androidx.compose.material.icons.rounded.QrCodeScanner
 import androidx.compose.material.icons.rounded.ScreenShare
+import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Stop
 import androidx.compose.material.icons.rounded.TwoWheeler
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -40,17 +43,24 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.zanderp.opencfmoto.R
 import dev.zanderp.opencfmoto.ui.design.ActionTile
+import dev.zanderp.opencfmoto.ui.design.Notice
 import dev.zanderp.opencfmoto.ui.design.Ocm
 import dev.zanderp.opencfmoto.ui.design.OcmCard
+import dev.zanderp.opencfmoto.ui.design.OcmMark
 import dev.zanderp.opencfmoto.ui.design.OcmScreen
+import dev.zanderp.opencfmoto.ui.design.OcmSpace
 import dev.zanderp.opencfmoto.ui.design.OcmType
 import dev.zanderp.opencfmoto.ui.design.PrimaryButton
+import dev.zanderp.opencfmoto.ui.design.SectionLabel
 import dev.zanderp.opencfmoto.ui.design.StatusChip
+import dev.zanderp.opencfmoto.ui.design.StatusKind
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.time.Instant
@@ -68,11 +78,24 @@ fun RideScreen(
     onParked: () -> Unit,
     onMirror: () -> Unit,
     onScan: () -> Unit,
+    onMapHub: () -> Unit,
+    onSearch: () -> Unit,
     onRides: () -> Unit,
 ) {
     val c = Ocm.colors
     OcmScreen {
-        Text(stringResource(R.string.ui_ride_title), style = OcmType.screenTitle, color = c.text)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            OcmMark()
+            Spacer(Modifier.width(OcmSpace.s + OcmSpace.xs))
+            Text(
+                stringResource(R.string.ui_ride_title), style = OcmType.screenTitle, color = c.text,
+                modifier = Modifier.weight(1f).semantics { heading() }, maxLines = 1,
+            )
+            // Destination search (also opened by the bike's "type on phone" request) — replaces the Map tab's box.
+            IconButton(onClick = onSearch, modifier = Modifier.size(OcmSpace.touch)) {
+                Icon(Icons.Rounded.Search, contentDescription = stringResource(R.string.ui_search_label), tint = c.text)
+            }
+        }
         Row(verticalAlignment = Alignment.CenterVertically) {
             StatusChip(stringResource(s.phase.labelRes), s.statusKind)
             Spacer(Modifier.width(10.dp))
@@ -88,13 +111,22 @@ fun RideScreen(
                 PrimaryAction.CONNECT -> stringResource(R.string.main_connect_to, s.bikeName ?: "")
                 PrimaryAction.SCAN -> stringResource(R.string.ui_scan_your_bike)
             },
-            icon = if (s.primary == PrimaryAction.STOP) Icons.Rounded.Stop else Icons.Rounded.PowerSettingsNew,
+            icon = when (s.primary) {
+                PrimaryAction.STOP -> Icons.Rounded.Stop
+                PrimaryAction.CONNECT -> Icons.Rounded.PowerSettingsNew
+                PrimaryAction.SCAN -> Icons.Rounded.QrCodeScanner
+            },
             onClick = onPrimary,
             danger = s.primary == PrimaryAction.STOP,
         )
-        if (s.detail.isNotBlank()) Text(s.detail, style = OcmType.body, color = c.text2)
+        // Errors get an icon'd notice right under the button that retries them (Connect); progress stays quiet text.
+        if (s.detail.isNotBlank()) {
+            if (s.statusKind == StatusKind.ERROR) Notice(s.detail, StatusKind.ERROR)
+            else Text(s.detail, style = OcmType.body, color = c.text2)
+        }
         hero.summary?.let { RideCard(it, onRides) }
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        SectionLabel(stringResource(R.string.ui_ride_actions))
+        Row(horizontalArrangement = Arrangement.spacedBy(OcmSpace.s)) {
             ActionTile(stringResource(R.string.ui_tile_dash_view), Icons.Rounded.CastConnected, onDashView, s.dashViewEnabled, Modifier.weight(1f))
             ActionTile(stringResource(R.string.ui_tile_controls), Icons.Rounded.Gamepad, onControls, s.controlsEnabled, Modifier.weight(1f))
             ActionTile(
@@ -102,8 +134,10 @@ fun RideScreen(
                 Icons.Rounded.LocalParking, onParked, true, Modifier.weight(1f),
             )
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(OcmSpace.s)) {
             ActionTile(stringResource(R.string.ui_tile_mirror), Icons.Rounded.ScreenShare, onMirror, s.mirrorEnabled, Modifier.weight(1f))
+            // Map & GPX hub (free ride, GPX, offline maps on the dash) — moved here from the retired Map tab.
+            ActionTile(stringResource(R.string.ui_map_title), Icons.Rounded.Map, onMapHub, s.mapEnabled, Modifier.weight(1f))
             ActionTile(stringResource(R.string.ui_tile_scan), Icons.Rounded.QrCodeScanner, onScan, s.scanEnabled, Modifier.weight(1f))
         }
     }

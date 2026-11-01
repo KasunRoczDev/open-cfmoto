@@ -13,9 +13,13 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-/** OpenCfMoto colour tokens (spec §3.1). Same names as the XML colours used by the View screens. */
+/**
+ * OpenCfMoto colour tokens (UI/UX SRS §5). Same names as the XML colours used by the View screens —
+ * keep values/colors.xml and values-night/colors.xml in step.
+ */
 data class OcmColors(
     val bg: Color, val bgTop: Color, val surface: Color, val surface2: Color,
     val accent: Color, val onAccent: Color, val text: Color, val text2: Color, val outline: Color,
@@ -26,15 +30,16 @@ data class OcmColors(
 
 val LightOcmColors = OcmColors(
     bg = Color(0xFFF4F7FA), bgTop = Color(0xFFE6EDF2), surface = Color(0xFFFFFFFF), surface2 = Color(0xFFEEF2F5),
-    accent = Color(0xFF0B8C9B), onAccent = Color(0xFFFFFFFF), text = Color(0xFF14191F), text2 = Color(0xFF5B6773),
+    // SRS proposes #0B8C9B; one step darker so white button text and accent labels clear WCAG AA (4.7:1).
+    accent = Color(0xFF0A7F8C), onAccent = Color(0xFFFFFFFF), text = Color(0xFF14191F), text2 = Color(0xFF5B6773),
     outline = Color(0xFFDCE3E9), live = Color(0xFF1FA66A), busy = Color(0xFFC98A00), error = Color(0xFFD93A3A),
     idle = Color(0xFF8A93A3),
 )
 
 val DarkOcmColors = OcmColors(
-    bg = Color(0xFF0F1419), bgTop = Color(0xFF1C2430), surface = Color(0xFF182029), surface2 = Color(0xFF212B36),
-    accent = Color(0xFF27C1D3), onAccent = Color(0xFF06262B), text = Color(0xFFEEF2F6), text2 = Color(0xFF9AA7B4),
-    outline = Color(0xFF2A3440), live = Color(0xFF34D399), busy = Color(0xFFFBBF24), error = Color(0xFFF87171),
+    bg = Color(0xFF0B1016), bgTop = Color(0xFF141C26), surface = Color(0xFF171F29), surface2 = Color(0xFF24303D),
+    accent = Color(0xFF27C1D3), onAccent = Color(0xFF06262B), text = Color(0xFFF4F7FA), text2 = Color(0xFFAAB8C6),
+    outline = Color(0xFF2A3644), live = Color(0xFF34D399), busy = Color(0xFFFBBF24), error = Color(0xFFF87171),
     idle = Color(0xFF8A93A3), onError = Color(0xFF3A0B0B),
 )
 
@@ -45,6 +50,17 @@ object Ocm {
         @Composable get() = LocalOcmColors.current
 }
 
+/** 8 dp spacing scale (SRS §5). [xs] is the only half step, for icon/label gaps. */
+object OcmSpace {
+    val xs = 4.dp
+    val s = 8.dp
+    val m = 16.dp
+    val l = 24.dp
+    val xl = 32.dp
+    /** Minimum touch target. */
+    val touch = 48.dp
+}
+
 /** Type scale (spec §3.2). */
 object OcmType {
     val heroModel = TextStyle(fontSize = 72.sp, fontWeight = FontWeight.ExtraBold, letterSpacing = (-2).sp, lineHeight = 70.sp)
@@ -53,6 +69,7 @@ object OcmType {
     val screenTitle = TextStyle(fontSize = 24.sp, fontWeight = FontWeight.SemiBold)
     val title = TextStyle(fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
     val body = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Normal, lineHeight = 21.sp)
+    val caption = TextStyle(fontSize = 13.sp, fontWeight = FontWeight.Normal, lineHeight = 18.sp)
     val label = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.Medium, letterSpacing = 1.4.sp)
     val stat = TextStyle(fontSize = 28.sp, fontWeight = FontWeight.Bold)
 }

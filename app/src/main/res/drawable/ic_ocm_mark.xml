@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- OpenCfMoto mark: original artwork (gauge ring + needle + wireless arcs). Source geometry lives in
+     docs/brand/opencfmoto-mark.svg — keep the two in step. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="64"
+    android:viewportHeight="64">
+    <group
+        android:translateX="-25.5"
+        android:translateY="-18.5">
+        <!-- Gauge ring, open at the bottom ("O" for Open) -->
+        <path
+            android:pathData="M37.979,70.021A17,17 0 1,1 62.021,70.021"
+            android:strokeColor="@color/text_primary"
+            android:strokeWidth="6"
+            android:strokeLineCap="round" />
+        <!-- Needle + hub, pointing at the signal -->
+        <path
+            android:pathData="M50,58L57.778,50.222"
+            android:strokeColor="@color/accent"
+            android:strokeWidth="5"
+            android:strokeLineCap="round" />
+        <path
+            android:fillColor="@color/accent"
+            android:pathData="M45.5,58a4.5,4.5 0 1,0 9,0a4.5,4.5 0 1,0 -9,0z" />
+        <!-- Wireless link to the dash -->
+        <path
+            android:pathData="M55.406,32.569A26,26 0 0,1 75.431,52.594"
+            android:strokeColor="@color/accent"
+            android:strokeWidth="4.5"
+            android:strokeLineCap="round" />
+        <path
+            android:pathData="M56.965,25.233A33.5,33.5 0 0,1 82.767,51.035"
+            android:strokeColor="@color/accent"
+            android:strokeWidth="4.5"
+            android:strokeLineCap="round" />
+    </group>
+</vector>

@@ -1852,7 +1852,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/setup_clock_lab"
                     android:textAllCaps="true"
-                    android:textColor="@color/brand_orange"
+                    android:textColor="@color/accent"
                     android:textSize="12sp"
                     android:letterSpacing="0.08" />
 

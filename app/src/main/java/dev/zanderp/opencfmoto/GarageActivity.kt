@@ -118,7 +118,7 @@ class GarageActivity : AppCompatActivity() {
             isClickable = true
             if (isActive) {
                 strokeWidth = dp(2)
-                strokeColor = ContextCompat.getColor(this@GarageActivity, R.color.brand_orange)
+                strokeColor = ContextCompat.getColor(this@GarageActivity, R.color.accent)
             }
             setOnClickListener { showActions(bike, isActive) }
         }
@@ -136,7 +136,7 @@ class GarageActivity : AppCompatActivity() {
                 setImageBitmap(bmp)
             } else {
                 setImageResource(R.drawable.ic_ride)
-                setColorFilter(ContextCompat.getColor(this@GarageActivity, R.color.brand_orange))
+                setColorFilter(ContextCompat.getColor(this@GarageActivity, R.color.accent))
                 setPadding(dp(10), dp(10), dp(10), dp(10))
             }
         })
@@ -164,7 +164,7 @@ class GarageActivity : AppCompatActivity() {
             setTextColor(
                 ContextCompat.getColor(
                     this@GarageActivity,
-                    if (isActive) R.color.brand_orange else R.color.text_secondary
+                    if (isActive) R.color.accent else R.color.text_secondary
                 )
             )
             textSize = 13f

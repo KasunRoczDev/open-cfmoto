@@ -724,7 +724,8 @@ before you ride — then pocket it. On touch dashes you can **drive it with your
 
 Android Auto (Maps / Waze) does **not** replace adventure tracks. **OpenCfMoto Map / GPX** projects a
 bike-sized map to the dash (own-content path — MapLibre on phone, osmdroid on the bike stream) using
-OpenStreetMap data:
+OpenStreetMap data. Open it from the **Map & GPX** tile on the Ride screen (the app has three tabs —
+**Ride · Trips · Me** — there is no separate Map tab):
 
 <img src="docs/media/map-demo-1.gif" width="560" alt="OpenCfMoto Map on the CFMoto dash — free ride / search"/>
 
@@ -736,7 +737,7 @@ OpenStreetMap data:
 | **Free ride** | Map + GPS — speed, altitude, heading-up chase zoom, Follow / North-up |
 | **GPX track** | Import `.gpx`, optional offline tiles, turn cues + voice, progress |
 | **Search / POI** | OSM search + fuel/cafe/parking/… chips → preview routes → **Go** |
-| **Type on phone** | Tap Search on the bike → keyboard on the phone home field; results on the dash |
+| **Type on phone** | Tap Search on the bike → a search sheet opens over Ride on the phone; results on the dash |
 | **Home / favorites / markers** | Long-press drop a pin to set Home or a marker; favorites from search |
 | **Parked** | Mark / update / clear parking; navigate back to the pin |
 | **Navigate-to** | Road routes (OSRM / ORS / offline) with Fast / Fun alts; Recalc re-routes |
@@ -756,10 +757,10 @@ Save routing key**. Your key stays on the phone (never uploaded by OpenCfMoto). 
 fall back to the free routers again. Offline region packs also route without any online key.
 
 Dash widgets: **speed / left / ETA / alt / limit**, maneuver cue, **End / Park / Recalc**, Follow,
-Heading/North, Voice, zoom. Phone can stay pocketed — or type destinations from the home search bar
-while the map is on the bike.
+Heading/North, Voice, zoom. Phone can stay pocketed — or type destinations from the search button on
+the Ride screen while the map is on the bike.
 
-**Mirror app** is only for casting the phone UI (needs screen on / awkward aspect). Prefer **Map** for
+**Mirror app** is only for casting the phone UI (needs screen on / awkward aspect). Prefer **Map & GPX** for
 OpenCfMoto routes and **Connect** for Maps/Waze Android Auto.
 
 ## 🔘 Button reference
@@ -770,7 +771,8 @@ OpenCfMoto routes and **Connect** for Maps/Waze Android Auto.
 | Button | What it does |
 | --- | --- |
 | **Connect / Stop** | Connect starts Android Auto on the dash; becomes **Stop** while linking or projecting. |
-| **Scan · Map · Mirror** | Scan QR; Map = OpenCfMoto Map/GPX; Mirror = cast phone. While connected, Map/Mirror switch content. |
+| **Mirror · Map & GPX · Scan** | Mirror = cast phone; Map & GPX = OpenCfMoto map hub; Scan QR. While connected, Map/Mirror switch content. |
+| **Search (🔍, Ride header)** | Type a destination: dash map search, Android Auto navigation, or the Map & GPX hub. The bike's Search button opens the same sheet. |
 | **Dash view · Controls** | Phone HUD and D-pad / handlebar (same row). |
 | **Dash view** | Live in-app mirror of the dash — touch + on-screen controls. |
 | **Controls** | On-screen D-pad/knob, volume, handlebar mapping, Navigate-to. |

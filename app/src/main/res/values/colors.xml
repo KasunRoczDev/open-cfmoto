@@ -3,10 +3,11 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
-    <!-- Brand (app icon, legacy highlights) — same in light and dark. -->
-    <color name="brand_orange">#FF6A2C</color>
-    <color name="brand_orange_dark">#E85A1E</color>
-    <color name="on_brand">#FFFFFF</color>
+    <!-- Brand (launcher icon, splash) — same in light and dark. Legacy highlights use @color/accent. -->
+    <color name="brand_ink">#0B1016</color>
+    <color name="brand_ink_top">#162230</color>
+    <color name="brand_cyan">#27C1D3</color>
+    <color name="brand_light">#F4F7FA</color>
 
     <!-- Light tokens (dark values live in values-night/colors.xml). -->
     <color name="bg">#F4F7FA</color>
@@ -14,7 +15,7 @@
     <color name="surface">#FFFFFF</color>
     <color name="surface_high">#EEF2F5</color>
     <color name="outline">#DCE3E9</color>
-    <color name="accent">#0B8C9B</color>
+    <color name="accent">#0A7F8C</color>
     <color name="on_accent">#FFFFFF</color>
     <color name="text_primary">#14191F</color>
     <color name="text_secondary">#5B6773</color>
@@ -26,4 +27,6 @@
     <!-- Drawn on the bike dash (GpxDashUi): fixed, never follows the phone's light/dark mode. -->
     <color name="dash_surface_high">#1F242E</color>
     <color name="dash_text_primary">#F2F5FA</color>
+    <color name="dash_accent">#27C1D3</color>
+    <color name="dash_on_accent">#06262B</color>
 </resources>

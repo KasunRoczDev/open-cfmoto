@@ -124,7 +124,7 @@ class MainActivity : AppCompatActivity() {
         openMaintenanceTick.intValue += 1
     }
 
-    /** Bike Search tap → bring the app forward, open the Map tab and focus the search field. */
+    /** Bike Search tap → bring the app forward, open the Ride search sheet and focus its field. */
     private fun installTypeOnPhoneHandler() {
         DashRemote.setTypeOnPhoneHandler {
             runOnUiThread {

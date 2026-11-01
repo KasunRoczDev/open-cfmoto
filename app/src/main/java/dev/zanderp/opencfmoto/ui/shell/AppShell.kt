@@ -7,7 +7,6 @@ import android.app.Activity
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Insights
-import androidx.compose.material.icons.rounded.Map
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.TwoWheeler
 import androidx.compose.material3.Icon
@@ -22,6 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -59,9 +59,9 @@ import dev.zanderp.opencfmoto.connect.ConnectionController
 import dev.zanderp.opencfmoto.ui.design.Ocm
 import dev.zanderp.opencfmoto.ui.dialog.DialogHost
 import dev.zanderp.opencfmoto.ui.log.LogsScreen
+import dev.zanderp.opencfmoto.ui.ride.DestinationSearchSheet
 import dev.zanderp.opencfmoto.ui.ride.RideScreen
 import dev.zanderp.opencfmoto.ui.ride.rideUiState
-import dev.zanderp.opencfmoto.ui.tabs.MapTab
 import dev.zanderp.opencfmoto.ui.tabs.MeTab
 import dev.zanderp.opencfmoto.ui.tabs.TripsTab
 
@@ -69,7 +69,6 @@ private data class Tab(val route: String, val labelRes: Int, val icon: ImageVect
 
 private val Tabs = listOf(
     Tab("ride", R.string.ui_tab_ride, Icons.Rounded.TwoWheeler),
-    Tab("map", R.string.ui_tab_map, Icons.Rounded.Map),
     Tab("trips", R.string.ui_tab_trips, Icons.Rounded.Insights),
     Tab("me", R.string.ui_tab_me, Icons.Rounded.Person),
 )
@@ -104,7 +103,19 @@ fun AppShell(c: ConnectionController, searchFocusTick: Int, openMaintenanceTick:
         }
     }
 
-    LaunchedEffect(searchFocusTick) { if (searchFocusTick > 0) nav.navigate("map") { launchSingleTop = true } }
+    // Destination search lives in a sheet over Ride (the Map tab is gone): the bike's "type on phone" request
+    // brings Ride forward and opens it; the Ride header's search button opens the same sheet.
+    var searchOpen by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(searchFocusTick) {
+        if (searchFocusTick > 0) {
+            nav.navigate("ride") {
+                popUpTo(nav.graph.findStartDestination().id) { saveState = true }
+                launchSingleTop = true
+                restoreState = true
+            }
+            searchOpen = true
+        }
+    }
     LaunchedEffect(openMaintenanceTick) { if (openMaintenanceTick > 0) nav.navigate("maintenance") { launchSingleTop = true } }
     LaunchedEffect(openReportTick) { if (openReportTick > 0) nav.navigate("report?back=1") { launchSingleTop = true } }   // the notification is about last week
 
@@ -150,11 +161,10 @@ fun AppShell(c: ConnectionController, searchFocusTick: Int, openMaintenanceTick:
                     },
                     onMirror = c::onMirrorPressed,
                     onScan = c::startAaScan,
+                    onMapHub = c::onMapPressed,
+                    onSearch = { searchOpen = true },
                     onRides = { TripsListActivity.start(ctx) },
                 )
-            }
-            composable("map") {
-                MapTab(searchFocusTick, openMapEnabled = ride.mapEnabled, onOpenMap = c::onMapPressed, onSearch = c::navigateToTyped, onSearchTextChanged = c::onSearchTextChanged)
             }
             composable("trips") {
                 TripsTab(onSavedRides = { TripsListActivity.start(ctx) }, onTripComputer = { TripActivity.start(ctx) }, onWeeklyReport = { nav.navigate("report") })
@@ -196,6 +206,14 @@ fun AppShell(c: ConnectionController, searchFocusTick: Int, openMaintenanceTick:
                 )
             }
         }
+    }
+    if (searchOpen) {
+        DestinationSearchSheet(
+            focusTick = searchFocusTick,
+            onSearch = c::navigateToTyped,
+            onSearchTextChanged = c::onSearchTextChanged,
+            onDismiss = { searchOpen = false },
+        )
     }
     DialogHost(dialog, c)
 }

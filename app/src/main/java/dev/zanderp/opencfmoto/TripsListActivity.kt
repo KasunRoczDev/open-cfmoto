@@ -280,7 +280,7 @@ class TripsListActivity : AppCompatActivity() {
                         trip = trip,
                         widthPx = w,
                         heightPx = thumbH,
-                        strokeColor = ContextCompat.getColor(this, R.color.brand_orange),
+                        strokeColor = ContextCompat.getColor(this, R.color.accent),
                         bgColor = ContextCompat.getColor(this, R.color.surface_high),
                         startColor = ContextCompat.getColor(this, R.color.status_live),
                         endColor = ContextCompat.getColor(this, R.color.status_error),
