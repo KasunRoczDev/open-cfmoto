@@ -151,6 +151,9 @@ class SetupActivity : AppCompatActivity() {
         findViewById<MaterialButton>(R.id.strip_cell_heading).setOnClickListener { toggleStripCell(StripCell.HEADING) }
         findViewById<MaterialButton>(R.id.turninfo_on).setOnClickListener { setTurnInfo(true) }
         findViewById<MaterialButton>(R.id.turninfo_off).setOnClickListener { setTurnInfo(false) }
+        findViewById<MaterialButton>(R.id.lockmoving_on).setOnClickListener { setLockWhileMoving(true) }
+        findViewById<MaterialButton>(R.id.btn_restore_projection).setOnClickListener { confirmRestoreProjection() }
+        findViewById<MaterialButton>(R.id.lockmoving_off).setOnClickListener { setLockWhileMoving(false) }
         findViewById<MaterialButton>(R.id.btn_bt_trigger).setOnClickListener { pickBtTrigger() }
         findViewById<MaterialButton>(R.id.theme_auto).setOnClickListener { setMapTheme(MapTheme.AUTO) }
         findViewById<MaterialButton>(R.id.theme_day).setOnClickListener { setMapTheme(MapTheme.DAY) }
@@ -385,6 +388,26 @@ class SetupActivity : AppCompatActivity() {
         MetricsStripPrefs.setTurnInfo(this, on)
         refreshOptions()
         toast(getString(R.string.setup_toast_turn_info,
+            getString(if (on) R.string.pref_turn_info_on else R.string.pref_turn_info_off)))
+    }
+
+    private fun confirmRestoreProjection() {
+        AlertDialog.Builder(this)
+            .setTitle(R.string.setup_restore_projection)
+            .setMessage(R.string.setup_restore_projection_confirm)
+            .setPositiveButton(R.string.setup_restore_projection_go) { _, _ ->
+                ProjectionReset.restore(this)
+                refreshOptions()
+                toast(getString(R.string.setup_toast_projection_restored))
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    private fun setLockWhileMoving(on: Boolean) {
+        AppSettings.setLockAaWhileMoving(this, on)
+        refreshOptions()
+        toast(getString(R.string.setup_toast_lock_moving,
             getString(if (on) R.string.pref_turn_info_on else R.string.pref_turn_info_off)))
     }
 
@@ -735,6 +758,9 @@ class SetupActivity : AppCompatActivity() {
         highlight(MetricsStripPrefs.turnInfo(this) || directionsMode,
             R.id.turninfo_on to true,
             R.id.turninfo_off to false)
+        highlight(AppSettings.lockAaWhileMoving(this),
+            R.id.lockmoving_on to true,
+            R.id.lockmoving_off to false)
         val stripOn = MetricsStripPrefs.height(this) != StripHeight.OFF
         findViewById<MaterialButton>(R.id.turninfo_on).isEnabled = stripOn && !directionsMode
         findViewById<MaterialButton>(R.id.turninfo_off).isEnabled = stripOn && !directionsMode

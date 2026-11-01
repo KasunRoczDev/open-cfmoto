@@ -680,6 +680,14 @@
     <string name="pref_turn_info_on">On</string>
     <string name="pref_turn_info_off">Off</string>
     <string name="setup_toast_turn_info">Turn info: %1$s</string>
+    <string name="setup_restore_projection">Restore working projection</string>
+    <string name="setup_restore_projection_desc">Something looks wrong on the dash? Puts video, fit, resolution, margins, profile, strip and experimental switches back to defaults for this bike. Your Wi‑Fi mode, buttons and rides are kept.</string>
+    <string name="setup_restore_projection_confirm">Reset this bike’s projection settings to defaults? Applies next connect.</string>
+    <string name="setup_restore_projection_go">Restore</string>
+    <string name="setup_toast_projection_restored">Projection settings restored — reconnect to apply</string>
+    <string name="setup_lock_moving">Lock Android Auto while moving (experimental)</string>
+    <string name="setup_lock_moving_desc">Tells Android Auto when the bike is moving (phone GPS, from 10 km/h) so it locks the keyboard, settings and long lists, like in a car. Unlocks 5 s after you stop. Applies next connect.</string>
+    <string name="setup_toast_lock_moving">Lock while moving: %1$s</string>
     <string name="ui_tab_ride">Ride</string>
     <string name="ui_tab_trips">Trips</string>
     <string name="ui_tab_me">Me</string>

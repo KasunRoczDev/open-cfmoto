@@ -4,13 +4,14 @@ package dev.zanderp.opencfmoto.aa
 import com.google.protobuf.Message
 import dev.zanderp.opencfmoto.aa.proto.Sensors
 
-class DrivingStatusEvent(status: Sensors.SensorBatch.DrivingStatusData.Status)
+/** @param status DrivingStatusData.Status bits (0 = unrestricted; see [DrivingStatusPolicy]). */
+class DrivingStatusEvent(status: Int)
     : AapMessage(Channel.ID_SEN, Sensors.SensorsMsgType.SENSOR_EVENT_VALUE, makeProto(status)) {
 
     companion object {
-        private fun makeProto(status: Sensors.SensorBatch.DrivingStatusData.Status): Message =
+        private fun makeProto(status: Int): Message =
             Sensors.SensorBatch.newBuilder()
-                .addDrivingStatus(Sensors.SensorBatch.DrivingStatusData.newBuilder().setStatus(status.number))
+                .addDrivingStatus(Sensors.SensorBatch.DrivingStatusData.newBuilder().setStatus(status))
                 .build()
     }
 }

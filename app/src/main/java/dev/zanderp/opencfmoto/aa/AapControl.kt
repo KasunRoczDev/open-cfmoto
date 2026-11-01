@@ -365,7 +365,8 @@ internal class AapControlGateway(
             )
         )
         if (channel == Channel.ID_SEN) {
-            aapTransport.send(DrivingStatusEvent(Sensors.SensorBatch.DrivingStatusData.Status.UNRESTRICTED))
+            aapTransport.sensorChannelOpen = true
+            aapTransport.send(DrivingStatusEvent(aapTransport.drivingStatus))
         }
         return 0
     }

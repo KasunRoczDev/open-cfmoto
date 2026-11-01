@@ -42,9 +42,18 @@ object AppSettings {
     private const val KEY_BT_RIDE_NAME = "bt_ride_name"
     private const val KEY_LAST_BACKUP_MS = "last_full_backup_ms"
     private const val KEY_WEATHER = "weather_on_dash"
+    private const val KEY_LOCK_AA_MOVING = "lock_aa_while_moving"
 
     private fun prefs(ctx: Context) =
         ctx.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+
+    /**
+     * Report real moving/parked to Android Auto (DRIVING_STATUS from GPS speed) so its while-driving
+     * restrictions apply. Off by default until ride-tested on each dash; applies next connect.
+     */
+    fun lockAaWhileMoving(ctx: Context): Boolean = prefs(ctx).getBoolean(KEY_LOCK_AA_MOVING, false)
+    fun setLockAaWhileMoving(ctx: Context, on: Boolean) =
+        prefs(ctx).edit().putBoolean(KEY_LOCK_AA_MOVING, on).apply()
 
     fun autoConnect(ctx: Context): Boolean = prefs(ctx).getBoolean(KEY_AUTO_CONNECT, true)
     fun setAutoConnect(ctx: Context, on: Boolean) =

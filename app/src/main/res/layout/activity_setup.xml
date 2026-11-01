@@ -180,6 +180,22 @@
                     android:textSize="12sp"
                     android:letterSpacing="0.08" />
 
+                <!-- One-tap fallback to plain Android Auto (SRS AA-004) -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_restore_projection"
+                    style="@style/Widget.OpenCfMoto.Button.Tonal"
+                    android:layout_width="match_parent"
+                    android:layout_marginTop="12dp"
+                    android:text="@string/setup_restore_projection" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/setup_restore_projection_desc"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="13sp" />
+
                 <!-- Quality -->
                 <TextView
                     android:layout_width="match_parent"
@@ -946,6 +962,49 @@
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/turninfo_off"
+                        style="@style/Widget.OpenCfMoto.Segment"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:layout_weight="1"
+                        android:text="@string/pref_turn_info_off" />
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="@string/setup_lock_moving"
+                    android:textColor="@color/text_primary"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginBottom="6dp"
+                    android:text="@string/setup_lock_moving_desc"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="13sp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:baselineAligned="false"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/lockmoving_on"
+                        style="@style/Widget.OpenCfMoto.Segment"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="4dp"
+                        android:layout_weight="1"
+                        android:text="@string/pref_turn_info_on" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/lockmoving_off"
                         style="@style/Widget.OpenCfMoto.Segment"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"

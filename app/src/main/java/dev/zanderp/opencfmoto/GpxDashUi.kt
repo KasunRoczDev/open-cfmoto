@@ -1841,7 +1841,7 @@ class GpxDashUi(
                 main.post(lapTick)
                 statusView.text = "Lap: ride out, then pass start/finish"
                 if (voiceOn) voiceLocal.speak("Lap timer armed")
-                log("[LAP] armed at ${loc.latitude},${loc.longitude}")
+                log("[LAP] armed (start/finish set, ±${loc.accuracy.toInt()} m)")
             }
         }
         if (GpxSession.pendingCircuit) {

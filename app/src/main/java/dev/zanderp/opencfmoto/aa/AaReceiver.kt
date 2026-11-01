@@ -59,6 +59,8 @@ class AaReceiver(
     @Volatile private var sessionStarting = false
     private val sessionLock = Any()
     @Volatile private var steadyVideoFired = false
+    /** GPS feed for the DRIVING_STATUS sensor while lock-while-moving is on (one per session). */
+    @Volatile private var driveSource: dev.zanderp.opencfmoto.MetricsSource? = null
 
     /**
      * Fired when an AA session ends. [userExit] is true when the rider tapped Exit in Android Auto
@@ -145,8 +147,37 @@ class AaReceiver(
         }
     }
 
+    /**
+     * Setup → "Lock Android Auto while moving": follow phone GPS speed and report moving/parked on the
+     * DRIVING_STATUS sensor ([DrivingStatusPolicy]). Off → the session stays UNRESTRICTED as before.
+     * Uses the location permission the app already holds; without GPS nothing is reported.
+     */
+    private fun startDrivingStatus(t: AapTransport) {
+        stopDrivingStatus()
+        if (!dev.zanderp.opencfmoto.AppSettings.lockAaWhileMoving(context)) return
+        val policy = DrivingStatusPolicy()
+        val source = dev.zanderp.opencfmoto.MetricsSource(context) { loc ->
+            if (transport === t && policy.onFix(loc.takeIf { it.hasSpeed() }?.speed, android.os.SystemClock.elapsedRealtime())) {
+                log("[DRIVE] ${if (policy.moving) "moving → Android Auto restricted" else "stopped → Android Auto unrestricted"}")
+                t.sendDrivingStatus(policy.status)
+            }
+        }
+        if (source.start()) {
+            driveSource = source
+            log("[DRIVE] lock-while-moving on — following GPS speed")
+        } else {
+            log("[DRIVE] lock-while-moving on but no GPS (permission or location off) — Android Auto stays unrestricted")
+        }
+    }
+
+    private fun stopDrivingStatus() {
+        driveSource?.stop()
+        driveSource = null
+    }
+
     fun stop() {
         running = false
+        stopDrivingStatus()
         AaVideoBridge.aaSessionLive = false
         AaVideoBridge.aaDecoding = false
         AaVideoBridge.touchSink = null
@@ -202,6 +233,7 @@ class AaReceiver(
             AaVideoBridge.scrollSink = null
             AaVideoBridge.previewTouchSink = null
             AaVideoBridge.nightSink = null
+            stopDrivingStatus()
             // AA session over → no route: don't leave a frozen maneuver on the metrics strip.
             dev.zanderp.opencfmoto.MetricsStrip.clearNavigation()
             try { t.microphone?.stop("transport quit") } catch (_: Exception) {}
@@ -249,6 +281,7 @@ class AaReceiver(
         t.nightMode = NightPrefs.isNightNow(context)
         AaVideoBridge.nightSink = { on -> t.sendNightMode(on) }
         startNightAutoLoop(t)
+        startDrivingStatus(t)
 
         // Microphone: AA requests it (MICROPHONE_REQUEST) when the Assistant starts; AaMicrophone then
         // streams the phone/helmet mic up the MIC channel so voice destination entry works hands-free.

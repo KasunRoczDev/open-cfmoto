@@ -8,6 +8,7 @@ package dev.zanderp.opencfmoto
  * Strips secrets out of log lines when written (so Share Logs / problem reports are safe by default).
  *
  * Masks Wi‑Fi / EasyConn / OTA passwords and shortens vehicle serials. SSID and model id are kept.
+ * Coordinates are cut to 2 decimals (~1 km): enough to debug a region, not to find a home.
  * Bypass via [AppSettings.includeSecretsInLogs] for local debugging only.
  */
 object LogRedactor {
@@ -31,12 +32,22 @@ object LogRedactor {
         RegexOption.IGNORE_CASE,
     )
 
+    /** "52.370216,4.895168" / "52.370216, 4.895168" — a lat,lon pair at GPS precision. */
+    private val COORD_PAIR = Regex("""(-?\d{1,3}\.\d{2})\d{2,}(\s*,\s*)(-?\d{1,3}\.\d{2})\d{2,}""")
+    /** lat=52.370216 / lon=… / lng=… / latitude: … */
+    private val COORD_NAMED = Regex(
+        """\b(lat|lon|lng|latitude|longitude)(\s*[=:]\s*)(-?\d{1,3}\.\d{2})\d{2,}""",
+        RegexOption.IGNORE_CASE,
+    )
+
     fun redact(line: String): String {
         var s = line
         s = JSON_SECRET.replace(s) { m -> m.groupValues[1] + "\"$MASK\"" }
         s = URL_SECRET.replace(s) { m -> m.groupValues[1] + "=" + MASK }
         s = JSON_SERIAL.replace(s) { m -> m.groupValues[1] + "\"" + maskTail(m.groupValues[2]) + "\"" }
         s = BARE_SERIAL.replace(s) { m -> m.groupValues[1] + "=" + maskTail(m.groupValues[2]) }
+        s = COORD_PAIR.replace(s) { m -> m.groupValues[1] + m.groupValues[2] + m.groupValues[3] }
+        s = COORD_NAMED.replace(s) { m -> m.groupValues[1] + m.groupValues[2] + m.groupValues[3] }
         return s
     }
 

@@ -89,6 +89,19 @@ class AapTransport(
         send(NightModeEvent(isNight))
     }
 
+    /** Last DRIVING_STATUS bits reported (0 = unrestricted). Sent when the sensor channel opens. */
+    @Volatile var drivingStatus: Int = DrivingStatusPolicy.STATUS_PARKED
+
+    /** Set once AA opens the sensor channel; earlier driving-status changes are only remembered. */
+    @Volatile internal var sensorChannelOpen = false
+
+    /** Report moving/parked to Android Auto so it applies (or lifts) its while-driving restrictions. */
+    fun sendDrivingStatus(status: Int) {
+        drivingStatus = status
+        if (!sensorChannelOpen) return
+        send(DrivingStatusEvent(status))
+    }
+
     private fun sendEncryptedMessage(data: ByteArray, length: Int): Int {
         val ba = ssl.encrypt(AapMessage.HEADER_SIZE, length - AapMessage.HEADER_SIZE, data) ?: return -1
         ba.data[0] = data[0]
