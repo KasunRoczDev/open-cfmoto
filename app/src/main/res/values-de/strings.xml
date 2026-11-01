@@ -176,9 +176,7 @@
     <string name="main_connect_start_android_auto_on_the_dash_becomes_s">• Verbinden – Android Auto auf dem Armaturenbrett starten (wird bei der Verbindung zu „Stopp“).\n• Karte – OpenCfMoto-Karte/GPX (nicht Google Maps). Spiegel – Telefonbildschirm spiegeln.\n• Während die Verbindung besteht, können Sie mit Karte/Spiegel umschalten, was auf dem Armaturenbrett angezeigt wird.\n• Armaturenbrettansicht und Bedienelemente – Telefon-HUD und D-Pad/Lenker.</string>
     <string name="main_about_credits">Über &amp; Credits</string>
     <string name="main_check_for_update">Nach Update suchen</string>
-    <string name="main_report_a_problem">Problem melden</string>
     <string name="main_diagnostics">Diagnose</string>
-    <string name="main_share">Teilen</string>
     <string name="main_clear">Löschen</string>
     <string name="qr_point_the_camera_at_the_bike_s_motoplay_qr_if_it">Richten Sie die Kamera auf den MotoPlay QR des Motorrads\n\nWenn der Scanvorgang nicht funktioniert, versuchen Sie es mit iOS/CarPlay QR oder geben Sie WLAN manuell ein (TRK).</string>
     <string name="qr_1x">1x</string>
@@ -361,7 +359,6 @@
     <string name="main_donate_failed">Der Spendenlink konnte nicht geöffnet werden</string>
     <string name="main_settings_failed">Die App-Einstellungen konnten nicht geöffnet werden</string>
     <string name="main_download_failed">Der Download-Link konnte nicht geöffnet werden</string>
-    <string name="main_share_report_failed">Bericht konnte nicht geteilt werden: %1$s</string>
     <string name="main_vpn_hint">Öffnen Sie Einstellungen ▸ Netzwerk ▸ VPN</string>
     <string name="main_type_place">Geben Sie einen Ort ein, an dem auf der Karte gesucht werden soll</string>
     <string name="main_searching_dash">Suche nach „%1$s“ im Armaturenbrett</string>

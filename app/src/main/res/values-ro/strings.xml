@@ -176,9 +176,7 @@
     <string name="main_connect_start_android_auto_on_the_dash_becomes_s">• Conectează — pornește Android Auto pe bord (devine Oprește cât ești conectat).\n• Hartă — harta OpenCfMoto / GPX (nu Google Maps). Oglindă — proiectează ecranul telefonului.\n• Cât ești conectat, Hartă / Oglindă comută ce se vede pe bord.\n• Vedere bord &amp; Comenzi — HUD pe telefon și D-pad / ghidon.</string>
     <string name="main_about_credits">Despre &amp; credite</string>
     <string name="main_check_for_update">Verifică actualizare</string>
-    <string name="main_report_a_problem">Raportează o problemă</string>
     <string name="main_diagnostics">Diagnostic</string>
-    <string name="main_share">Partajează</string>
     <string name="main_clear">Șterge</string>
     <string name="qr_point_the_camera_at_the_bike_s_motoplay_qr_if_it">Îndreaptă camera spre QR-ul MotoPlay de pe moto\n\nDacă nu scanează — încearcă QR-ul iOS / CarPlay sau introdu Wi‑Fi manual (TRK).</string>
     <string name="qr_1x">1x</string>
@@ -361,7 +359,6 @@
     <string name="main_donate_failed">Nu s-a putut deschide linkul de donație</string>
     <string name="main_settings_failed">Nu s-au putut deschide setările aplicației</string>
     <string name="main_download_failed">Nu s-a putut deschide linkul de descărcare</string>
-    <string name="main_share_report_failed">Nu s-a putut partaja raportul: %1$s</string>
     <string name="main_vpn_hint">Deschide Setări ▸ Rețea ▸ VPN</string>
     <string name="main_type_place">Tastează un loc de căutat pe hartă</string>
     <string name="main_searching_dash">Caut „%1$s” pe bord</string>

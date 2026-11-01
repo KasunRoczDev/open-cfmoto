@@ -93,7 +93,6 @@ interface ConnectionEngine {
     fun openUrl(url: String): Boolean
     fun openSettingsAction(action: String, forThisApp: Boolean = false): Boolean
     fun shareLog(activity: Activity?)
-    fun shareProblemReport(activity: Activity?, problem: String, model: String, year: String)
     fun clearCrash()
     fun startSetup(activity: Activity?)
     fun hostDestroyedTeardown()

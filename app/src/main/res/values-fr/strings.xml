@@ -176,9 +176,7 @@
     <string name="main_connect_start_android_auto_on_the_dash_becomes_s">• Connecter : démarrez Android Auto sur le tableau de bord (devient Stop une fois lié).\n• Carte — Carte OpenCfMoto/GPX (pas Google Maps). Miroir : projeter l\'écran du téléphone.\n• Une fois connecté, Map / Mirror change ce que le tableau de bord affiche.\n• Vue et commandes du tableau de bord : HUD du téléphone et D-pad/guidon.</string>
     <string name="main_about_credits">À propos et crédits</string>
     <string name="main_check_for_update">Vérifier la mise à jour</string>
-    <string name="main_report_a_problem">Signaler un problème</string>
     <string name="main_diagnostics">Diagnostic</string>
-    <string name="main_share">Partager</string>
     <string name="main_clear">Effacer</string>
     <string name="qr_point_the_camera_at_the_bike_s_motoplay_qr_if_it">Pointez la caméra vers le QR MotoPlay de la moto\n\nS\'il ne parvient pas à numériser, essayez le QR iOS/CarPlay ou entrez le Wi-Fi manuellement (TRK).</string>
     <string name="qr_1x">1x</string>
@@ -361,7 +359,6 @@
     <string name="main_donate_failed">Impossible d\'ouvrir le lien de don</string>
     <string name="main_settings_failed">Impossible d\'ouvrir les paramètres de l\'application</string>
     <string name="main_download_failed">Impossible d\'ouvrir le lien de téléchargement</string>
-    <string name="main_share_report_failed">Impossible de partager le rapport : %1$s</string>
     <string name="main_vpn_hint">Ouvrez Paramètres ▸ Réseau ▸ VPN</string>
     <string name="main_type_place">Tapez un lieu à rechercher sur la carte</string>
     <string name="main_searching_dash">Recherche de \\&quot;%1$s\\&quot; sur le tableau de bord</string>

@@ -46,6 +46,7 @@ and let the app look after the rest — **range, rain, rides and service** — f
 > 🧩 **This is the _Rider Extras_ build** by [KasunRoczDev](https://github.com/KasunRoczDev), based on
 > **[OpenCfMoto](https://github.com/zanderp/open-cfmoto)** by Alexandru and its contributors. Same
 > connection core, with extra rider features on top (see [What's new in 2.1](#-whats-new-in-21--rider-extras)).
+> On your phone the app is called **My moto**.
 > It's signed with a different key than the original releases, so **uninstall the original app first**
 > if you're switching (save a backup with *Me ▸ Backup & restore* before you do).
 
@@ -197,7 +198,7 @@ instead of linking the dash to a dead session (map with no directions).
 | 🔋 **Battery & power tuning** | Smooth / Balanced / Saver + **Auto** (adapts to heat & Wi‑Fi). |
 | 🛟 **Auto-recovery & seamless resume** | Stalled/dropped dash reconnects; long stop parks AA and re-projects when the bike returns. |
 | 🔄 **In-app updates** | Optional nag when a newer GitHub Release of this build is available (Download / Skip / Later). |
-| 🧰 **Diagnostics & problem report** | Live logs (secrets redacted by default), Share Logs, and Setup → **Report a problem**. |
+| 🧰 **Diagnostics** | Live logs (secrets and exact locations redacted by default) and Share Logs. |
 | 📤 **Share / import bike tuning** | Export profile, resolution, fit, margins & button map as JSON (no passwords / personal prefs) — share on Discord, Import on another phone. |
 | 📶 **Wi‑Fi-off alert** | If phone Wi‑Fi is off when connecting, a dialog offers **Wi‑Fi settings** (one tap). |
 | 🗺️ **Map / GPX** | Free ride, GPX tracks, OSM search/POI, Home/favorites/markers, parked pin, road routing, voice cues — on the bike dash or phone. |
@@ -706,7 +707,6 @@ before you ride — then pocket it. On touch dashes you can **drive it with your
 
 - **Logs** — live connection narrative. **Share** exports the log (**Wi‑Fi passwords / serials are
   redacted by default**; Setup → *Include secrets in shared logs* only if you need them locally).
-- **Setup → Report a problem** — short form + diagnostics + redacted log in one shareable file.
 - **Setup → Share JSON / Import…** — export bike tuning (profile, resolution, fit, margins, buttons,
   transport) — no Wi‑Fi passwords and no personal prefs (map theme, saved places, …). Import applies
   onto your selected bike.
@@ -724,8 +724,9 @@ before you ride — then pocket it. On touch dashes you can **drive it with your
 
 Android Auto (Maps / Waze) does **not** replace adventure tracks. **OpenCfMoto Map / GPX** projects a
 bike-sized map to the dash (own-content path — MapLibre on phone, osmdroid on the bike stream) using
-OpenStreetMap data. Open it from the **Map & GPX** tile on the Ride screen (the app has three tabs —
-**Ride · Trips · Me** — there is no separate Map tab):
+OpenStreetMap data. Open it from the map button in **Dash view**, or search a place from the Ride screen
+when no dash map or Android Auto is running (the app has three tabs — **Ride · Trips · Me** — and no
+Map tab or home tile):
 
 <img src="docs/media/map-demo-1.gif" width="560" alt="OpenCfMoto Map on the CFMoto dash — free ride / search"/>
 
@@ -771,7 +772,7 @@ OpenCfMoto routes and **Connect** for Maps/Waze Android Auto.
 | Button | What it does |
 | --- | --- |
 | **Connect / Stop** | Connect starts Android Auto on the dash; becomes **Stop** while linking or projecting. |
-| **Mirror · Map & GPX · Scan** | Mirror = cast phone; Map & GPX = OpenCfMoto map hub; Scan QR. While connected, Map/Mirror switch content. |
+| **Mirror · Scan** | Mirror = cast phone; Scan QR for a new bike. |
 | **Search (🔍, Ride header)** | Type a destination: dash map search, Android Auto navigation, or the Map & GPX hub. The bike's Search button opens the same sheet. |
 | **Dash view · Controls** | Phone HUD and D-pad / handlebar (same row). |
 | **Dash view** | Live in-app mirror of the dash — touch + on-screen controls. |
@@ -813,7 +814,7 @@ OpenCfMoto routes and **Connect** for Maps/Waze Android Auto.
 | Dash **froze** and didn't recover | With *Auto-recovery* on it should reconnect itself; otherwise tap **Stop** then **Connect**. |
 | **Didn't resume on its own** after a long stop | Enable **Seamless resume** (Setup ▸ Startup & recovery → *Display over other apps*) so the app can re-project with the screen off; otherwise tap the **“Bike reconnected”** notification. |
 
-**Getting help:** reproduce the issue, then **Logs ▸ Share** or **Setup → Report a problem**, and drop
+**Getting help:** reproduce the issue, then **Logs ▸ Share**, and drop
 the file in **[Discord](https://discord.gg/KNTjJhmFZ6)**.
 
 ---

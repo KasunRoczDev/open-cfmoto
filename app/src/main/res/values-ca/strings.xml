@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Open CfMoto</string>
+    <string name="app_name">My moto</string>
     <string name="about_copyright">© 2026 Alexandru</string>
     <string name="about_copyright_body">Mantingut per Alexandru (zanderp). Programari gratuït sota GNU AGPL v3 o posterior: consulteu LICÈNCIA i AVÍS al repositori per obtenir el text complet de drets d\'autor i atribució.</string>
     <string name="about_license_body">Podeu utilitzar, estudiar, compartir i modificar aquesta aplicació segons l\'AGPL. Si redistribuïu una versió modificada (fins i tot com a servei de xarxa), heu d\'oferir el codi font corresponent complet sota la mateixa llicència.</string>
@@ -259,15 +259,8 @@
     <string name="main_connect_start_android_auto_on_the_dash_becomes_s">• Connecta: inicia Android Auto al quadre (es converteix en Atura mentre està vinculat).\n• Mapa: mapa OpenCfMoto / GPX (no Google Maps). Mirall: transmetre la pantalla del telèfon.\n• Mentre està connectat, Mapa/Mirall canvia el que mostra el quadre.\n• Vista del quadre i controls: HUD del telèfon i D-pad/manillar.</string>
     <string name="main_about_credits">Quant a i crèdits</string>
     <string name="main_check_for_update">Cerca actualitzacions</string>
-    <string name="main_report_a_problem">Informar d\'un problema</string>
-    <string name="main_report_problem_message">Crea un informe compartible amb diagnòstics + registre recent (els secrets s\'eliminen tret que estiguin habilitats a la configuració).</string>
-    <string name="main_report_hint_problem">Què ha anat malament?</string>
-    <string name="main_report_hint_bike_model">Model de moto (per exemple, 800NK Advanced)</string>
-    <string name="main_report_hint_year">Any (opcional)</string>
     <string name="main_mirror_leave_shared_app">Deixa l\'aplicació compartida a la pantalla (OpenCfMoto es queda a la notificació)</string>
-    <string name="main_share_problem_report">Comparteix l\'informe de problemes</string>
     <string name="main_diagnostics">Diagnòstic</string>
-    <string name="main_share">Comparteix</string>
     <string name="main_clear">Neteja</string>
     <string name="qr_point_the_camera_at_the_bike_s_motoplay_qr_if_it">Apunta la càmera al QR MotoPlay de la moto\n\nSi no escaneja, proveu amb iOS/CarPlay QR o introduïu Wi-Fi manualment (TRK).</string>
     <string name="qr_1x">1x</string>
@@ -571,7 +564,6 @@
     <string name="main_donate_failed">No s\'ha pogut obrir l\'enllaç de donació</string>
     <string name="main_settings_failed">No s\'ha pogut obrir la configuració de l\'aplicació</string>
     <string name="main_download_failed">No s\'ha pogut obrir l\'enllaç de baixada</string>
-    <string name="main_share_report_failed">No s\'ha pogut compartir l\'informe: %1$s</string>
     <string name="main_vpn_hint">Obriu Configuració ▸ Xarxa ▸ VPN</string>
     <string name="main_type_place">Escriviu un lloc per cercar al mapa.</string>
     <string name="main_searching_dash">Cercant \\&quot;%1$s\\&quot; al quadre</string>

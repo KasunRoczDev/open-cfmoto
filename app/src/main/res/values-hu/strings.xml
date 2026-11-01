@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Draft + terminology pass — improve via PR: docs/TRANSLATIONS.md -->
 <resources>
-    <string name="app_name">Open CfMoto</string>
+    <string name="app_name">My moto</string>
     <string name="about_copyright">© 2026 Alexandru</string>
     <string name="about_copyright_body">Karbantartja Alexandru (zanderp). Szabad szoftver a GNU AGPL v3 vagy újabb alatt — a teljes szerzői jogi és attribúciós szöveg a LICENSE és NOTICE fájlokban található a repóban.</string>
     <string name="about_license_body">Az AGPL alatt használhatod, tanulmányozhatod, megoszthatod és módosíthatod ezt az alkalmazást. Ha módosított verziót terjesztesz (beleértve hálózati szolgáltatásként is), a teljes megfelelő forráskódot ugyanezen licenc alatt kell elérhetővé tenned.</string>
@@ -236,15 +236,8 @@
     <string name="main_connect_start_android_auto_on_the_dash_becomes_s">• Csatlakozás — Android Auto indítása a műszerfalon (kapcsolat közben Leállítás lesz).\n• Térkép — OpenCfMoto térkép / GPX (nem Google Maps). Tükrözés — telefon képernyő tükrözése.\n• Kapcsolat közben a Térkép / Tükrözés váltja, mit mutat a műszerfal.\n• Műszerfal nézet és Vezérlés — telefon HUD és D-pad / kormány.</string>
     <string name="main_about_credits">Névjegy és köszönet</string>
     <string name="main_check_for_update">Frissítés keresése</string>
-    <string name="main_report_a_problem">Probléma jelentése</string>
-    <string name="main_report_problem_message">Megosztható jelentést készít diagnosztikával és a legutóbbi naplóval (a titkok kitakarva, hacsak nincs bekapcsolva a beállításokban).</string>
-    <string name="main_report_hint_problem">Mi volt a probléma?</string>
-    <string name="main_report_hint_bike_model">Modell (pl. 800NK Advanced)</string>
-    <string name="main_report_hint_year">Évjárat (opcionális)</string>
     <string name="main_mirror_leave_shared_app">Hagyd a megosztott alkalmazást a képernyőn (az OpenCfMoto az értesítésben marad)</string>
-    <string name="main_share_problem_report">Probléma jelentés megosztása</string>
     <string name="main_diagnostics">Diagnosztika</string>
-    <string name="main_share">Megosztás</string>
     <string name="main_clear">Törlés</string>
     <string name="qr_point_the_camera_at_the_bike_s_motoplay_qr_if_it">Irányítsd a kamerát a motor MotoPlay QR-kódjára\n\nHa nem olvasható be — próbáld az iOS / CarPlay QR-t, vagy add meg a Wi‑Fi-t kézzel (TRK).</string>
     <string name="qr_1x">1x</string>
@@ -499,7 +492,6 @@
     <string name="main_donate_failed">Az adomány link nem nyitható meg</string>
     <string name="main_settings_failed">Az alkalmazás beállítások nem nyithatók meg</string>
     <string name="main_download_failed">A letöltési link nem nyitható meg</string>
-    <string name="main_share_report_failed">A jelentés megosztása sikertelen: %1$s</string>
     <string name="main_vpn_hint">Nyisd meg a Beállítások ▸ Hálózat ▸ VPN menüt</string>
     <string name="main_type_place">Írj be egy helyet a térképen való kereséshez</string>
     <string name="main_searching_dash">„%1$s” keresése a műszerfalon</string>

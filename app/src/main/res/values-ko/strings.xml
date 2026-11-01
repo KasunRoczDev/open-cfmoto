@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Open CfMoto</string>
+    <string name="app_name">My moto</string>
     <string name="about_copyright">© 2026 Alexandru</string>
     <string name="about_copyright_body">Maintained by Alexandru (zanderp). Free software under the GNU AGPL v3 or later — see LICENSE and NOTICE in the repository for the full copyright and attribution text.</string>
     <string name="about_license_body">You may use, study, share, and modify this app under the AGPL. If you redistribute a modified version (including as a network service), you must offer the complete corresponding source under the same license.</string>
@@ -181,9 +181,7 @@
     <string name="main_connect_start_android_auto_on_the_dash_becomes_s">• Connect — start Android Auto on the dash (becomes Stop while linked).\n• Map — OpenCfMoto map / GPX (not Google Maps). Mirror — cast phone screen.\n• While connected, Map / Mirror switch what the dash shows.\n• Dash view &amp; Controls — phone HUD and D-pad / handlebar.</string>
     <string name="main_about_credits">About &amp; credits</string>
     <string name="main_check_for_update">Check for update</string>
-    <string name="main_report_a_problem">Report a problem</string>
     <string name="main_diagnostics">Diagnostics</string>
-    <string name="main_share">Share</string>
     <string name="main_clear">Clear</string>
     <string name="qr_point_the_camera_at_the_bike_s_motoplay_qr_if_it">Point the camera at the bike\'s MotoPlay QR\n\nIf it won\'t scan — try the iOS / CarPlay QR, or enter Wi‑Fi manually (TRK).</string>
     <string name="qr_1x">1x</string>
@@ -385,7 +383,6 @@
     <string name="main_donate_failed">Couldn\'t open donate link</string>
     <string name="main_settings_failed">Couldn\'t open app settings</string>
     <string name="main_download_failed">Couldn\'t open download link</string>
-    <string name="main_share_report_failed">Couldn\'t share report: %1$s</string>
     <string name="main_vpn_hint">Open Settings ▸ Network ▸ VPN</string>
     <string name="main_type_place">Type a place to search on the map</string>
     <string name="main_searching_dash">Searching \"%1$s\" on the dash</string>

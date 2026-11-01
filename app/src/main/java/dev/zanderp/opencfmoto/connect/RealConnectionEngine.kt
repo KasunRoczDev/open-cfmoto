@@ -696,46 +696,6 @@ class RealConnectionEngine(private val app: Application) : ConnectionEngine {
         }
     }
 
-    override fun shareProblemReport(activity: Activity?, problem: String, model: String, year: String) {
-        try {
-            val diagnostics = buildString {
-                appendLine(
-                    "app=${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE}) " +
-                        "git=${BuildConfig.GIT_HASH}",
-                )
-                appendLine("profile=${BikeProfileHolder.active.name}")
-                appendLine("override=${BikeProfileHolder.profileOverride}")
-                appendLine("transport=${AppSettings.transport(ctx).label}")
-                appendLine("margins=${ScreenMargins.summary()}")
-                appendLine("forceNonTouch=${BikeProfileHolder.forceNonTouch}")
-                appendLine("forceTouch=${BikeProfileHolder.forceTouch}")
-                appendLine("ssid=${BikeMemory.lastQr(ctx)?.ssid ?: "—"}")
-                appendLine("phase=${ConnectionState.phase} ${ConnectionState.detail}")
-            }
-            val text = ProblemReport.file(
-                problem = problem.ifBlank { "(not specified)" },
-                model = model,
-                year = year,
-                diagnostics = diagnostics,
-                log = LogBus.snapshot(),
-            )
-            val dir = File(ctx.cacheDir, "logs").apply { mkdirs() }
-            val file = File(dir, "opencfmoto-report.txt")
-            file.writeText(text)
-            val uri = FileProvider.getUriForFile(ctx, "${ctx.packageName}.fileprovider", file)
-            val send = Intent(Intent.ACTION_SEND).apply {
-                type = "text/plain"
-                putExtra(Intent.EXTRA_SUBJECT, ProblemReport.subject(model, BuildConfig.VERSION_NAME))
-                putExtra(Intent.EXTRA_TEXT, ProblemReport.body(problem, model, year, diagnostics))
-                putExtra(Intent.EXTRA_STREAM, uri)
-                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            }
-            startChooser(activity, Intent.createChooser(send, ctx.getString(R.string.main_share_problem_report)))
-        } catch (e: Exception) {
-            Toast.makeText(ctx, ctx.getString(R.string.main_share_report_failed, e.toString()), Toast.LENGTH_LONG).show()
-        }
-    }
-
     override fun clearCrash() = CrashGuard.clearCrash(ctx)
     override fun startSetup(activity: Activity?) { activity?.let { SetupActivity.start(it) } ?: noScreen("setup") }
 

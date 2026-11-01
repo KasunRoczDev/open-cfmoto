@@ -6,18 +6,12 @@ package dev.zanderp.opencfmoto.ui.dialog
 import android.text.method.LinkMovementMethod
 import android.widget.TextView
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.stringResource
@@ -142,28 +136,5 @@ fun DialogHost(dialog: AppDialog?, c: ConnectionController) {
             },
             confirmButton = { TextButton(onClick = c::onMirrorContinue) { Text("Continue") } },
         )
-        is AppDialog.ReportProblem -> {
-            var problem by remember { mutableStateOf("") }
-            var model by remember { mutableStateOf(dialog.defaultModel) }
-            var year by remember { mutableStateOf("") }
-            AlertDialog(
-                onDismissRequest = c::dismissDialog,
-                title = { Text(stringResource(R.string.main_report_a_problem)) },
-                text = {
-                    // Scrolls so the model/year fields stay reachable in landscape.
-                    Column(Modifier.verticalScroll(rememberScrollState())) {
-                        Text(stringResource(R.string.main_report_problem_message))
-                        OutlinedTextField(problem, { problem = it }, Modifier.fillMaxWidth(), minLines = 3,
-                            placeholder = { Text(stringResource(R.string.main_report_hint_problem)) })
-                        OutlinedTextField(model, { model = it }, Modifier.fillMaxWidth(),
-                            placeholder = { Text(stringResource(R.string.main_report_hint_bike_model)) })
-                        OutlinedTextField(year, { year = it }, Modifier.fillMaxWidth(),
-                            placeholder = { Text(stringResource(R.string.main_report_hint_year)) })
-                    }
-                },
-                confirmButton = { TextButton(onClick = { c.onReportShare(problem, model, year) }) { Text(stringResource(R.string.main_share)) } },
-                dismissButton = { TextButton(onClick = c::dismissDialog) { Text(stringResource(R.string.dash_cancel)) } },
-            )
-        }
     }
 }

@@ -176,9 +176,7 @@
     <string name="main_connect_start_android_auto_on_the_dash_becomes_s">• Verbinden: start Android Auto op het dashboard (wordt Stop wanneer gekoppeld).\n• Kaart — OpenCfMoto-kaart / GPX (niet Google Maps). Spiegelen: telefoonscherm casten.\n• Terwijl de verbinding is gemaakt, schakelt Kaart/Spiegel over naar wat het dashboard laat zien.\n• Dashweergave en bedieningselementen: telefoon-HUD en D-pad/stuur.</string>
     <string name="main_about_credits">Over &amp; kredieten</string>
     <string name="main_check_for_update">Controleer op update</string>
-    <string name="main_report_a_problem">Meld een probleem</string>
     <string name="main_diagnostics">Diagnostiek</string>
-    <string name="main_share">Deel</string>
     <string name="main_clear">Duidelijk</string>
     <string name="qr_point_the_camera_at_the_bike_s_motoplay_qr_if_it">Richt de camera op de MotoPlay QR van de motor\n\nAls er niet wordt gescand, probeer dan de iOS/CarPlay QR, of voer handmatig Wi-Fi in (TRK).</string>
     <string name="qr_1x">1x</string>
@@ -361,7 +359,6 @@
     <string name="main_donate_failed">Kan donatielink niet openen</string>
     <string name="main_settings_failed">Kan app-instellingen niet openen</string>
     <string name="main_download_failed">Kan de downloadlink niet openen</string>
-    <string name="main_share_report_failed">Kan rapport niet delen: %1$s</string>
     <string name="main_vpn_hint">Open Instellingen ▸ Netwerk ▸ VPN</string>
     <string name="main_type_place">Typ een plaats waarnaar u wilt zoeken op de kaart</string>
     <string name="main_searching_dash">Zoeken naar \\&quot;%1$s\\&quot; op het dashboard</string>

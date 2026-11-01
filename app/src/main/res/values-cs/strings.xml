@@ -176,9 +176,7 @@
     <string name="main_connect_start_android_auto_on_the_dash_becomes_s">• Připojit — spusťte Android Auto na přístrojové desce (při připojení se změní na Stop).\n• Mapa — OpenCfMoto mapa / GPX (nikoli Google Maps). Zrcadlit – odeslat obrazovku telefonu.\n• Když jste připojeni, mapa / zrcadlení přepne, co zobrazuje obrazovka.\n• Dash view &amp; Controls — HUD telefonu a D-pad / řídítka.</string>
     <string name="main_about_credits">Informace a poděkování</string>
     <string name="main_check_for_update">Zkontrolovat aktualizace</string>
-    <string name="main_report_a_problem">Nahlásit problém</string>
     <string name="main_diagnostics">Diagnostika</string>
-    <string name="main_share">Sdílet</string>
     <string name="main_clear">Smazat</string>
     <string name="qr_point_the_camera_at_the_bike_s_motoplay_qr_if_it">Namiřte fotoaparát na MotoPlay QR motocyklu\n\nPokud nedojde ke spojení, zkuste iOS / CarPlay QR nebo zadejte Wi-Fi ručně (TRK).</string>
     <string name="qr_1x">1x</string>
@@ -361,7 +359,6 @@
     <string name="main_donate_failed">Nepodařilo se otevřít darovací odkaz</string>
     <string name="main_settings_failed">Nastavení aplikace nelze otevřít</string>
     <string name="main_download_failed">Odkaz ke stažení nelze otevřít</string>
-    <string name="main_share_report_failed">Hlášení se nepodařilo sdílet: %1$s</string>
     <string name="main_vpn_hint">Otevřete Nastavení ▸ Síť ▸ VPN</string>
     <string name="main_type_place">Zadejte na mapě místo, které chcete hledat</string>
     <string name="main_searching_dash">Hledání \\&quot;%1$s\\&quot; na pomlčce</string>

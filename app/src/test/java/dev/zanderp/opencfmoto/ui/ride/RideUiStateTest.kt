@@ -57,14 +57,6 @@ class RideUiStateTest {
     }
 
     @Test
-    fun openMapBlockedWhileConnectingOrReconnecting() {
-        // Opening the Map hub mid-connect abandons an active NAV_TO route (review finding).
-        for (p in Phase.values().filter { it.busy }) assertFalse(p.name, rideUiState(p, "", "Bike", true).mapEnabled)
-        assertTrue(rideUiState(Phase.IDLE, "", "Bike", true).mapEnabled)
-        assertTrue(rideUiState(Phase.MIRRORING, "", "Bike", true).mapEnabled)
-    }
-
-    @Test
     fun heroTextPrefersModel() {
         assertEquals("150 SC", heroText(" 150 SC ", "CFMOTO4288"))
     }

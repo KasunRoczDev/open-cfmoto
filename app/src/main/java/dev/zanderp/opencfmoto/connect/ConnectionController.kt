@@ -467,16 +467,9 @@ class ConnectionController(private val engine: ConnectionEngine) {
 
     fun onMirrorContinue() { _dialog.value = null; startMirrorLink() }
 
-    fun onReportShare(problem: String, model: String, year: String) {
-        _dialog.value = null
-        engine.shareProblemReport(port?.activity, problem, model, year)
-    }
-
     // ---------------------------------------------------------------- Me tab helpers
 
     fun shareLog() = engine.shareLog(port?.activity)
-
-    fun reportProblem() { _dialog.value = AppDialog.ReportProblem(engine.bikeName().orEmpty()) }
 
     fun checkUpdateManual() {
         engine.toast(engine.string(R.string.main_checking_update))
@@ -540,15 +533,6 @@ class ConnectionController(private val engine: ConnectionEngine) {
             log("→ Mirror: scan the dash QR…")
             port?.launchQrScan()
         }
-    }
-
-    /** Map tab "Open map": always the Hub. */
-    fun onMapPressed() {
-        if (engine.phase != Phase.STREAMING && engine.phase != Phase.MIRRORING) {
-            engine.abandonStaleNavigation("map hub")
-        }
-        log("→ Map: open Hub")
-        engine.openMapHub(port?.activity)
     }
 
     /** Map / GPX session ready — hard switch the dash to our map, or phone preview. */

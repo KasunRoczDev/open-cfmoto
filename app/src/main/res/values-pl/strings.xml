@@ -179,9 +179,7 @@
     <string name="main_connect_start_android_auto_on_the_dash_becomes_s">• Połącz — uruchom Android Auto na ekranie motocykla (po połączeniu zmienia się w Zatrzymaj).\n• Mapa — mapa OpenCfMoto / GPX (nie Google Maps). Projekcja — przesyłaj ekran telefonu.\n• Po podłączeniu, Mapa/Projekcja przełącza to, co pokazuje ekran.\n• Widok ekranu motocykla i sterowanie — HUD telefonu i pad kierunkowy/kierownica.</string>
     <string name="main_about_credits">Informacje i autorzy</string>
     <string name="main_check_for_update">Sprawdź dostępność aktualizacji</string>
-    <string name="main_report_a_problem">Zgłoś problem</string>
     <string name="main_diagnostics">Diagnostyka</string>
-    <string name="main_share">Udostępnij</string>
     <string name="main_clear">Wyczyść</string>
     <string name="qr_point_the_camera_at_the_bike_s_motoplay_qr_if_it">Skieruj aparat na kod QR aplikacji MotoPlay na motocyklu\n\nJeśli skanowanie nie powiedzie się, przełącz na kod QR w systemie iOS/CarPlay i spróbuj ponownie lub ręcznie wprowadź Wi-Fi (TRK).</string>
     <string name="qr_1x">1x</string>
@@ -393,7 +391,6 @@
     <string name="main_donate_failed">Nie można otworzyć linku do przekazania darowizny</string>
     <string name="main_settings_failed">Nie udało się otworzyć ustawień aplikacji</string>
     <string name="main_download_failed">Nie można otworzyć linku do pobrania</string>
-    <string name="main_share_report_failed">Nie można udostępnić raportu: %1$s</string>
     <string name="main_vpn_hint">Otwórz Ustawienia ▸ Sieć ▸ VPN</string>
     <string name="main_type_place">Wpisz miejsce, które chcesz wyszukać na mapie</string>
     <string name="main_searching_dash">Wyszukiwanie „%1$s” na ekranie motocykla</string>

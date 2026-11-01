@@ -211,9 +211,7 @@
     <string name="main_connect_start_android_auto_on_the_dash_becomes_s">• Connetti - avvia Android Auto sul cruscotto (diventa Stop se collegato).\n• Mappa: mappa OpenCfMoto/GPX (non Google Maps). Mirroring: trasmette lo schermo del telefono.\n• Durante la connessione, Mappa/Mirror cambia ciò che mostra il cruscotto.\n• Visualizzazione e controlli del cruscotto: HUD del telefono e D-pad/manubrio.</string>
     <string name="main_about_credits">Informazioni e crediti</string>
     <string name="main_check_for_update">Controlla l\'aggiornamento</string>
-    <string name="main_report_a_problem">Segnala un problema</string>
     <string name="main_diagnostics">Diagnostica</string>
-    <string name="main_share">Condividi</string>
     <string name="main_clear">Pulisci</string>
     <string name="qr_point_the_camera_at_the_bike_s_motoplay_qr_if_it">Punta la fotocamera verso il QR MotoPlay della moto\n\nSe la scansione non viene eseguita, prova iOS/CarPlay QR o inserisci Wi‑Fi manualmente (TRK).</string>
     <string name="qr_1x">1x</string>
@@ -396,7 +394,6 @@
     <string name="main_donate_failed">Impossibile aprire il link di donazione</string>
     <string name="main_settings_failed">Impossibile aprire le impostazioni dell\'app</string>
     <string name="main_download_failed">Impossibile aprire il link per il download</string>
-    <string name="main_share_report_failed">Impossibile condividere il log di registro</string>
     <string name="main_vpn_hint">Apri Impostazioni ▸ Rete ▸ VPN</string>
     <string name="main_type_place">Digita un luogo da cercare sulla mappa</string>
     <string name="main_searching_dash">Cerca sul cruscotto</string>
@@ -470,12 +467,7 @@
     <string name="gpx_no_roadside_poi_in_corridor">Nessun POI lungo la tratta nel corridoio.</string>
     <string name="gpx_export_map_subject">Mappa data OpenCFMoto</string>
     <string name="gpx_offline_area_detail_vector_raster">%1$s Dettagli · vettori %2$d MB · raster sulla moto</string>
-    <string name="main_report_problem_message">Crea un report condivisibile con diagnostica e log recente, con i segreti oscurati a meno che non siano stati abilitati in Configurazione.</string>
-    <string name="main_report_hint_problem">Cosa è andato storto?</string>
-    <string name="main_report_hint_bike_model">Modello moto (e.g. 800NK Advanced)</string>
-    <string name="main_report_hint_year">Anno (opzionale)</string>
     <string name="main_mirror_leave_shared_app">Lascia l’app condivisa sullo schermo (OpenCfMoto resta nella notifica)</string>
-    <string name="main_share_problem_report">Condividi la segnalazione del problema</string>
     <string name="margins_summary_none">Nessuno — Android Auto usa l’intero cruscotto.</string>
     <string name="margins_summary_profile_default">Sopra %1$d · Sotto %2$d · Sinistra %3$d · Destra %4$d px (Profilo Predefinito)</string>
     <string name="margins_summary_custom">Sopra %1$d · Sotto %2$d · Sinistra %3$d · Destra %4$d px</string>

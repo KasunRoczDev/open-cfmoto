@@ -22,7 +22,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CastConnected
 import androidx.compose.material.icons.rounded.Gamepad
 import androidx.compose.material.icons.rounded.LocalParking
-import androidx.compose.material.icons.rounded.Map
 import androidx.compose.material.icons.rounded.PowerSettingsNew
 import androidx.compose.material.icons.rounded.QrCodeScanner
 import androidx.compose.material.icons.rounded.ScreenShare
@@ -78,7 +77,6 @@ fun RideScreen(
     onParked: () -> Unit,
     onMirror: () -> Unit,
     onScan: () -> Unit,
-    onMapHub: () -> Unit,
     onSearch: () -> Unit,
     onRides: () -> Unit,
 ) {
@@ -136,8 +134,6 @@ fun RideScreen(
         }
         Row(horizontalArrangement = Arrangement.spacedBy(OcmSpace.s)) {
             ActionTile(stringResource(R.string.ui_tile_mirror), Icons.Rounded.ScreenShare, onMirror, s.mirrorEnabled, Modifier.weight(1f))
-            // Map & GPX hub (free ride, GPX, offline maps on the dash) — moved here from the retired Map tab.
-            ActionTile(stringResource(R.string.ui_map_title), Icons.Rounded.Map, onMapHub, s.mapEnabled, Modifier.weight(1f))
             ActionTile(stringResource(R.string.ui_tile_scan), Icons.Rounded.QrCodeScanner, onScan, s.scanEnabled, Modifier.weight(1f))
         }
     }

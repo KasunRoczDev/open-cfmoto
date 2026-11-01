@@ -13,7 +13,6 @@ sealed interface AppDialog {
     data object CrashRecovery : AppDialog
     data class Update(val release: UpdateChecker.Release) : AppDialog
     data object MirrorReady : AppDialog
-    data class ReportProblem(val defaultModel: String) : AppDialog
 }
 
 data class BikeInfo(val name: String?, val hasSaved: Boolean)

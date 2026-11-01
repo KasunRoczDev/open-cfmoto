@@ -161,7 +161,6 @@ fun AppShell(c: ConnectionController, searchFocusTick: Int, openMaintenanceTick:
                     },
                     onMirror = c::onMirrorPressed,
                     onScan = c::startAaScan,
-                    onMapHub = c::onMapPressed,
                     onSearch = { searchOpen = true },
                     onRides = { TripsListActivity.start(ctx) },
                 )
@@ -180,7 +179,7 @@ fun AppShell(c: ConnectionController, searchFocusTick: Int, openMaintenanceTick:
                             java.text.DateFormat.getDateInstance(java.text.DateFormat.MEDIUM).format(java.util.Date(it))
                         }
                     },
-                    onLogs = { nav.navigate("logs") }, onReport = c::reportProblem, onUpdate = c::checkUpdateManual,
+                    onLogs = { nav.navigate("logs") }, onUpdate = c::checkUpdateManual,
                     onAbout = { AboutActivity.start(ctx) },
                 )
             }

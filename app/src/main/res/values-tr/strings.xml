@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Open CfMoto</string>
+    <string name="app_name">My moto</string>
     <string name="about_copyright">© 2026 Alexandru</string>
     <string name="about_copyright_body">Alexandru (zanderp) tarafından sürdürülmektedir. GNU AGPL v3 veya daha yenisi altında ücretsiz yazılım — tam telif hakkı ve atıf metni için depodaki LICENSE ve NOTICE dosyalarına bak..</string>
     <string name="about_license_body">Bu uygulamayı AGPL kapsamında kullanabilir, inceleyebilir, paylaşabilir ve değiştirebilirsin. Değiştirilmiş bir sürümü yeniden dağıtırsan (ağ hizmeti olarak dahil), aynı lisans altında ilgili kaynak kodunun tamamını sunmalısın.</string>
@@ -181,9 +181,7 @@
     <string name="main_connect_start_android_auto_on_the_dash_becomes_s">• Bağlan — Ekranda Android Auto\'yu başlat (bağlıyken Durdur olur).\n• Harita — OpenCfMoto haritası / GPX (Google Haritalar değil). Yansıt — telefon ekranını yansıt.\n• Bağlıyken, Harita / Yansıt ekranda neyin görüneceğini değiştirir.\n• Ekran görünümü &amp; Kontroller — telefonda HUD ve D-pad / gidon.</string>
     <string name="main_about_credits">Hakkında &amp; emeği geçenler</string>
     <string name="main_check_for_update">Güncelleme kontrol et</string>
-    <string name="main_report_a_problem">Sorun bildir</string>
     <string name="main_diagnostics">Teşhis</string>
-    <string name="main_share">Paylaş</string>
     <string name="main_clear">Temizle</string>
     <string name="qr_point_the_camera_at_the_bike_s_motoplay_qr_if_it">Kamerayı motorun MotoPlay QR koduna tut\n\nEğer taranmazsa — iOS / CarPlay QR kodunu dene veya Wi‑Fi\'yi manuel gir (TRK).</string>
     <string name="qr_1x">1x</string>
@@ -385,7 +383,6 @@
     <string name="main_donate_failed">Bağış bağlantısı açılamadı</string>
     <string name="main_settings_failed">Uygulama ayarları açılamadı</string>
     <string name="main_download_failed">İndirme bağlantısı açılamadı</string>
-    <string name="main_share_report_failed">Rapor paylaşılamadı: %1$s</string>
     <string name="main_vpn_hint">Ayarlar ▸ Ağ ▸ VPN</string>
     <string name="main_type_place">Haritada aramak için bir yer yazın</string>
     <string name="main_searching_dash">Ekranda \"%1$s\" aranıyor</string>

@@ -107,7 +107,6 @@ class FakeConnectionEngine : ConnectionEngine {
     override fun openUrl(url: String): Boolean { calls += "openUrl"; return true }
     override fun openSettingsAction(action: String, forThisApp: Boolean): Boolean { calls += "openSettings:$action"; return true }
     override fun shareLog(activity: Activity?) { calls += "shareLog" }
-    override fun shareProblemReport(activity: Activity?, problem: String, model: String, year: String) { calls += "shareReport" }
     override fun clearCrash() { calls += "clearCrash" }
     override fun startSetup(activity: Activity?) { calls += "startSetup" }
     override fun hostDestroyedTeardown() { calls += "hostTeardown" }

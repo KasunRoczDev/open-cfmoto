@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Draft from sashop2001/APOpenCfMoto — improve via PR: docs/TRANSLATIONS.md -->
 <resources>
-    <string name="app_name">Open CfMoto</string>
+    <string name="app_name">My moto</string>
     <string name="about_copyright">© 2026 Alexandru</string>
     <string name="about_copyright_body">Поддържа се от Alexandru (zanderp). Безплатен софтуер под GNU AGPL v3 или по-нова версия — вижте LICENSE и NOTICE в хранилището за пълния текст относно авторските права.</string>
     <string name="about_license_body">Можете да използвате, изучавате, споделяте и модифицирате това приложение според AGPL. Ако разпространявате модифицирана версия (включително като мрежова услуга), трябва да предложите пълния съответен изходен код под същия лиценз.</string>
@@ -243,15 +243,8 @@
     <string name="main_connect_start_android_auto_on_the_dash_becomes_s">• Свързване (Connect) — стартира Android Auto на таблото (става Спри, докато сте свързани).\n• Карта (Map) — Карта на OpenCfMoto / GPX (не Google Maps). Огледален (Mirror) — предава екрана на телефона.\n• Докато сте свързани, Карта / Огледален превключват какво показва таблото.\n• Изглед табло и Контроли — екранни бутони на телефона и управление от кормилото.</string>
     <string name="main_about_credits">Относно и признания</string>
     <string name="main_check_for_update">Провери за актуализация</string>
-    <string name="main_report_a_problem">Докладвай проблем</string>
-    <string name="main_report_problem_message">Изгражда доклад за споделяне с диагностика + скорошен лог (тайните са скрити, освен ако не са разрешени в Настройки).</string>
-    <string name="main_report_hint_problem">Какво се обърка?</string>
-    <string name="main_report_hint_bike_model">Модел на мотора (напр. 800NK Advanced)</string>
-    <string name="main_report_hint_year">Година (по избор)</string>
     <string name="main_mirror_leave_shared_app">Оставете споделеното приложение на екрана (OpenCfMoto остава в известията)</string>
-    <string name="main_share_problem_report">Сподели доклад за проблем</string>
     <string name="main_diagnostics">Диагностика</string>
-    <string name="main_share">Сподели</string>
     <string name="main_clear">Изчисти</string>
     <string name="qr_point_the_camera_at_the_bike_s_motoplay_qr_if_it">Насочете камерата към MotoPlay QR кода на мотора\n\nАко не може да се сканира — опитайте с QR кода за iOS / CarPlay или въведете Wi‑Fi ръчно (TRK).</string>
     <string name="qr_1x">1x</string>
@@ -535,7 +528,6 @@
     <string name="main_donate_failed">Неуспешно отваряне на линка за дарение</string>
     <string name="main_settings_failed">Неуспешно отваряне на настройките на приложението</string>
     <string name="main_download_failed">Неуспешно отваряне на линка за изтегляне</string>
-    <string name="main_share_report_failed">Неуспешно споделяне на доклада: %1$s</string>
     <string name="main_vpn_hint">Отворете Настройки ▸ Мрежа ▸ VPN</string>
     <string name="main_type_place">Въведете място за търсене на картата</string>
     <string name="main_searching_dash">Търсене на \"%1$s\" на таблото</string>

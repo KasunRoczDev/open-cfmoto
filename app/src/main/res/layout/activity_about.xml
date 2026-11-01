@@ -45,10 +45,18 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    android:text="OpenCfMoto"
+                    android:text="@string/app_name"
                     android:textColor="@color/text_primary"
                     android:textSize="22sp"
                     android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/about_built_on"
+                    android:textColor="@color/accent"
+                    android:textSize="13sp" />
 
                 <TextView
                     android:id="@+id/about_version"
@@ -162,6 +170,15 @@
                     android:textColor="@color/text_secondary"
                     android:textSize="13sp" />
 
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:lineSpacingExtra="2dp"
+                    android:text="@string/about_this_build"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="13sp" />
+
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_about_website"
                     style="@style/Widget.OpenCfMoto.Segment"
@@ -177,6 +194,14 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:text="@string/about_source_on_github" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_about_upstream"
+                    style="@style/Widget.OpenCfMoto.Segment"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/about_upstream_project" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -252,6 +277,15 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
+                    android:lineSpacingExtra="3dp"
+                    android:text="@string/about_credits_this_build"
+                    android:textColor="@color/text_primary"
+                    android:textSize="13sp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
                     android:lineSpacingExtra="3dp"
                     android:text="@string/about_credits"
                     android:textColor="@color/text_secondary"

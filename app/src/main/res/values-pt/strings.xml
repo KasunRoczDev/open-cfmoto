@@ -176,9 +176,7 @@
     <string name="main_connect_start_android_auto_on_the_dash_becomes_s">• Conectar – inicia o Android Auto no painel (torna-se Parar enquanto estiver vinculado).\n• Mapa — mapa OpenCfMoto / GPX (não Google Maps). Espelho – transmitir a tela do telefone.\n• Enquanto estiver conectado, Mapa/Espelho alterna o que o painel mostra.\n• Visualização e controles do painel — HUD do telefone e D-pad/guiador.</string>
     <string name="main_about_credits">Sobre e créditos</string>
     <string name="main_check_for_update">Verifique se há atualização</string>
-    <string name="main_report_a_problem">Informar um problema</string>
     <string name="main_diagnostics">Diagnóstico</string>
-    <string name="main_share">Compartilhar</string>
     <string name="main_clear">Claro</string>
     <string name="qr_point_the_camera_at_the_bike_s_motoplay_qr_if_it">Aponte a câmera para o MotoPlay QR da moto\n\nSe não for possível digitalizar, experimente o QR do iOS/CarPlay ou insira o Wi-Fi manualmente (TRK).</string>
     <string name="qr_1x">1x</string>
@@ -361,7 +359,6 @@
     <string name="main_donate_failed">Não foi possível abrir o link de doação</string>
     <string name="main_settings_failed">Não foi possível abrir as configurações do aplicativo</string>
     <string name="main_download_failed">Não foi possível abrir o link de download</string>
-    <string name="main_share_report_failed">Não foi possível compartilhar o relatório: %1$s</string>
     <string name="main_vpn_hint">Abra Configurações ▸ Rede ▸ VPN</string>
     <string name="main_type_place">Digite um lugar para pesquisar no mapa</string>
     <string name="main_searching_dash">Pesquisando \\&quot;%1$s\\&quot; no painel</string>
