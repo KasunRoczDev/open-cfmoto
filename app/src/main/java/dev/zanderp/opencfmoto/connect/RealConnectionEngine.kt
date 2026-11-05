@@ -648,6 +648,39 @@ class RealConnectionEngine(private val app: Application) : ConnectionEngine {
 
     override fun skipUpdate(version: String) = UpdateChecker.skip(ctx, version)
 
+    override fun installUpdate(activity: Activity?, release: UpdateChecker.Release) {
+        if (ApkUpdater.manualInstallBlocked()) {
+            toast(ctx.getString(R.string.update_busy), long = true)
+            return
+        }
+        if (!ApkUpdater.canInstall(ctx)) {
+            // One-time special access; the rider comes back and taps Install again.
+            toast(ctx.getString(R.string.update_allow_install), long = true)
+            try {
+                ctx.startActivity(
+                    Intent(android.provider.Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, Uri.parse("package:${ctx.packageName}"))
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                )
+            } catch (_: Exception) {
+                openUrl(release.pageUrl)
+            }
+            return
+        }
+        toast(ctx.getString(R.string.update_downloading, release.version))
+        Thread {
+            try {
+                val apk = ApkUpdater.download(ctx, release)
+                ApkUpdater.install(ctx, apk, interactive = true)
+            } catch (e: Exception) {
+                LogBus.log("[UPDATE] in-app update failed: ${e.message}")
+                main.post {
+                    toast(ctx.getString(R.string.update_failed, e.message ?: e.javaClass.simpleName), long = true)
+                    openUrl(release.pageUrl)
+                }
+            }
+        }.start()
+    }
+
     override fun openUrl(url: String): Boolean = try {
         ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)); true
     } catch (_: Exception) { false }

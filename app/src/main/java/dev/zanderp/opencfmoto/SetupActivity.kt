@@ -169,6 +169,8 @@ class SetupActivity : AppCompatActivity() {
         findViewById<MaterialButton>(R.id.hold_short).setOnClickListener { setLongPress(LongPressDelay.SHORT) }
         findViewById<MaterialButton>(R.id.hold_normal).setOnClickListener { setLongPress(LongPressDelay.NORMAL) }
         findViewById<MaterialButton>(R.id.hold_long).setOnClickListener { setLongPress(LongPressDelay.LONG) }
+        findViewById<MaterialButton>(R.id.autoupdate_on).setOnClickListener { AppSettings.setAutoUpdate(this, true); refreshOptions() }
+        findViewById<MaterialButton>(R.id.autoupdate_off).setOnClickListener { AppSettings.setAutoUpdate(this, false); refreshOptions() }
         findViewById<MaterialButton>(R.id.autoconnect_on).setOnClickListener { setAutoConnect(true) }
         findViewById<MaterialButton>(R.id.autoconnect_off).setOnClickListener { setAutoConnect(false) }
         findViewById<MaterialButton>(R.id.commute_off).setOnClickListener { setCommute(false) }
@@ -794,6 +796,9 @@ class SetupActivity : AppCompatActivity() {
         highlight(AppSettings.autoConnect(this),
             R.id.autoconnect_on to true,
             R.id.autoconnect_off to false)
+        highlight(AppSettings.autoUpdate(this),
+            R.id.autoupdate_on to true,
+            R.id.autoupdate_off to false)
         val commuteOn = AppSettings.commuteNav(this)
         highlight(commuteOn,
             R.id.commute_on to true,

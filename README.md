@@ -870,8 +870,8 @@ for fast incremental rebuilds.
 ./gradlew :app:assembleRelease -PupdateRepo=KasunRoczDev/open-cfmoto -Pabi=armeabi-v7a   # 32-bit phones
 ```
 
-`-PupdateRepo=owner/name` points the in-app update check at your fork's releases (default: the
-upstream repo). Release builds are R8-shrunk, one ABI each.
+`-PupdateRepo=owner/name` points the in-app updater at another fork's releases (default: this
+repo). Release builds are R8-shrunk, one ABI each.
 
 </details>
 

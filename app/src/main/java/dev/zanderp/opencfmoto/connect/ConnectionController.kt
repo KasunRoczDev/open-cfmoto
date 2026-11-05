@@ -460,7 +460,23 @@ class ConnectionController(private val engine: ConnectionEngine) {
 
     fun onUpdateDownload(release: UpdateChecker.Release) {
         _dialog.value = null
-        if (!engine.openUrl(release.downloadUrl)) engine.toast(engine.string(R.string.main_download_failed))
+        if (release.apkUrl == null) {
+            if (!engine.openUrl(release.pageUrl)) engine.toast(engine.string(R.string.main_download_failed))
+            return
+        }
+        val phase = engine.phase
+        if (phase == Phase.STREAMING || phase == Phase.MIRRORING) {
+            // Installing replaces the app and would drop the dash mid-ride.
+            engine.toast(engine.string(R.string.update_busy), long = true)
+            return
+        }
+        // Still looking for the bike (auto-connect at home, bike off): the rider asked to update, so
+        // give up the attempt rather than make them find Stop first.
+        if (phase.busy) {
+            log("→ Update: stopping the bike connection attempt first")
+            stop()
+        }
+        engine.installUpdate(port?.activity, release)
     }
 
     fun onUpdateSkip(release: UpdateChecker.Release) { _dialog.value = null; engine.skipUpdate(release.version) }

@@ -114,7 +114,7 @@ fun DialogHost(dialog: AppDialog?, c: ConnectionController) {
                         })
                     }
                 },
-                confirmButton = { TextButton(onClick = { c.onUpdateDownload(dialog.release) }) { Text("Download") } },
+                confirmButton = { TextButton(onClick = { c.onUpdateDownload(dialog.release) }) { Text(stringResource(R.string.update_install)) } },
                 dismissButton = {
                     Column {
                         TextButton(onClick = { c.onUpdateSkip(dialog.release) }) { Text("Skip") }

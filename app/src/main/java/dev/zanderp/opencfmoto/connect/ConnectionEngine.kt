@@ -90,6 +90,8 @@ interface ConnectionEngine {
     fun rivalInstalled(): Boolean
     fun checkUpdate(manual: Boolean, onResult: (UpdateChecker.Release?) -> Unit)
     fun skipUpdate(version: String)
+    /** Download + verify + install [release] in place (see [dev.zanderp.opencfmoto.ApkUpdater]). */
+    fun installUpdate(activity: Activity?, release: UpdateChecker.Release)
     fun openUrl(url: String): Boolean
     fun openSettingsAction(action: String, forThisApp: Boolean = false): Boolean
     fun shareLog(activity: Activity?)

@@ -200,4 +200,38 @@ class ConnectionControllerTest {
         c.attach(port)
         assertNull(c.dialog.value)
     }
+
+    private val release = dev.zanderp.opencfmoto.UpdateChecker.Release("v9.9.9", "notes", "https://x/OpenCfMoto.apk", "https://x")
+
+    @Test
+    fun installUpdateWhenIdle() {
+        c.onUpdateDownload(release)
+        assertTrue(e.calls.contains("installUpdate"))
+        assertFalse(e.calls.contains("stopEverything"))
+    }
+
+    @Test
+    fun installUpdateStopsAPendingConnectionFirst() {
+        for (p in listOf(Phase.RECONNECTING, Phase.WAITING_FOR_BIKE, Phase.JOINING_WIFI)) {
+            e.calls.clear(); e.phase = p
+            c.onUpdateDownload(release)
+            assertTrue(p.name, idx("stopEverything") in 0 until idx("installUpdate"))
+        }
+    }
+
+    @Test
+    fun installUpdateRefusedWhileProjecting() {
+        for (p in listOf(Phase.STREAMING, Phase.MIRRORING)) {
+            e.calls.clear(); e.phase = p
+            c.onUpdateDownload(release)
+            assertFalse(p.name, e.calls.contains("installUpdate"))
+            assertFalse(p.name, e.calls.contains("stopEverything"))
+        }
+    }
+
+    @Test
+    fun updateWithoutApkOpensReleasePage() {
+        c.onUpdateDownload(release.copy(apkUrl = null))
+        assertFalse(e.calls.contains("installUpdate"))
+    }
 }

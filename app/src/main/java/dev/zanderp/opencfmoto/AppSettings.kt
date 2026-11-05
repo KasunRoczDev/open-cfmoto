@@ -43,6 +43,7 @@ object AppSettings {
     private const val KEY_LAST_BACKUP_MS = "last_full_backup_ms"
     private const val KEY_WEATHER = "weather_on_dash"
     private const val KEY_LOCK_AA_MOVING = "lock_aa_while_moving"
+    private const val KEY_AUTO_UPDATE = "auto_update"
 
     private fun prefs(ctx: Context) =
         ctx.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
@@ -54,6 +55,11 @@ object AppSettings {
     fun lockAaWhileMoving(ctx: Context): Boolean = prefs(ctx).getBoolean(KEY_LOCK_AA_MOVING, false)
     fun setLockAaWhileMoving(ctx: Context, on: Boolean) =
         prefs(ctx).edit().putBoolean(KEY_LOCK_AA_MOVING, on).apply()
+
+    /** Daily background update from this repo's releases ([UpdateWorker]). On by default. */
+    fun autoUpdate(ctx: Context): Boolean = prefs(ctx).getBoolean(KEY_AUTO_UPDATE, true)
+    fun setAutoUpdate(ctx: Context, on: Boolean) =
+        prefs(ctx).edit().putBoolean(KEY_AUTO_UPDATE, on).apply()
 
     fun autoConnect(ctx: Context): Boolean = prefs(ctx).getBoolean(KEY_AUTO_CONNECT, true)
     fun setAutoConnect(ctx: Context, on: Boolean) =

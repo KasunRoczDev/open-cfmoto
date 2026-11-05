@@ -42,7 +42,7 @@ android {
 
         // GitHub repo "owner/name" the in-app update check reads releases from. Forks shipping their
         // own builds pass -PupdateRepo=owner/name so their riders aren't sent to another fork's APK.
-        val updateRepo = (project.findProperty("updateRepo") as String?)?.trim()?.ifEmpty { null } ?: "zanderp/open-cfmoto"
+        val updateRepo = (project.findProperty("updateRepo") as String?)?.trim()?.ifEmpty { null } ?: "KasunRoczDev/open-cfmoto"
         buildConfigField("String", "UPDATE_REPO", "\"$updateRepo\"")
 
         // Short git hash for Share Logs triage (configuration-cache safe).

@@ -104,6 +104,7 @@ class FakeConnectionEngine : ConnectionEngine {
     override fun openGpxPreview(activity: Activity?) { calls += "openGpxPreview" }
     override fun checkUpdate(manual: Boolean, onResult: (UpdateChecker.Release?) -> Unit) { calls += "checkUpdate:$manual"; onResult(updateResult) }
     override fun skipUpdate(version: String) { calls += "skipUpdate" }
+    override fun installUpdate(activity: Activity?, release: UpdateChecker.Release) { calls += "installUpdate" }
     override fun openUrl(url: String): Boolean { calls += "openUrl"; return true }
     override fun openSettingsAction(action: String, forThisApp: Boolean): Boolean { calls += "openSettings:$action"; return true }
     override fun shareLog(activity: Activity?) { calls += "shareLog" }

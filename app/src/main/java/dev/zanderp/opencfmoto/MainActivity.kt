@@ -59,6 +59,7 @@ class MainActivity : AppCompatActivity() {
         installTypeOnPhoneHandler()
         takeOpenMaintenance(intent)
         takeOpenReport(intent)
+        takeCheckUpdate(intent)
         val flags = takeIntentFlags(intent)
         controller.onHostCreated(
             startGpx = flags.startGpx, resume = flags.resume, btTrigger = flags.btTrigger, gpxToBike = flags.gpxToBike,
@@ -75,6 +76,7 @@ class MainActivity : AppCompatActivity() {
         setIntent(intent)
         takeOpenMaintenance(intent)
         takeOpenReport(intent)
+        takeCheckUpdate(intent)
         val f = takeIntentFlags(intent)
         controller.onNewIntent(resume = f.resume, btTrigger = f.btTrigger, startGpx = f.startGpx, gpxToBike = f.gpxToBike)
     }
@@ -117,6 +119,13 @@ class MainActivity : AppCompatActivity() {
         openReportTick.intValue += 1
     }
 
+    /** "Update available" notification tap → run the update check (offers Install). One-shot. */
+    private fun takeCheckUpdate(i: Intent?) {
+        if (i?.getBooleanExtra(EXTRA_CHECK_UPDATE, false) != true) return
+        i.removeExtra(EXTRA_CHECK_UPDATE)
+        controller.checkUpdateManual()
+    }
+
     /** Maintenance notification tap → open Me ▸ Maintenance (one-shot, like the other extras). */
     private fun takeOpenMaintenance(i: Intent?) {
         if (i?.getBooleanExtra(EXTRA_OPEN_MAINTENANCE, false) != true) return
@@ -150,6 +159,7 @@ class MainActivity : AppCompatActivity() {
         const val EXTRA_BT_TRIGGER = "bt_trigger"
         const val EXTRA_OPEN_MAINTENANCE = "open_maintenance"
         const val EXTRA_OPEN_REPORT = "open_weekly_report"
+        const val EXTRA_CHECK_UPDATE = "check_update"
         /** When set with [EXTRA_START_GPX], join the bike even if not already live. */
         const val EXTRA_GPX_TO_BIKE = "gpx_to_bike"
     }

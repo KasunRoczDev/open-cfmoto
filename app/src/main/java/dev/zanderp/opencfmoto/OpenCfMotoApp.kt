@@ -30,6 +30,7 @@ class OpenCfMotoApp : Application() {
         try {
             dev.zanderp.opencfmoto.maintenance.MaintenanceCheckWorker.schedule(this)
             dev.zanderp.opencfmoto.report.WeeklyReportWorker.schedule(this)
+            UpdateWorker.schedule(this)
         } catch (_: Exception) {
         }
         try {
