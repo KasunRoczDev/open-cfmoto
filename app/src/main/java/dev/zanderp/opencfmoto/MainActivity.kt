@@ -56,6 +56,8 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContent { OcmTheme { AppShell(controller, searchFocusTick.intValue, openMaintenanceTick.intValue, openReportTick.intValue) } }
         controller.attach(port)
+        // Fresh launch with a bike saved: Wi‑Fi off would only fail the connect later — ask now.
+        if (savedInstanceState == null && BikeMemory.lastQr(this) != null) WifiGate.promptOnLaunch(this)
         installTypeOnPhoneHandler()
         takeOpenMaintenance(intent)
         takeOpenReport(intent)

@@ -27,6 +27,8 @@ object WifiGate {
     /** Avoid stacking multiple Wi‑Fi dialogs / re-notifying while it stays off. */
     @Volatile private var promptShowing = false
     @Volatile private var notifiedWhileOff = false
+    /** When we last raised the Wi‑Fi panel: launch + auto-connect both ask, the rider sees it once. */
+    @Volatile private var panelShownAt = 0L
 
     fun isWifiEnabled(context: Context): Boolean {
         val wm = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager
@@ -36,7 +38,8 @@ object WifiGate {
     }
 
     /**
-     * Foreground path: show a modal with **Wi‑Fi settings**. Prefer this from activities.
+     * Foreground path: raise Android's Wi‑Fi panel so the rider turns it on with one tap. (Apps can't
+     * switch Wi‑Fi on themselves since Android 10.) Prefer this from activities.
      * @return true when phone Wi‑Fi is on and the caller may proceed.
      */
     fun ensureEnabledOrPrompt(activity: Activity): Boolean {
@@ -44,10 +47,38 @@ object WifiGate {
             clearOffState(activity)
             return true
         }
-        LogBus.log("[WIFI] phone Wi‑Fi is OFF — prompting for Wi‑Fi settings")
+        LogBus.log("[WIFI] phone Wi‑Fi is OFF — showing the Wi‑Fi panel")
         ConnectionState.set(Phase.ERROR, "phone Wi‑Fi is off")
-        showDialog(activity)
+        showPanel(activity)
         return false
+    }
+
+    /**
+     * App opened with a bike saved and Wi‑Fi off: raise the Wi‑Fi panel straight away, without marking
+     * the connection as failed (nothing was attempted yet).
+     */
+    fun promptOnLaunch(activity: Activity) {
+        if (isWifiEnabled(activity)) return
+        LogBus.log("[WIFI] app opened with phone Wi‑Fi OFF — showing the Wi‑Fi panel")
+        showPanel(activity)
+    }
+
+    /** Android's Wi‑Fi panel (a sheet over the app); the old dialog if the phone has no panel. */
+    private fun showPanel(activity: Activity) {
+        if (activity.isFinishing || activity.isDestroyed) {
+            ensureEnabledOrNotify(activity)
+            return
+        }
+        val now = android.os.SystemClock.elapsedRealtime()
+        if (now - panelShownAt < PANEL_DEBOUNCE_MS) return
+        panelShownAt = now
+        try {
+            activity.startActivity(Intent(Settings.Panel.ACTION_WIFI))
+            android.widget.Toast.makeText(activity, R.string.wifi_turn_on_hint, android.widget.Toast.LENGTH_LONG).show()
+        } catch (e: Exception) {
+            LogBus.log("[WIFI] Wi‑Fi panel unavailable ($e) — showing the dialog")
+            showDialog(activity)
+        }
     }
 
     /**
@@ -90,6 +121,7 @@ object WifiGate {
 
     private fun clearOffState(context: Context) {
         promptShowing = false
+        panelShownAt = 0L
         notifiedWhileOff = false
         cancelNotification(context)
     }
@@ -105,7 +137,7 @@ object WifiGate {
             MaterialAlertDialogBuilder(activity)
                 .setTitle("Turn on Wi‑Fi")
                 .setMessage(
-                    "OpenCfMoto joins the bike over Wi‑Fi, but your phone’s Wi‑Fi is off.\n\n" +
+                    "My moto joins the bike over Wi‑Fi, but your phone’s Wi‑Fi is off.\n\n" +
                         "Turn it on, then tap Connect again."
                 )
                 .setPositiveButton("Wi‑Fi settings") { _, _ ->
@@ -139,7 +171,7 @@ object WifiGate {
             val n = Notification.Builder(app, CHANNEL_ID)
                 .setSmallIcon(android.R.drawable.ic_dialog_alert)
                 .setContentTitle("Turn on Wi‑Fi")
-                .setContentText("OpenCfMoto can’t reach the bike — tap to open Wi‑Fi settings.")
+                .setContentText("My moto can’t reach the bike — tap to open Wi‑Fi settings.")
                 .setContentIntent(pi)
                 .setAutoCancel(true)
                 .setOnlyAlertOnce(true)
@@ -164,4 +196,6 @@ object WifiGate {
             }
         )
     }
+
+    private const val PANEL_DEBOUNCE_MS = 15_000L
 }
