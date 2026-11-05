@@ -8,7 +8,8 @@ import androidx.core.text.HtmlCompat
 
 /**
  * Formats GitHub release-note Markdown for in-app dialogs. Covers the subset we actually ship
- * (headings, bold, bullets, links) so riders see readable text instead of raw `#` / `**` markers.
+ * (headings, bold, italics, `code`, bullets, links, `>` quotes) so riders see readable text instead
+ * of raw `#` / `**` / `>` markers.
  */
 object ReleaseNotes {
 
@@ -16,7 +17,7 @@ object ReleaseNotes {
         val src = markdown.trim().take(maxChars)
         if (src.isEmpty()) {
             return HtmlCompat.fromHtml(
-                "A newer OpenCfMoto release is available.",
+                "A newer My moto release is available.",
                 HtmlCompat.FROM_HTML_MODE_LEGACY,
             )
         }
@@ -26,7 +27,8 @@ object ReleaseNotes {
     internal fun markdownToHtml(md: String): String {
         val out = StringBuilder()
         for (rawLine in md.replace("\r\n", "\n").replace('\r', '\n').lines()) {
-            val trimmed = rawLine.trim()
+            // A quote line reads as plain text; a bare ">" is the quote's blank line.
+            val trimmed = rawLine.trim().let { if (it.startsWith(">")) it.removePrefix(">").trim() else it }
             when {
                 trimmed.isEmpty() || trimmed == "---" || trimmed == "***" || trimmed == "___" -> {
                     out.append("<br>")
@@ -56,12 +58,15 @@ object ReleaseNotes {
             return "\uE000${holds.lastIndex}\uE001"
         }
         var s = text
+        // Code first, so markers inside it stay literal.
+        s = CODE_RE.replace(s) { m -> hold("<tt>${escape(m.groupValues[1])}</tt>") }
         s = LINK_RE.replace(s) { m ->
             hold("<a href=\"${escapeAttr(m.groupValues[2])}\">${escape(m.groupValues[1])}</a>")
         }
         s = BOLD_RE.replace(s) { m ->
             hold("<b>${escape(m.groupValues[1])}</b>")
         }
+        s = ITALIC_RE.replace(s) { m -> hold("<i>${escape(m.groupValues[1])}</i>") }
         s = escape(s)
         holds.forEachIndexed { i, html ->
             s = s.replace("\uE000$i\uE001", html)
@@ -76,6 +81,9 @@ object ReleaseNotes {
 
     private fun escapeAttr(s: String): String = escape(s).replace("\"", "&quot;")
 
+    private val CODE_RE = Regex("""`([^`]+)`""")
     private val BOLD_RE = Regex("""\*\*(.+?)\*\*""")
+    /** *word* or _word_ — not a lone "*" or snake_case. */
+    private val ITALIC_RE = Regex("""(?<![\w*])[*_](?=\S)(.+?)(?<=\S)[*_](?![\w*])""")
     private val LINK_RE = Regex("""\[([^\]]+)\]\(([^)]+)\)""")
 }
