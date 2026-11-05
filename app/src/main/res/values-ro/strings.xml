@@ -1,34 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Romanian — human-reviewed. Improve via PR: docs/TRANSLATIONS.md -->
 <resources>
-    <string name="about_copyright">© 2026 Alexandru</string>
-    <string name="about_copyright_body">Întreținut de Alexandru (zanderp). Software liber sub GNU AGPL v3 sau ulterior — vezi LICENSE și NOTICE din repository pentru textul complet de copyright și atribuire.</string>
     <string name="about_license_body">Poți folosi, studia, partaja și modifica această aplicație sub AGPL. Dacă redistribui o versiune modificată (inclusiv ca serviciu pe rețea), trebuie să oferi sursa completă corespunzătoare sub aceeași licență.</string>
-    <string name="about_credits">Construit pe linia comunității open-cfmoto:\n\n• dcoletto / coletz — QR &amp; EasyConn original\n• BojanJ — integrare receptor Android Auto\n• richardbizik — suport 1000 MT‑X\n• ionutradu252 / open-cflink — butoane ghidon, margini, reconectare &amp; polish\n• eugen0309 — Wi‑Fi Direct / CL‑C450\n• headunit-revived — stivă de proiecție Android Auto (AGPL)\n\nȘi tuturor celor care au testat pe moto, au trimis loguri și au raportat probleme.</string>
     <string name="about_disclaimer">OpenCfMoto este un proiect comunitar independent. Nu este afiliat, susținut sau sponsorizat de CFMOTO, Carbit, Google, Android Auto sau alte mărci cu borduri EasyConnect (inclusiv Voge, Zontes, Moto Morini, Benelli, QJ Motor, Morbidelli și Longjia). CFMOTO, MotoPlay, EasyConn, Carbit, Android, Android Auto și mărcile aferente aparțin deținătorilor lor. Folosești pe propria răspundere — setează traseul înainte să pleci.</string>
     <string name="supported_bikes_intro">Funcționează cu CFMoto MotoPlay / EasyConnect și alte borduri pe framework Carbit care arată un QR de asociere. Nu e nevoie de T‑BOX. SUA și internațional — dacă vezi QR-ul, încearcă Conectează.</string>
     <string name="supported_bikes_confirmed_title">Confirmate cu OpenCfMoto</string>
     <string name="supported_bikes_confirmed">CFMoto: 800MT (MT‑X / Explore / Explore GT) · 1000 MT‑X · 800NK (US CRCP) · 800NK Advanced · 675NK · 700MT Adventure · 450MT · 450SR (+ SR‑S / TC) · 450CL‑C / CL‑C450 · 450NK · 150SC scooter · CFORCE 850 / 1000 · GOES Terrox 1000 / Gladiator G3 1000\nAltele: Voge DS800 Rally / DS900X · Moto Morini X-Cape 649 / 700 / Seiemmezzo · Benelli TRK 702 / 702X · Rieju 307 · Zontes 125X · Morbidelli T1002VX / T352X · QJ Motor SRK800RR / SRK450RR / SRK250RD / SRT 600 / SRV600</string>
     <string name="supported_bikes_other_title">Alte mărci (Carbit / EasyConnect)</string>
-    <string name="supported_bikes_other">Același traseu Carbit QR — încearcă Conectează dacă bordul arată QR de asociere. Raportează rezultatele pe Discord.\nVoge (DS800 Rally / DS900X confirmat) · Moto Morini (X-Cape 649 / 700 / Seiemmezzo confirmate; MotoFun) · Zontes (125X confirmed) · Benelli (ex. TRK 702 / 702X) · QJ Motor (SRK800RR / SRK250RD / SRK450RR / SRT/SRV 600 confirmed; 600SX / 550SX testing; Fort 4.0) · Morbidelli / MBP (T1002VX confirmat) · Longjia (e.g. V-Bob 650; MotoFUN / Carbit Ride — unconfirmed)</string>
+    <string name="supported_bikes_other">Același traseu Carbit QR — încearcă Conectează dacă bordul arată QR de asociere.\nVoge (DS800 Rally / DS900X confirmat) · Moto Morini (X-Cape 649 / 700 / Seiemmezzo confirmate; MotoFun) · Zontes (125X confirmed) · Benelli (ex. TRK 702 / 702X) · QJ Motor (SRK800RR / SRK250RD / SRK450RR / SRT/SRV 600 confirmed; 600SX / 550SX testing; Fort 4.0) · Morbidelli / MBP (T1002VX confirmat) · Longjia (e.g. V-Bob 650; MotoFUN / Carbit Ride — unconfirmed)</string>
     <string name="supported_bikes_full_title">Listă completă — borduri CFMoto EasyConnect / MotoPlay cunoscute</string>
     <string name="supported_bikes_full">Naked:  125NK · 450NK · 675NK · 800NK · 800NK Advanced · 800NK Sport · 800NK (US CRCP)\nSport:  300SR · 450SR · 450SR‑S · 450SR TC · 500SR VOOM · 675SR · 675SR‑R\nTouring / Adv:  450MT · 700MT · 700MT Adventure · 800MT‑X · 800MT Explore · 800MT Explore GT · 1000 MT‑X\nCruiser:  450CL‑C · CL‑C450\nScooter:  150SC\nATV / SSV (TFT):  CFORCE 800 · CFORCE 850 Touring · CFORCE 1000 · CFORCE 1000 Touring · GOES Terrox 1000 / Gladiator G3 1000\nAltele:  U10 Pro (unde bordul oferă QR)</string>
     <string name="supported_bikes_unlikely_title">De obicei fără QR de proiecție</string>
     <string name="supported_bikes_unlikely">800MT Sport · 800MT Touring · 450SR World Champion Edition · 700CL‑X (Adventure / Heritage / Sport) · PAPIO — decât dacă unitatea ta arată totuși QR-ul.</string>
-    <string name="supported_bikes_footer">Listă completă online: github.com/zanderp/open-cfmoto → docs/SUPPORTED-BIKES.md — raportează moto noi pe Discord.</string>
+    <string name="supported_bikes_footer">Listă completă online: github.com/KasunRoczDev/open-cfmoto → docs/SUPPORTED-BIKES.md</string>
     <string name="about_about">Despre</string>
     <string name="about_wireless_android_auto_for_carbit_easyconnect_das">Android Auto wireless pentru borduri Carbit / EasyConnect (CFMoto MotoPlay și similare).</string>
-    <string name="about_community_support">Comunitate &amp; suport</string>
-    <string name="about_questions_logs_or_a_new_bike_join_discord_tips_k">Întrebări, loguri sau o moto nouă? Intră pe Discord. Donațiile țin proiectul în viață.</string>
-    <string name="about_discord">Discord</string>
     <string name="about_donate">Donează</string>
     <string name="about_copyright_2">Copyright</string>
-    <string name="about_website_alexandru_rocks">Site — alexandru.rocks</string>
     <string name="about_source_on_github">Sursă pe GitHub</string>
     <string name="about_license">Licență</string>
     <string name="about_gnu_affero_general_public_license_v3_or_later">GNU Affero General Public License v3 sau ulterior</string>
     <string name="about_view_license_notice">Vezi LICENSE &amp; NOTICE</string>
-    <string name="about_credits_2">Credite</string>
     <string name="about_disclaimer_2">Declinarea responsabilității</string>
     <string name="about_done">Gata</string>
     <string name="buttons_button_mapping">Mapare butoane</string>
@@ -279,7 +271,7 @@
     <string name="setup_include_secrets_in_shared_logs">Include secrete în jurnalele partajate</string>
     <string name="setup_off_passwords_and_serials_are_redacted_recommend">Oprit — parolele și serialele sunt cenzurate (recomandat)</string>
     <string name="setup_share_settings">Partajează setările</string>
-    <string name="setup_export_bike_tuning_only_profile_resolution_fit_m">Exportă doar reglajele moto — profil, rezoluție, potrivire, margini, butoane, transport Wi‑Fi (fără parole, fără preferințe personale). Partajează pe Discord ca alții să poată Importa.</string>
+    <string name="setup_export_bike_tuning_only_profile_resolution_fit_m">Exportă doar reglajele moto — profil, rezoluție, potrivire, margini, butoane, transport Wi‑Fi (fără parole, fără preferințe personale).</string>
     <string name="setup_share_json">Partajează JSON</string>
     <string name="setup_import">Importă…</string>
     <string name="setup_supported_bikes">Moto suportate</string>

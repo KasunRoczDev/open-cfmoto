@@ -31,17 +31,11 @@ class AboutActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.about_version).text =
             "Version ${BuildConfig.VERSION_NAME}  ·  build ${BuildConfig.VERSION_CODE}"
 
-        findViewById<MaterialButton>(R.id.btn_about_website).setOnClickListener {
-            openUrl(URL_WEBSITE)
-        }
         findViewById<MaterialButton>(R.id.btn_about_github).setOnClickListener {
             openUrl(URL_GITHUB)
         }
         findViewById<MaterialButton>(R.id.btn_about_upstream).setOnClickListener {
             openUrl(URL_UPSTREAM)
-        }
-        findViewById<MaterialButton>(R.id.btn_about_discord).setOnClickListener {
-            openUrl(URL_DISCORD)
         }
         findViewById<MaterialButton>(R.id.btn_about_license).setOnClickListener {
             openUrl(URL_NOTICE)
@@ -58,11 +52,9 @@ class AboutActivity : AppCompatActivity() {
     }
 
     companion object {
-        private const val URL_WEBSITE = "https://alexandru.rocks"
         /** Source of this build (AGPL §13: offer the corresponding source of what users run). */
         private const val URL_GITHUB = "https://github.com/KasunRoczDev/open-cfmoto"
         private const val URL_UPSTREAM = "https://github.com/zanderp/open-cfmoto"
-        private const val URL_DISCORD = "https://discord.gg/KNTjJhmFZ6"
         private const val URL_NOTICE =
             "https://github.com/KasunRoczDev/open-cfmoto/blob/main/NOTICE"
 

@@ -83,7 +83,7 @@ fun MeTab(
         SectionLabel(stringResource(R.string.ui_me_section_support))
         OcmCard {
             SettingRow(stringResource(R.string.ui_me_logs), stringResource(R.string.ui_me_logs_desc), Icons.AutoMirrored.Rounded.Article, onLogs)
-            SettingRow(stringResource(R.string.ui_me_about), icon = Icons.Rounded.Info, onClick = onAbout)
+            SettingRow(stringResource(R.string.about_about), icon = Icons.Rounded.Info, onClick = onAbout)
         }
         Text(stringResource(R.string.ui_version, BuildConfig.VERSION_NAME), style = OcmType.caption, color = c.text2)
         Text(stringResource(R.string.ui_community_note), style = OcmType.caption, color = c.text2)

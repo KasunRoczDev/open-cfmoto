@@ -1,34 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Draft + terminology pass — improve via PR: docs/TRANSLATIONS.md -->
 <resources>
-    <string name="about_copyright">© 2026 Alexandru</string>
-    <string name="about_copyright_body">Spravuje Alexandru (zanderp). Volný software pod GNU AGPL v3 nebo novějším — viz LICENSE a NOTICE v úložišti, kde najdete úplný text autorských práv a uvedení zdroje.</string>
     <string name="about_license_body">Tuto aplikaci můžete používat, studovat, sdílet a upravovat pod AGPL. Pokud redistribuujete upravenou verzi (včetně síťové služby), musíte nabídnout úplný odpovídající zdroj pod stejnou licencí.</string>
-    <string name="about_credits">Postaveno na komunitní linii open-cfmoto:\n\n• dcoletto / coletz — originální QR &amp; EasyConn práce\n• BojanJ – integrace přijímače Android Auto\n• richardbizik — podpora 1000 MT-X\n• ionutradu252 / open-cflink – ovládání řídítek, okraje, opětovné připojení a vyleštění\n• eugen0309 — Wi-Fi Direct / CL-C450 cesta\n• Oživení hlavní jednotky — Android Auto Projection stack (AGPL)\n\nA všichni, kdo testovali kola, sdíleli protokoly a podávali problémy.</string>
     <string name="about_disclaimer">OpenCfMoto je nezávislý komunitní projekt. Není přidružena, podporována ani sponzorována společnostmi CFMOTO, Carbit, Google, Android Auto nebo jinými značkami, které licencují obrazovky ve stylu EasyConnect (včetně Voge, Zontes, Moto Morini, Benelli, QJ Motor, Morbidelli a Longjia). CFMOTO, MotoPlay, EasyConn, Carbit, Android, Android Auto a související značky jsou ochranné známky příslušných vlastníků. Používejte na vlastní nebezpečí – trasu si nastavte před jízdou.</string>
     <string name="supported_bikes_intro">Funguje s CFMoto MotoPlay / EasyConnect a dalšími obrazovkami v rámci Carbit, které zobrazují párovací QR. Není potřeba T-BOX. USA a mezinárodní — pokud vidíte QR, zkuste se připojit.</string>
     <string name="supported_bikes_confirmed_title">Potvrzeno pomocí OpenCfMoto</string>
     <string name="supported_bikes_confirmed">CFMoto: 800MT (MT‑X / Explore / Explore GT) · 1000 MT‑X · 800NK (US CRCP) · 800NK Advanced · 675NK · 700MT Adventure · 450MT · 450SR (+ SR‑S / TC) · 450CL‑C / CL‑C450 · 450NK · 150SC scooter · CFORCE 850 / 1000 · GOES Terrox 1000 / Gladiator G3 1000\nOstatní: Voge DS800 Rally / DS900X · Moto Morini X-Cape 649 / 700 / Seiemmezzo · Benelli TRK 702 / 702X · Rieju 307 · Zontes 125X · Morbidelli T1002VX / T352X · QJ Motor SRK800RR / SRK450RR / SRK250RD / SRT 600 / SRV600</string>
     <string name="supported_bikes_other_title">Jiné značky (Carbit / EasyConnect)</string>
-    <string name="supported_bikes_other">Stejný postup Carbit QR – zkuste Connect, pokud obrazovka ukazuje párovací QR. Hlásit výsledky můžete ve službě Discord.\nVoge (DS800 Rally / DS900X potvrzeno) · Moto Morini (X-Cape 649 / 700 / Seiemmezzo potvrzeno; MotoFun) · Zontes (125X confirmed) · Benelli (např. TRK 702 / 702X) · QJ Motor (SRK800RR / SRK250RD / SRK450RR / SRT/SRV 600 confirmed; 600SX / 550SX testing; Fort 4.0) 0 · T1X Morbidelli · Longjia (e.g. V-Bob 650; MotoFUN / Carbit Ride — unconfirmed)</string>
+    <string name="supported_bikes_other">Stejný postup Carbit QR – zkuste Connect, pokud obrazovka ukazuje párovací QR.\nVoge (DS800 Rally / DS900X potvrzeno) · Moto Morini (X-Cape 649 / 700 / Seiemmezzo potvrzeno; MotoFun) · Zontes (125X confirmed) · Benelli (např. TRK 702 / 702X) · QJ Motor (SRK800RR / SRK250RD / SRK450RR / SRT/SRV 600 confirmed; 600SX / 550SX testing; Fort 4.0) 0 · T1X Morbidelli · Longjia (e.g. V-Bob 650; MotoFUN / Carbit Ride — unconfirmed)</string>
     <string name="supported_bikes_full_title">Úplný seznam — známé obrazovky CFMoto EasyConnect / MotoPlay</string>
     <string name="supported_bikes_full">Naháč: 125 NK · 450 NK · 675 NK · 800 NK · 800 NK Advanced · 800 NK Sport · 800 NK (US CRCP)\nSport: 300SR · 450SR · 450SR‑S · 450SR TC · 500SR VOOM · 675SR · 675SR‑R\nTouring / Adv: 450 MT · 700 MT · 700 MT Adventure · 800 MT‑X · 800 MT Explorer · 800 MT Explorer GT · 1000 MT‑X\nCruiser: 450CL-C · CL-C450\nSkútr: 150SC\nATV / SSV (TFT): CFORCE 800 · CFORCE 850 Touring · CFORCE 1000 · CFORCE 1000 Touring · GOES Terrox 1000 / Gladiator G3 1000\nJiné: U10 Pro (kde obrazovka nabízí QR)</string>
     <string name="supported_bikes_unlikely_title">Obvykle bez projekce QR</string>
     <string name="supported_bikes_unlikely">800MT Sport · 800MT Touring · Edice mistra světa 450SR · 700CL‑X (Adventure / Heritage / Sport) · PAPIO — pokud vaše jednotka přesto neukáže QR.</string>
-    <string name="supported_bikes_footer">Úplný seznam online: github.com/zanderp/open-cfmoto → docs/SUPPORTED-BIKES.md — nahlaste nové stroje v Discordu.</string>
+    <string name="supported_bikes_footer">Úplný seznam online: github.com/KasunRoczDev/open-cfmoto → docs/SUPPORTED-BIKES.md</string>
     <string name="about_about">O</string>
     <string name="about_wireless_android_auto_for_carbit_easyconnect_das">Bezdrátové Android Auto pro obrazovky Carbit / EasyConnect (CFMoto MotoPlay a sourozenci).</string>
-    <string name="about_community_support">Komunita a podpora</string>
-    <string name="about_questions_logs_or_a_new_bike_join_discord_tips_k">Otázky, záznamy, nebo novou motorku? Připojte se k Discordu. Tipy udržují projekt v pohybu.</string>
-    <string name="about_discord">Discord</string>
     <string name="about_donate">Darovat</string>
     <string name="about_copyright_2">Copyright</string>
-    <string name="about_website_alexandru_rocks">Webové stránky — alexandru.rocks</string>
     <string name="about_source_on_github">Zdroj na GitHubu</string>
     <string name="about_license">Licence</string>
     <string name="about_gnu_affero_general_public_license_v3_or_later">GNU Affero General Public License v3 nebo novější</string>
     <string name="about_view_license_notice">Zobrazit LICENSE a NOTICE</string>
-    <string name="about_credits_2">Poděkování</string>
     <string name="about_disclaimer_2">Právní prohlášení</string>
     <string name="about_done">Hotovo</string>
     <string name="buttons_button_mapping">Mapování tlačítek</string>
@@ -279,7 +271,7 @@
     <string name="setup_include_secrets_in_shared_logs">Zahrnout soukromé data do sdílených protokolů</string>
     <string name="setup_off_passwords_and_serials_are_redacted_recommend">Vypnuto – hesla a identifikace jsou skryta (doporučeno)</string>
     <string name="setup_share_settings">Sdílet nastavení</string>
-    <string name="setup_export_bike_tuning_only_profile_resolution_fit_m">Exportujte pouze nastavení motocyklu – profil, rozlišení, přizpůsobení, odsazení, tlačítka, přenos přes Wi-Fi (bez hesel, bez osobních předvoleb). Sdílejte na Discord, aby ostatní mohli importovat.</string>
+    <string name="setup_export_bike_tuning_only_profile_resolution_fit_m">Exportujte pouze nastavení motocyklu – profil, rozlišení, přizpůsobení, odsazení, tlačítka, přenos přes Wi-Fi (bez hesel, bez osobních předvoleb).</string>
     <string name="setup_share_json">Sdílejte JSON</string>
     <string name="setup_import">Importovat…</string>
     <string name="setup_supported_bikes">Podporované motorky</string>

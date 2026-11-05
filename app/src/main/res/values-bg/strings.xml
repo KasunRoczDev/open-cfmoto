@@ -2,34 +2,26 @@
 <!-- Draft from sashop2001/APOpenCfMoto — improve via PR: docs/TRANSLATIONS.md -->
 <resources>
     <string name="app_name">My moto</string>
-    <string name="about_copyright">© 2026 Alexandru</string>
-    <string name="about_copyright_body">Поддържа се от Alexandru (zanderp). Безплатен софтуер под GNU AGPL v3 или по-нова версия — вижте LICENSE и NOTICE в хранилището за пълния текст относно авторските права.</string>
     <string name="about_license_body">Можете да използвате, изучавате, споделяте и модифицирате това приложение според AGPL. Ако разпространявате модифицирана версия (включително като мрежова услуга), трябва да предложите пълния съответен изходен код под същия лиценз.</string>
-    <string name="about_credits">Изградено въз основа на общността на open-cfmoto:\n\n• dcoletto / coletz — първоначална работа по QR и EasyConn\n• BojanJ — интеграция на Android Auto receiver\n• richardbizik — поддръжка за 1000 MT‑X\n• ionutradu252 / open-cflink — управление от кормилото, полета, повторно свързване и полиране\n• eugen0309 — Wi‑Fi Direct / CL‑C450 свързване\n• Martin Escudero (martinescudero) — Android Auto 17.4+ сървърна свързаност\n• headunit-revived — стек за прожектиране на Android Auto (AGPL)\n\nИ всички, които тестваха моторите, споделяха логове и докладваха проблеми.</string>
     <string name="about_disclaimer">OpenCfMoto е независим проект на общността. Не е свързан с, одобрен от или спонсориран от CFMOTO, Carbit, Google, Android Auto или други марки, лицензиращи табла в стил EasyConnect (включително Voge, Zontes, Moto Morini, Benelli, Rieju, QJ Motor, Morbidelli, Longjia и Kove). CFMOTO, MotoPlay, EasyConn, Carbit, Android, Android Auto и свързаните с тях марки са търговски марки на съответните им собственици. Използвайте на свой собствен риск — задайте маршрута си преди да потеглите.</string>
     <string name="supported_bikes_intro">Работи с CFMoto MotoPlay / EasyConnect и други табла с Carbit-фреймуърк, които показват QR код за сдвояване. Не се изисква T‑BOX. За САЩ и международни модели — ако виждате QR кода, опитайте Свързване (Connect).</string>
     <string name="supported_bikes_confirmed_title">Потвърдени с OpenCfMoto</string>
     <string name="supported_bikes_confirmed">CFMoto: 800MT (MT‑X / Explore / Explore GT / Ibex 800) · 1000 MT‑X · 800NK (US CRCP) · 800NK Advanced · 675NK · 675SR‑R · 700MT Adventure · 450MT · 450SR (+ SR‑S / TC) · 450CL‑C / CL‑C450 · 450NK · 150SC скутер · CFORCE 850 / 1000 · GOES Terrox 1000 / Gladiator G3 1000\nДруги: Voge DS800 Rally / DS900X · Moto Morini X-Cape 649 / 700 / Seiemmezzo · Benelli TRK 702 / 702X · Rieju 307 · Zontes 125X · Morbidelli T1002VX / T352X · QJ Motor SRK800RR / SRK450RR / SRK250RD / SRT 600 / SRV600</string>
     <string name="supported_bikes_other_title">Други марки (Carbit / EasyConnect)</string>
-    <string name="supported_bikes_other">Същият Carbit QR път — опитайте Свързване, ако таблото показва QR код за сдвояване. Споделете резултатите в Discord.\nVoge (DS800 Rally / DS900X потвърдени) · Moto Morini (X-Cape 649 / 700 / Seiemmezzo потвърдени; 1200 SoftAP експериментално; MotoFun) · Zontes (125X потвърден) · Benelli (напр. TRK 702 / 702X) · Rieju (307 потвърден) · QJ Motor (SRK800RR / SRK250RD / SRK450RR / SRT/SRV 600 потвърдени; 600SX / 550SX в процес на тестване; Fort 4.0) · Morbidelli / MBP (T1002VX / T352X потвърдени) · Longjia (напр. V-Bob 650; MotoFUN / Carbit Ride — непотвърдено) · Kove (Thinkerride SoftAP експериментално — все още без видео на таблото)</string>
+    <string name="supported_bikes_other">Същият Carbit QR път — опитайте Свързване, ако таблото показва QR код за сдвояване.\nVoge (DS800 Rally / DS900X потвърдени) · Moto Morini (X-Cape 649 / 700 / Seiemmezzo потвърдени; 1200 SoftAP експериментално; MotoFun) · Zontes (125X потвърден) · Benelli (напр. TRK 702 / 702X) · Rieju (307 потвърден) · QJ Motor (SRK800RR / SRK250RD / SRK450RR / SRT/SRV 600 потвърдени; 600SX / 550SX в процес на тестване; Fort 4.0) · Morbidelli / MBP (T1002VX / T352X потвърдени) · Longjia (напр. V-Bob 650; MotoFUN / Carbit Ride — непотвърдено) · Kove (Thinkerride SoftAP експериментално — все още без видео на таблото)</string>
     <string name="supported_bikes_full_title">Пълен списък — познати CFMoto EasyConnect / MotoPlay табла</string>
     <string name="supported_bikes_full">Naked: 125NK · 450NK · 675NK · 800NK · 800NK Advanced · 800NK Sport · 800NK (US CRCP)\nSport: 300SR · 450SR · 450SR‑S · 450SR TC · 500SR VOOM · 675SR · 675SR‑R\nTouring / Adv: 450MT · 700MT · 700MT Adventure · 800MT‑X · 800MT Explore · 800MT Explore GT · 1000 MT‑X\nCruiser: 450CL‑C · CL‑C450\nСкутер: 150SC\nATV / SSV (TFT): CFORCE 800 · CFORCE 850 Touring · CFORCE 1000 · CFORCE 1000 Touring · GOES Terrox 1000 / Gladiator G3 1000\nДруги: U10 Pro (ако таблото предлага QR код)</string>
     <string name="supported_bikes_unlikely_title">Обикновено без QR за прожектиране</string>
     <string name="supported_bikes_unlikely">800MT Sport · 800MT Touring · 450SR World Champion Edition · 700CL‑X (Adventure / Heritage / Sport) · PAPIO — освен ако устройството ви все пак показва QR кода.</string>
-    <string name="supported_bikes_footer">Пълен списък онлайн: github.com/zanderp/open-cfmoto → docs/SUPPORTED-BIKES.md — докладвайте нови мотори в Discord.</string>
+    <string name="supported_bikes_footer">Пълен списък онлайн: github.com/KasunRoczDev/open-cfmoto → docs/SUPPORTED-BIKES.md</string>
     <string name="about_about">Относно</string>
     <string name="about_wireless_android_auto_for_carbit_easyconnect_das">Безжичен Android Auto за табла с Carbit / EasyConnect (CFMoto MotoPlay и сродни).</string>
-    <string name="about_community_support">Общност и поддръжка</string>
-    <string name="about_questions_logs_or_a_new_bike_join_discord_tips_k">Въпроси, логове или нов мотор? Присъединете се към Discord. Даренията помагат за развитието на проекта.</string>
-    <string name="about_discord">Discord</string>
     <string name="about_donate">Дарение</string>
     <string name="about_copyright_2">Авторски права</string>
-    <string name="about_website_alexandru_rocks">Уебсайт — alexandru.rocks</string>
     <string name="about_source_on_github">Изходен код в GitHub</string>
     <string name="about_license">Лиценз</string>
     <string name="about_gnu_affero_general_public_license_v3_or_later">GNU Affero General Public License v3 или по-нова</string>
     <string name="about_view_license_notice">Вижте LICENSE и NOTICE</string>
-    <string name="about_credits_2">Признания</string>
     <string name="about_disclaimer_2">Отказ от отговорност</string>
     <string name="about_done">Готово</string>
     <string name="buttons_button_mapping">Функции на бутоните</string>
@@ -396,7 +388,7 @@
     <string name="setup_secrets_on_desc">Вкл — паролите/серийните номера остават в споделените логове</string>
     <string name="setup_off_passwords_and_serials_are_redacted_recommend">Изкл — паролите и серийните номера са скрити (препоръчително)</string>
     <string name="setup_share_settings">Сподели настройки</string>
-    <string name="setup_export_bike_tuning_only_profile_resolution_fit_m">Експортирайте само настройките на мотора — профил, резолюция, побиране, полета, бутони, Wi‑Fi транспорт (без пароли и лични предпочитания). Споделете в Discord, за да могат други да ги импортират.</string>
+    <string name="setup_export_bike_tuning_only_profile_resolution_fit_m">Експортирайте само настройките на мотора — профил, резолюция, побиране, полета, бутони, Wi‑Fi транспорт (без пароли и лични предпочитания).</string>
     <string name="setup_share_json">Сподели JSON</string>
     <string name="setup_import">Импортирай…</string>
     <string name="setup_supported_bikes">Поддържани мотори</string>

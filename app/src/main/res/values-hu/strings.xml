@@ -2,34 +2,26 @@
 <!-- Draft + terminology pass — improve via PR: docs/TRANSLATIONS.md -->
 <resources>
     <string name="app_name">My moto</string>
-    <string name="about_copyright">© 2026 Alexandru</string>
-    <string name="about_copyright_body">Karbantartja Alexandru (zanderp). Szabad szoftver a GNU AGPL v3 vagy újabb alatt — a teljes szerzői jogi és attribúciós szöveg a LICENSE és NOTICE fájlokban található a repóban.</string>
     <string name="about_license_body">Az AGPL alatt használhatod, tanulmányozhatod, megoszthatod és módosíthatod ezt az alkalmazást. Ha módosított verziót terjesztesz (beleértve hálózati szolgáltatásként is), a teljes megfelelő forráskódot ugyanezen licenc alatt kell elérhetővé tenned.</string>
-    <string name="about_credits">Az open-cfmoto közösségi örökségre épül:\n\n• dcoletto / coletz — eredeti QR és EasyConn munka\n• BojanJ — Android Auto vevő integráció\n• richardbizik — 1000 MT‑X támogatás\n• ionutradu252 / open-cflink — kormányvezérlés, margók, újracsatlakozás és finomítások\n• eugen0309 — Wi‑Fi Direct / CL‑C450 útvonal\n• headunit-revived — Android Auto vetítési stack (AGPL)\n\nÉs mindenki, aki tesztelte a motorokat, megosztotta a naplókat és jelentette a hibákat.</string>
     <string name="about_disclaimer">Az OpenCfMoto független közösségi projekt. Nem áll kapcsolatban a CFMOTO-val, a Carbit-tel, a Google-lal, az Android Autóval vagy más EasyConnect-stílusú műszerfalakat licencelő márkákkal (köztük Voge, Zontes, Moto Morini, Benelli, QJ Motor, Morbidelli és Longjia), és nem támogatják vagy szponzorálják őket. A CFMOTO, MotoPlay, EasyConn, Carbit, Android, Android Auto és kapcsolódó védjegyek a megfelelő tulajdonosok védjegyei. Saját felelősségre használd — állítsd be az útvonalat indulás előtt.</string>
     <string name="supported_bikes_intro">Működik CFMoto MotoPlay / EasyConnect és más Carbit-keretrendszerű műszerfalakkal, amelyek párosító QR-kódot mutatnak. T‑BOX nem szükséges. USA és nemzetközi — ha látod a QR-kódot, próbáld a Csatlakozást.</string>
     <string name="supported_bikes_confirmed_title">OpenCfMoto-val megerősítve</string>
     <string name="supported_bikes_confirmed">CFMoto: 800MT (MT‑X / Explore / Explore GT) · 1000 MT‑X · 800NK (US CRCP) · 800NK Advanced · 675NK · 700MT Adventure · 450MT · 450SR (+ SR‑S / TC) · 450CL‑C / CL‑C450 · 450NK · 150SC scooter · CFORCE 850 / 1000 · GOES Terrox 1000 / Gladiator G3 1000\nEgyéb: Voge DS800 Rally / DS900X · Moto Morini X-Cape 649 / 700 / Seiemmezzo · Benelli TRK 702 / 702X · Rieju 307 · Zontes 125X · Morbidelli T1002VX / T352X · QJ Motor SRK800RR / SRK450RR / SRK250RD / SRT 600 / SRV600</string>
     <string name="supported_bikes_other_title">Egyéb márkák (Carbit / EasyConnect)</string>
-    <string name="supported_bikes_other">Ugyanaz a Carbit QR útvonal — próbáld a Csatlakozást, ha a műszerfal párosító QR-kódot mutat. Eredményeket jelentsd Discordon.\nVoge (DS800 Rally / DS900X megerősítve) · Moto Morini (X-Cape 649 / 700 / Seiemmezzo megerősítve; MotoFun) · Zontes (125X confirmed) · Benelli (pl. TRK 702 / 702X) · QJ Motor (SRK800RR / SRK250RD / SRK450RR / SRT/SRV 600 confirmed; 600SX / 550SX testing; Fort 4.0) · Morbidelli / MBP (T1002VX megerősítve) · Longjia (pl. V-Bob 650; MotoFUN / Carbit Ride — nem megerősített)</string>
+    <string name="supported_bikes_other">Ugyanaz a Carbit QR útvonal — próbáld a Csatlakozást, ha a műszerfal párosító QR-kódot mutat.\nVoge (DS800 Rally / DS900X megerősítve) · Moto Morini (X-Cape 649 / 700 / Seiemmezzo megerősítve; MotoFun) · Zontes (125X confirmed) · Benelli (pl. TRK 702 / 702X) · QJ Motor (SRK800RR / SRK250RD / SRK450RR / SRT/SRV 600 confirmed; 600SX / 550SX testing; Fort 4.0) · Morbidelli / MBP (T1002VX megerősítve) · Longjia (pl. V-Bob 650; MotoFUN / Carbit Ride — nem megerősített)</string>
     <string name="supported_bikes_full_title">Teljes lista — ismert CFMoto EasyConnect / MotoPlay műszerfalak</string>
     <string name="supported_bikes_full">Naked:  125NK · 450NK · 675NK · 800NK · 800NK Advanced · 800NK Sport · 800NK (US CRCP)\nSport:  300SR · 450SR · 450SR‑S · 450SR TC · 500SR VOOM · 675SR · 675SR‑R\nTúra / Adv:  450MT · 700MT · 700MT Adventure · 800MT‑X · 800MT Explore · 800MT Explore GT · 1000 MT‑X\nCruiser:  450CL‑C · CL‑C450\nRobogó:  150SC\nATV / SSV (TFT):  CFORCE 800 · CFORCE 850 Touring · CFORCE 1000 · CFORCE 1000 Touring · GOES Terrox 1000 / Gladiator G3 1000\nEgyéb:  U10 Pro (ahol a műszerfalon QR-kódot kínál)</string>
     <string name="supported_bikes_unlikely_title">Általában nincs tükrözéshes szükséges QR-kód</string>
     <string name="supported_bikes_unlikely">800MT Sport · 800MT Touring · 450SR World Champion Edition · 700CL‑X (Adventure / Heritage / Sport) · PAPIO — kivéve, ha az egységed mégis mutatja a QR-kódot.</string>
-    <string name="supported_bikes_footer">Teljes lista online: github.com/zanderp/open-cfmoto → docs/SUPPORTED-BIKES.md — új motorokat jelents Discordon.</string>
+    <string name="supported_bikes_footer">Teljes lista online: github.com/KasunRoczDev/open-cfmoto → docs/SUPPORTED-BIKES.md</string>
     <string name="about_about">Névjegy</string>
     <string name="about_wireless_android_auto_for_carbit_easyconnect_das">Vezeték nélküli Android Auto Carbit / EasyConnect műszerfalakhoz (CFMoto MotoPlay és társai).</string>
-    <string name="about_community_support">Közösség és támogatás</string>
-    <string name="about_questions_logs_or_a_new_bike_join_discord_tips_k">Kérdés, napló vagy új motor? Csatlakozz Discordon. Az adományok segítik a projektet.</string>
-    <string name="about_discord">Discord</string>
     <string name="about_donate">Adomány</string>
     <string name="about_copyright_2">Szerzői jog</string>
-    <string name="about_website_alexandru_rocks">Weboldal — alexandru.rocks</string>
     <string name="about_source_on_github">Forrás a GitHubon</string>
     <string name="about_license">Licenc</string>
     <string name="about_gnu_affero_general_public_license_v3_or_later">GNU Affero General Public License v3 vagy újabb</string>
     <string name="about_view_license_notice">LICENSE és NOTICE megtekintése</string>
-    <string name="about_credits_2">Köszönetnyilvánítás</string>
     <string name="about_disclaimer_2">Felelősségkizárás</string>
     <string name="about_done">Kész</string>
     <string name="buttons_button_mapping">Gomb-hozzárendelés</string>
@@ -381,7 +373,7 @@
     <string name="setup_secrets_on_desc">Bekapcsolva — jelszavak/sorozatszámok a megosztott naplókban maradnak</string>
     <string name="setup_off_passwords_and_serials_are_redacted_recommend">Kikapcsolva — jelszavak és sorozatszámok kitakarva (ajánlott)</string>
     <string name="setup_share_settings">Beállítások megosztása</string>
-    <string name="setup_export_bike_tuning_only_profile_resolution_fit_m">Csak motor hangolás exportálása — profil, felbontás, illesztés, margók, gombok, Wi‑Fi átvitel (nincs jelszó, nincs személyes beállítás). Oszd meg Discordon, hogy mások importálhassák.</string>
+    <string name="setup_export_bike_tuning_only_profile_resolution_fit_m">Csak motor hangolás exportálása — profil, felbontás, illesztés, margók, gombok, Wi‑Fi átvitel (nincs jelszó, nincs személyes beállítás).</string>
     <string name="setup_share_json">JSON megosztása</string>
     <string name="setup_import">Importálás…</string>
     <string name="setup_supported_bikes">Támogatott motorok</string>

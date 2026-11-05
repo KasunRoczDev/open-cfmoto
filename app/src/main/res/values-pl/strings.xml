@@ -1,34 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Draft + terminology pass — improve via PR: docs/TRANSLATIONS.md -->
 <resources>
-    <string name="about_copyright">© 2026 Aleksandru</string>
-    <string name="about_copyright_body">Utrzymywany przez Alexandru (zanderp). Wolne oprogramowanie na licencji GNU AGPL v3 lub nowszej — zobacz LICENSE i NOTICE w repozytorium, aby zapoznać się z pełnym tekstem dotyczącym praw autorskich i autorstwa.</string>
     <string name="about_license_body">Możesz używać, studiować, udostępniać i modyfikować tę aplikację na podstawie umowy AGPL. Jeśli rozpowszechniasz zmodyfikowaną wersję (w tym jako usługę sieciową), musisz zaoferować kompletne odpowiednie źródło w ramach tej samej licencji.</string>
-    <string name="about_credits">Zbudowany w oparciu o linię społeczności open-cfmoto:\n\n• dcoletto / coletz — oryginalne dzieło QR i EasyConn\n• BojanJ — integracja odbiornika Android Auto\n• richardbizik — obsługa 1000 MT‑X\n• ionutradu252 / open-cflink — sterowanie na kierownicy, marginesy, ponowne połączenie i polerowanie\n• eugen0309 — ścieżka Wi-Fi Direct / CL-C450\n• odnowiona jednostka główna — stos projekcyjny Android Auto (AGPL)\n\nI wszyscy, którzy testowali motocykly, udostępniali dzienniki i zgłaszali problemy.</string>
     <string name="about_disclaimer">OpenCfMoto to niezależny projekt społecznościowy. Nie jest powiązany, wspierany ani sponsorowany przez CFMOTO, Carbit, Google, Android Auto ani inne marki, które licencjonują ekrany w stylu EasyConnect (w tym Voge, Zontes, Moto Morini, Benelli, QJ Motor, Morbidelli i Longjia). CFMOTO, MotoPlay, EasyConn, Carbit, Android, Android Auto i powiązane znaki są znakami towarowymi odpowiednich właścicieli. Korzystasz na własne ryzyko — ustal trasę przed jazdą.</string>
     <string name="supported_bikes_intro">Współpracuje z CFMoto MotoPlay / EasyConnect i innymi myślnikami platformy Carbit, które pokazują kod QR parowania. Nie jest wymagany T-BOX. USA i zagranica — jeśli widzisz kod QR, wypróbuj Połącz.</string>
     <string name="supported_bikes_confirmed_title">Potwierdzone za pomocą OpenCfMoto</string>
     <string name="supported_bikes_confirmed">CFMoto: 800MT (MT‑X / Explore / Explore GT) · 1000 MT‑X · 800NK (US CRCP) · 800NK Advanced · 675NK · 700MT Adventure · 450MT · 450SR (+ SR‑S / TC) · 450CL‑C / CL‑C450 · 450NK · 150SC scooter · CFORCE 850 / 1000 · GOES Terrox 1000 / Gladiator G3 1000\nInne: Voge DS800 Rally / DS900X · Moto Morini X-Cape 649 / 700 / Seiemmezzo · Benelli TRK 702 / 702X · Rieju 307 · Zontes 125X · Morbidelli T1002VX / T352X · QJ Motor SRK800RR / SRK450RR / SRK250RD / SRT 600 / SRV600</string>
     <string name="supported_bikes_other_title">Inne marki (Carbit / EasyConnect)</string>
-    <string name="supported_bikes_other">Ta sama ścieżka QR Carbit — spróbuj połączyć, jeśli myślnik pokazuje parujący kod QR. Zgłaszaj wyniki na Discordzie.\nVoge (potwierdzono DS800 Rally / DS900X) · Moto Morini (potwierdzono X-Cape 649 / 700 / Seiemmezzo; MotoFun) · Zontes (125X confirmed) · Benelli (np. TRK 702 / 702X) · QJ Motor (SRK800RR / SRK250RD / SRK450RR / SRT/SRV 600 confirmed; 600SX / 550SX testing; Fort 4.0) · Morbidelli / MBP (potwierdzono T1002VX) · Longjia (e.g. V-Bob 650; MotoFUN / Carbit Ride — unconfirmed)</string>
+    <string name="supported_bikes_other">Ta sama ścieżka QR Carbit — spróbuj połączyć, jeśli myślnik pokazuje parujący kod QR.\nVoge (potwierdzono DS800 Rally / DS900X) · Moto Morini (potwierdzono X-Cape 649 / 700 / Seiemmezzo; MotoFun) · Zontes (125X confirmed) · Benelli (np. TRK 702 / 702X) · QJ Motor (SRK800RR / SRK250RD / SRK450RR / SRT/SRV 600 confirmed; 600SX / 550SX testing; Fort 4.0) · Morbidelli / MBP (potwierdzono T1002VX) · Longjia (e.g. V-Bob 650; MotoFUN / Carbit Ride — unconfirmed)</string>
     <string name="supported_bikes_full_title">Pełna lista — znane ekrany CFMoto EasyConnect / MotoPlay</string>
     <string name="supported_bikes_full">Nagi: 125NK · 450NK · 675NK · 800NK · 800NK Advanced · 800NK Sport · 800NK (US CRCP)\nSport: 300SR · 450SR · 450SR-S · 450SR TC · 500SR VOOM · 675SR · 675SR-R\nTouring / Adv: 450MT · 700MT · 700MT Adventure · 800MT-X · 800MT Eksploruj · 800MT Przeglądaj GT · 1000 MT-X\nKrążownik: 450CL-C · CL-C450\nSkuter: 150SC\nATV / SSV (TFT): CFORCE 800 · CFORCE 850 Touring · CFORCE 1000 · CFORCE 1000 Touring · GOES Terrox 1000 / Gladiator G3 1000\nInne: U10 Pro (gdzie deska rozdzielcza oferuje QR)</string>
     <string name="supported_bikes_unlikely_title">Zwykle nie ma projekcji kodu QR</string>
     <string name="supported_bikes_unlikely">800MT Sport · 800MT Touring · 450SR World Champion Edition · 700CL-X (Adventure / Heritage / Sport) · PAPIO — chyba że urządzenie i tak wyświetla kod QR.</string>
-    <string name="supported_bikes_footer">Pełna lista online: github.com/zanderp/open-cfmoto → docs/SUPPORTED-BIKES.md — zgłoś nowe motocykle na Discordzie.</string>
+    <string name="supported_bikes_footer">Pełna lista online: github.com/KasunRoczDev/open-cfmoto → docs/SUPPORTED-BIKES.md</string>
     <string name="about_about">O</string>
     <string name="about_wireless_android_auto_for_carbit_easyconnect_das">Bezprzewodowy Android Auto dla ekranów Carbit / EasyConnect (CFMoto MotoPlay i podobne).</string>
-    <string name="about_community_support">Społeczność i wsparcie</string>
-    <string name="about_questions_logs_or_a_new_bike_join_discord_tips_k">Pytania, logi lub nowy motocykl? Dołącz do Discorda. Wskazówki podtrzymują projekt w ruchu.</string>
-    <string name="about_discord">Discord</string>
     <string name="about_donate">Wesprzyj</string>
     <string name="about_copyright_2">Prawo autorskie</string>
-    <string name="about_website_alexandru_rocks">Strona internetowa — alexandru.rocks</string>
     <string name="about_source_on_github">Źródło na GitHubie</string>
     <string name="about_license">Licencja</string>
     <string name="about_gnu_affero_general_public_license_v3_or_later">GNU Affero General Public License v3 lub nowsza</string>
     <string name="about_view_license_notice">Zobacz LICENSE i NOTICE</string>
-    <string name="about_credits_2">Współautorzy</string>
     <string name="about_disclaimer_2">Zastrzeżenie</string>
     <string name="about_done">Zamknij</string>
     <string name="buttons_button_mapping">Mapowanie przycisków</string>
@@ -277,7 +269,7 @@
     <string name="setup_bluetooth_clock">Ustaw zegar ekranu poprzez Bluetooth (eksperymentalne)</string>
     <string name="setup_bluetooth_clock_desc">Niektóre ekrany proszą o podanie czasu przez Bluetooth zamaist Wi-Fi, i ustawiają 00:00 gdy operacja się nie powiedzie. Najpier sparuj motocykl w ustawieniach Bluetooth w Androidzie. \'Wyłączony\' domyślnie — apka poda czas tylko gdy ekran wyśle żądanie swoim protokołem.</string>
     <string name="setup_clock_lab">Zegar (EKSPERYMENTALNE)</string>
-    <string name="setup_clock_lab_desc">One tester pack for every clock experiment — Wi‑Fi query/sync, Bluetooth listen (ZT / EC-BTP), stay-on-bike-Wi‑Fi. Defaults match Latest 2.0.13 (empty 0x10451, echo 0x10600, BLE off). Pick a combo, Connect once, Share Logs in Discord #clock-issue. Do not leave a combo on for daily riding.</string>
+    <string name="setup_clock_lab_desc">One tester pack for every clock experiment — Wi‑Fi query/sync, Bluetooth listen (ZT / EC-BTP), stay-on-bike-Wi‑Fi. Defaults match Latest 2.0.13 (empty 0x10451, echo 0x10600, BLE off). Pick a combo, Connect once, then Share Logs. Do not leave a combo on for daily riding.</string>
     <string name="setup_clock_lab_bt">Nasłuch Bluetooth</string>
     <string name="setup_clock_lab_presets">Wstępnie ustawienia (fill the knobs only)</string>
     <string name="setup_clock_lab_preset_latest">Ostatnie</string>
@@ -310,7 +302,7 @@
     <string name="setup_include_secrets_in_shared_logs">Uwzględnij hasła w udostępnionych logach</string>
     <string name="setup_off_passwords_and_serials_are_redacted_recommend">Wyłączone — hasła i numery seryjne są redagowane (zalecane)</string>
     <string name="setup_share_settings">Udostępnij ustawienia</string>
-    <string name="setup_export_bike_tuning_only_profile_resolution_fit_m">Eksportuj tylko ustawienia dopasowania do ekranu motocykla — profil, rozdzielczość, dopasowanie, marginesy, przyciski, transport Wi-Fi (bez haseł i osobistych preferencji). Udostępnij na Discordzie, aby inni mogli importować.</string>
+    <string name="setup_export_bike_tuning_only_profile_resolution_fit_m">Eksportuj tylko ustawienia dopasowania do ekranu motocykla — profil, rozdzielczość, dopasowanie, marginesy, przyciski, transport Wi-Fi (bez haseł i osobistych preferencji).</string>
     <string name="setup_share_json">Udostępnij JSON</string>
     <string name="setup_import">Import…</string>
     <string name="setup_supported_bikes">Obsługiwane motocykle</string>

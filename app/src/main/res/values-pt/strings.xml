@@ -1,34 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Draft + terminology pass — improve via PR: docs/TRANSLATIONS.md -->
 <resources>
-    <string name="about_copyright">© 2026 Alexandru</string>
-    <string name="about_copyright_body">Mantido por Alexandru (zanderp). Software gratuito sob GNU AGPL v3 ou posterior — consulte LICENÇA e AVISO no repositório para obter o texto completo de direitos autorais e atribuição.</string>
     <string name="about_license_body">Você pode usar, estudar, compartilhar e modificar este aplicativo sob a AGPL. Se você redistribuir uma versão modificada (inclusive como um serviço de rede), deverá oferecer a fonte correspondente completa sob a mesma licença.</string>
-    <string name="about_credits">Construído com base na linhagem da comunidade open-cfmoto:\n\n• dcoletto / coletz — trabalho original de QR e EasyConn\n• BojanJ — integração com receptor Android Auto\n• richardbizik — suporte para 1000 MT‑X\n• ionutradu252 / open-cflink — controles do guidão, margens, reconexão e polimento\n• eugen0309 — caminho Wi‑Fi Direct/CL‑C450\n• unidade central revivida — pilha de projeção Android Auto (AGPL)\n\nE todos que testaram motos, compartilharam registros e registraram problemas.</string>
     <string name="about_disclaimer">OpenCfMoto é um projeto comunitário independente. Não é afiliado, endossado ou patrocinado por CFMOTO, Carbit, Google, Android Auto ou outras marcas que licenciam painéis estilo EasyConnect (incluindo Voge, Zontes, Moto Morini, Benelli, QJ Motor, Morbidelli e Longjia). CFMOTO, MotoPlay, EasyConn, Carbit, Android, Android Auto e marcas relacionadas são marcas registradas de seus respectivos proprietários. Use por sua conta e risco – defina sua rota antes de pedalar.</string>
     <string name="supported_bikes_intro">Funciona com CFMoto MotoPlay / EasyConnect e outros traços da estrutura Carbit que mostram um QR de emparelhamento. Não é necessário T‑BOX. EUA e internacional — se você vir o QR, experimente o Connect.</string>
     <string name="supported_bikes_confirmed_title">Confirmado com OpenCfMoto</string>
     <string name="supported_bikes_confirmed">CFMoto: 800MT (MT‑X / Explore / Explore GT) · 1000 MT‑X · 800NK (US CRCP) · 800NK Advanced · 675NK · 700MT Adventure · 450MT · 450SR (+ SR‑S / TC) · 450CL‑C / CL‑C450 · 450NK · 150SC scooter · CFORCE 850 / 1000 · GOES Terrox 1000 / Gladiator G3 1000\nOutros: Voge DS800 Rally / DS900X · Moto Morini X-Cape 649 / 700 / Seiemmezzo · Benelli TRK 702 / 702X · Rieju 307 · Zontes 125X · Morbidelli T1002VX / T352X · QJ Motor SRK800RR / SRK450RR / SRK250RD / SRT 600 / SRV600</string>
     <string name="supported_bikes_other_title">Outras marcas (Carbit / EasyConnect)</string>
-    <string name="supported_bikes_other">Mesmo caminho Carbit QR – tente Connect se o painel mostrar um QR de emparelhamento. Relate os resultados no Discord.\nVoge (DS800 Rally / DS900X confirmado) · Moto Morini (X-Cape 649/700 / Seiemmezzo confirmado; MotoFun) · Zontes (125X confirmed) · Benelli (por exemplo, TRK 702 / 702X) · QJ Motor (SRK800RR / SRK250RD / SRK450RR / SRT/SRV 600 confirmed; 600SX / 550SX testing; Fort 4.0) · Morbidelli / MBP (T1002VX confirmado) · Longjia (e.g. V-Bob 650; MotoFUN / Carbit Ride — unconfirmed)</string>
+    <string name="supported_bikes_other">Mesmo caminho Carbit QR – tente Connect se o painel mostrar um QR de emparelhamento.\nVoge (DS800 Rally / DS900X confirmado) · Moto Morini (X-Cape 649/700 / Seiemmezzo confirmado; MotoFun) · Zontes (125X confirmed) · Benelli (por exemplo, TRK 702 / 702X) · QJ Motor (SRK800RR / SRK250RD / SRK450RR / SRT/SRV 600 confirmed; 600SX / 550SX testing; Fort 4.0) · Morbidelli / MBP (T1002VX confirmado) · Longjia (e.g. V-Bob 650; MotoFUN / Carbit Ride — unconfirmed)</string>
     <string name="supported_bikes_full_title">Lista completa – traços conhecidos do CFMoto EasyConnect / MotoPlay</string>
     <string name="supported_bikes_full">Nu: 125NK · 450NK · 675NK · 800NK · 800NK Avançado · 800NK Sport · 800NK (US CRCP)\nEsporte: 300SR · 450SR · 450SR‑S · 450SR TC · 500SR VOOM · 675SR · 675SR‑R\nTouring / Adv: 450MT · 700MT · 700MT Aventura · 800MT‑X · 800MT Explorar · 800MT Explorar GT · 1000 MT‑X\nCruzador: 450CL‑C · CL‑C450\nScooter: 150SC\nATV / SSV (TFT): CFORCE 800 · CFORCE 850 Touring · CFORCE 1000 · CFORCE 1000 Touring · GOES Terrox 1000 / Gladiator G3 1000\nOutro: U10 Pro (onde o painel oferece o QR)</string>
     <string name="supported_bikes_unlikely_title">Geralmente sem projeção QR</string>
     <string name="supported_bikes_unlikely">800MT Sport · 800MT Touring · 450SR World Champion Edition · 700CL‑X (Adventure / Heritage / Sport) · PAPIO — a menos que sua unidade mostre o QR de qualquer maneira.</string>
-    <string name="supported_bikes_footer">Lista completa online: github.com/zanderp/open-cfmoto → docs/SUPPORTED-BIKES.md - relate novas motos no Discord.</string>
+    <string name="supported_bikes_footer">Lista completa online: github.com/KasunRoczDev/open-cfmoto → docs/SUPPORTED-BIKES.md</string>
     <string name="about_about">Sobre</string>
     <string name="about_wireless_android_auto_for_carbit_easyconnect_das">Android Auto sem fio para painéis Carbit / EasyConnect (CFMoto MotoPlay e irmãos).</string>
-    <string name="about_community_support">Comunidade e suporte</string>
-    <string name="about_questions_logs_or_a_new_bike_join_discord_tips_k">Dúvidas, registros ou uma moto nova? Junte-se ao Discord. Dicas mantêm o projeto em andamento.</string>
-    <string name="about_discord">Discórdia</string>
     <string name="about_donate">Doar</string>
     <string name="about_copyright_2">Direitos autorais</string>
-    <string name="about_website_alexandru_rocks">Site - alexandru.rocks</string>
     <string name="about_source_on_github">Fonte no GitHub</string>
     <string name="about_license">Licença</string>
     <string name="about_gnu_affero_general_public_license_v3_or_later">Licença Pública Geral GNU Affero v3 ou posterior</string>
     <string name="about_view_license_notice">Ver LICENÇA E AVISO</string>
-    <string name="about_credits_2">Créditos</string>
     <string name="about_disclaimer_2">Isenção de responsabilidade</string>
     <string name="about_done">Feito</string>
     <string name="buttons_button_mapping">Mapeamento de botões</string>
@@ -279,7 +271,7 @@
     <string name="setup_include_secrets_in_shared_logs">Incluir segredos em logs compartilhados</string>
     <string name="setup_off_passwords_and_serials_are_redacted_recommend">Desativado — senhas e números de série são editados (recomendado)</string>
     <string name="setup_share_settings">Configurações de compartilhamento</string>
-    <string name="setup_export_bike_tuning_only_profile_resolution_fit_m">Exporte apenas ajustes de moto — perfil, resolução, ajuste, margens, botões, transporte Wi-Fi (sem senhas, sem preferências pessoais). Compartilhe no Discord para que outras pessoas possam importar.</string>
+    <string name="setup_export_bike_tuning_only_profile_resolution_fit_m">Exporte apenas ajustes de moto — perfil, resolução, ajuste, margens, botões, transporte Wi-Fi (sem senhas, sem preferências pessoais).</string>
     <string name="setup_share_json">Compartilhar JSON</string>
     <string name="setup_import">Importar…</string>
     <string name="setup_supported_bikes">Motos suportadas</string>
