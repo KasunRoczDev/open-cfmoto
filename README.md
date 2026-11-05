@@ -7,7 +7,7 @@
 **CFMoto** · **Voge** · **Moto Morini** · **Morbidelli** · **Zontes** · **Benelli** · **QJ Motor** ·
 **Rieju** · **UM** · **Wmoto** · **Longjia** · **GOES** / **Gladiator** · and other brands with a pairing QR
 
-[![Download APK](https://img.shields.io/badge/Download-OpenCfMoto%202.1.0-2ea44f?style=for-the-badge&logo=android&logoColor=white)](https://github.com/KasunRoczDev/open-cfmoto/releases/latest/download/OpenCfMoto.apk)
+[![Download APK](https://img.shields.io/badge/Download-My%20moto%202.2.0-2ea44f?style=for-the-badge&logo=android&logoColor=white)](https://github.com/KasunRoczDev/open-cfmoto/releases/latest/download/OpenCfMoto.apk)
 [![Latest release](https://img.shields.io/github/v/release/KasunRoczDev/open-cfmoto?style=for-the-badge&label=Release)](https://github.com/KasunRoczDev/open-cfmoto/releases/latest)
 [![Android 10+](https://img.shields.io/badge/Android-10%2B-3DDC84?style=for-the-badge&logo=android&logoColor=white)](#-what-you-need)
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue?style=for-the-badge)](LICENSE)
@@ -244,7 +244,7 @@ required. US CRCP and international dashes both work. OpenCfMoto projects **wire
 ### Confirmed with OpenCfMoto
 
 Community-confirmed Android Auto on the dash (Discord `#confirmed-working` + brand rooms). Pairing QR
-required. Confirmed on upstream **2.0.18**; 2.1.0 keeps the same connection core.
+required. Confirmed on upstream **2.0.18**; 2.1.0 and 2.2.0 keep the same connection core.
 
 **CFMoto**
 - **1000MT‑X** · **800MT‑X** · **800MT Explore** / Explore GT · **Ibex 800** (US)
