@@ -181,7 +181,7 @@
     <string name="gpx_downloading_roadside_poi">Изтегляне на крайпътни POI…</string>
     <string name="gpx_no_roadside_poi_in_corridor">Няма крайпътни POI в коридора</string>
     <string name="gpx_roadside_poi_count">Крайпътни POI: %1$d (гориво, паркинг, храна…)</string>
-    <string name="gpx_export_map_subject">Данни за картата на OpenCfMoto</string>
+    <string name="gpx_export_map_subject">Данни за картата на My moto</string>
     <string name="gpx_export_map_chooser">Експортиране на данни за картата</string>
     <string name="gpx_export_failed">Неуспешно експортиране: %1$s</string>
     <string name="gpx_free_ride_place">Свободно каране</string>

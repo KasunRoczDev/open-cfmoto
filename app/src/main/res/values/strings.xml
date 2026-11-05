@@ -217,7 +217,7 @@
     <string name="gpx_downloading_roadside_poi">Downloading roadside POI…</string>
     <string name="gpx_no_roadside_poi_in_corridor">No roadside POI in corridor</string>
     <string name="gpx_roadside_poi_count">Roadside POI: %1$d (fuel, parking, food…)</string>
-    <string name="gpx_export_map_subject">OpenCfMoto map data</string>
+    <string name="gpx_export_map_subject">My moto map data</string>
     <string name="gpx_export_map_chooser">Export map data</string>
     <string name="gpx_export_failed">Export failed: %1$s</string>
     <string name="gpx_free_ride_place">Free ride</string>
@@ -724,7 +724,7 @@
     <string name="ui_me_donate">Donate</string>
     <string name="ui_logs_share">Share</string>
     <string name="ui_logs_clear">Clear</string>
-    <string name="ui_version">OpenCfMoto %1$s</string>
+    <string name="ui_version">My moto %1$s</string>
     <string name="setup_strip_mode">Strip shows</string>
     <string name="setup_strip_mode_desc">Directions: next turn, lanes and arrival time from Google Maps — only while navigating, over the bottom of Android Auto (which keeps the full screen). Metrics: speed / altitude / heading. Applies next connect.</string>
     <string name="pref_strip_mode_metrics">Metrics</string>
@@ -876,7 +876,7 @@
     <string name="fuel_entry">%1$s L · %2$s</string>
     <string name="fuel_full">full tank</string>
     <string name="fuel_partial">partial</string>
-    <string name="fuel_rides_note">The range only counts rides OpenCfMoto logged. Turn on Settings ▸ “Log rides over the bike\'s Bluetooth” so every ride counts.</string>
+    <string name="fuel_rides_note">The range only counts rides My moto logged. Turn on Settings ▸ “Log rides over the bike\'s Bluetooth” so every ride counts.</string>
     <string name="fuel_dialog_title">Add fill-up</string>
     <string name="fuel_dialog_litres">Litres</string>
     <string name="fuel_dialog_cost">Total cost (optional)</string>

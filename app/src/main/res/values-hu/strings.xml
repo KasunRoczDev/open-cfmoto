@@ -174,7 +174,7 @@
     <string name="gpx_downloading_roadside_poi">Útszéli POI letöltése…</string>
     <string name="gpx_no_roadside_poi_in_corridor">Nincs útszéli POI a folyosón</string>
     <string name="gpx_roadside_poi_count">Útszéli POI: %1$d (benzinkút, parkoló, étterem…)</string>
-    <string name="gpx_export_map_subject">OpenCfMoto térkép adatok</string>
+    <string name="gpx_export_map_subject">My moto térkép adatok</string>
     <string name="gpx_export_map_chooser">Térkép adatok exportálása</string>
     <string name="gpx_export_failed">Export sikertelen: %1$s</string>
     <string name="gpx_free_ride_place">Szabad vezetés</string>

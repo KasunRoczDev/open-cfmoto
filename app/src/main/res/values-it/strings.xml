@@ -465,7 +465,7 @@
     <string name="gpx_parking_spot_saved">Posizione parcheggio salvata</string>
     <string name="gpx_downloading_roadside_poi">Scaricamento dei POI lungo il percorso…</string>
     <string name="gpx_no_roadside_poi_in_corridor">Nessun POI lungo la tratta nel corridoio.</string>
-    <string name="gpx_export_map_subject">Mappa data OpenCFMoto</string>
+    <string name="gpx_export_map_subject">Mappa data My moto</string>
     <string name="gpx_offline_area_detail_vector_raster">%1$s Dettagli · vettori %2$d MB · raster sulla moto</string>
     <string name="main_mirror_leave_shared_app">Lascia l’app condivisa sullo schermo (OpenCfMoto resta nella notifica)</string>
     <string name="margins_summary_none">Nessuno — Android Auto usa l’intero cruscotto.</string>

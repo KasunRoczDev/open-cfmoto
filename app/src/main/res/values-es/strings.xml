@@ -181,7 +181,7 @@
     <string name="gpx_downloading_roadside_poi">Descargando PDI de la ruta…</string>
     <string name="gpx_no_roadside_poi_in_corridor">No hay PDI en el corredor de la ruta</string>
     <string name="gpx_roadside_poi_count">PDI de la ruta: %1$d (gasolina, aparcamiento, comida…)</string>
-    <string name="gpx_export_map_subject">Datos de mapa de OpenCfMoto</string>
+    <string name="gpx_export_map_subject">Datos de mapa de My moto</string>
     <string name="gpx_export_map_chooser">Exportar datos de mapa</string>
     <string name="gpx_export_failed">Error al exportar: %1$s</string>
     <string name="gpx_free_ride_place">Ruta libre</string>

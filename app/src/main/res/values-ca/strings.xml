@@ -197,7 +197,7 @@
     <string name="gpx_downloading_roadside_poi">S\'està descarregant el PDI de carretera…</string>
     <string name="gpx_no_roadside_poi_in_corridor">No hi ha PDI de carretera al corredor</string>
     <string name="gpx_roadside_poi_count">PDI de carretera: %1$d (combustible, aparcament, menjar…)</string>
-    <string name="gpx_export_map_subject">Dades del mapa d\'OpenCfMoto</string>
+    <string name="gpx_export_map_subject">Dades del mapa de My moto</string>
     <string name="gpx_export_map_chooser">Exportar dades del mapa</string>
     <string name="gpx_export_failed">Error d\'exportació: %1$s</string>
     <string name="gpx_free_ride_place">Viatge gratuït</string>
