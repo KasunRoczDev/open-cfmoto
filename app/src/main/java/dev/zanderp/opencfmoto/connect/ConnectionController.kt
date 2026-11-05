@@ -126,7 +126,24 @@ class ConnectionController(private val engine: ConnectionEngine) {
         }
     }
 
-    fun stop() = engine.stopEverything()
+    /**
+     * Stop: tear everything down and void every connect timer already queued (self-mode triggers,
+     * the delayed auto-connect, rival retries) so nothing restarts the flow until the rider taps
+     * Connect again. Bike Wi-Fi re-join retries are cancelled inside [ConnectionEngine.stopEverything].
+     */
+    fun stop() {
+        stopGeneration++
+        engine.stopEverything()
+    }
+
+    /** Bumped by [stop]; delayed connect steps posted before it become no-ops. */
+    private var stopGeneration = 0
+
+    /** [ConnectionEngine.postDelayed] that is dropped if the rider taps Stop before it fires. */
+    private fun postUnlessStopped(delayMs: Long, block: () -> Unit) {
+        val gen = stopGeneration
+        engine.postDelayed(delayMs) { if (gen == stopGeneration) block() }
+    }
 
     /** Launch the QR scanner for the Android Auto path (profile is chosen from the scan result). */
     fun startAaScan() {
@@ -207,7 +224,7 @@ class ConnectionController(private val engine: ConnectionEngine) {
             engine.startAaHandoff()
             // Trigger Google AA from the FOREGROUND activity (BAL-safe) after the :5288 server binds.
             // Uses whichever activity is attached *when it fires* — AA can recreate MainActivity.
-            engine.postDelayed(900) {
+            postUnlessStopped(900) {
                 try {
                     engine.triggerSelfMode(port?.activity)
                 } catch (e: Exception) {
@@ -216,10 +233,10 @@ class ConnectionController(private val engine: ConnectionEngine) {
             }
             // Additive retry for AA 16.4+/17.4+ that ignore the first broadcast — skipped if a session
             // is already live (re-firing START_WIRELESS_PROJECTION kills AAP).
-            engine.postDelayed(4_500) {
+            postUnlessStopped(4_500) {
                 if (aaAlreadyLiveOrTerminal()) {
                     if (engine.aaSessionActive()) log("[AA] skip re-trigger — AA already connected/decoding")
-                    return@postDelayed
+                    return@postUnlessStopped
                 }
                 try {
                     log("[AA] no video yet — re-triggering self-mode (AA 16.4+/17.4+ fallbacks)")
@@ -229,12 +246,12 @@ class ConnectionController(private val engine: ConnectionEngine) {
                 }
             }
             // Give up the silent black/QR reconnect loop — surface a clear error after several tries.
-            engine.postDelayed(18_000) {
+            postUnlessStopped(18_000) {
                 val p = engine.phase
                 if (p == Phase.IDLE || p == Phase.STOPPED || p == Phase.ERROR ||
                     p == Phase.STREAMING || p == Phase.MIRRORING
-                ) return@postDelayed
-                if (engine.aaSessionActive()) return@postDelayed
+                ) return@postUnlessStopped
+                if (engine.aaSessionActive()) return@postUnlessStopped
                 log("[AA] Android Auto never attached — stopping silent retry")
                 val detail = if (engine.aaSessionSeen()) {
                     engine.string(R.string.conn_detail_aa_dropped)
@@ -335,12 +352,12 @@ class ConnectionController(private val engine: ConnectionEngine) {
         log("→ Auto-connect: '${engine.bikeName()}' ($why). Disable in Setup ▸ Startup.")
         engine.clearProjection()   // bike uses the AA pipeline, not mirror
         engine.ensureLocationPermission(port?.activity)
-        engine.postDelayed(1200) {
+        postUnlessStopped(1200) {
             try {
                 if (port == null) {
                     // Recreated before we fired — let the next instance retry.
                     autoConnectStarted = false
-                    return@postDelayed
+                    return@postUnlessStopped
                 }
                 if (!engine.aaServiceRunning() && !engine.phase.busy) startAaFlow(saved)
             } catch (e: Exception) {
@@ -370,7 +387,7 @@ class ConnectionController(private val engine: ConnectionEngine) {
         rivalSettingsSentAt = null
         if (!RivalClient.shouldRetryOnResume(sentAt, engine.elapsedRealtime())) return
         log("→ back from CFMoto app settings — retrying")
-        engine.postDelayed(1000) { reconnectSavedBike() }
+        postUnlessStopped(1000) { reconnectSavedBike() }
     }
 
     // ---------------------------------------------------------------- phase → prompts
@@ -417,7 +434,7 @@ class ConnectionController(private val engine: ConnectionEngine) {
         val killed = engine.closeRival()
         log(if (killed) "→ asked Android to close the official CFMoto app; retrying…"
             else "→ couldn't auto-close the official CFMoto app — open its settings to Force stop.")
-        engine.postDelayed(1500) { reconnectSavedBike() }
+        postUnlessStopped(1500) { reconnectSavedBike() }
     }
 
     fun onRivalAppSettings() {

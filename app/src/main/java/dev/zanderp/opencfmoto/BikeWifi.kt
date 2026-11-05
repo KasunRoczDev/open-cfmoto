@@ -44,7 +44,6 @@ object BikeWifi {
 
     @Volatile private var active = false
     @Volatile private var firstDelivered = false
-    private var rejoinAttempts = 0
     private var ssid: String = ""
     private var onAvailableCb: ((Network) -> Unit)? = null
     private var onLostCb: (() -> Unit)? = null
@@ -58,11 +57,11 @@ object BikeWifi {
     // network the moment the bike's AP blips, and if we don't re-grab the bike AP fast the dash's
     // EasyConn times out ("device is not on the network") and needs a manual restart. Grabbing it back
     // immediately keeps us on the bike's network long enough for the dash to reconnect on its own.
-    private const val REJOIN_FAST_MS = 300L
-    private const val REJOIN_BASE_MS = 2500L
-    private const val REJOIN_MAX_MS = 15000L
-    /** After a failed *first* join (picker canceled / timed out), wait before re-prompting. */
-    private const val FIRST_JOIN_RETRY_MS = 4_000L
+    // Timings live in [WifiRejoinLoop]; every retry runs on [handler], and Stop cancels the loop.
+    private val rejoin = WifiRejoinLoop(
+        post = { ms, block -> handler.postDelayed(block, ms) },
+        cancelAll = { handler.removeCallbacksAndMessages(null) },
+    )
     /**
      * Must be passed to [ConnectivityManager.requestNetwork]. Without a timeout the request can
      * wait forever after the bike AP dies — none of onAvailable/onLost/onUnavailable fire — so
@@ -85,8 +84,8 @@ object BikeWifi {
         log: (String) -> Unit,
     ) {
         val cm = context.applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        // Tear down any previous session's callback first.
-        handler.removeCallbacksAndMessages(null)
+        // Tear down any previous session's callback (and queued retries) first.
+        rejoin.start()
         callback?.let { try { cm.unregisterNetworkCallback(it) } catch (_: Exception) {} }
 
         this.appContext = context.applicationContext
@@ -97,7 +96,6 @@ object BikeWifi {
         this.logCb = log
         this.active = true
         this.firstDelivered = false
-        this.rejoinAttempts = 0
 
         val specifier = WifiNetworkSpecifier.Builder()
             .setSsid(ssid)
@@ -131,6 +129,8 @@ object BikeWifi {
             this.onAvailableCb = onAvailable
             this.onLostCb = onLost
             this.logCb = log
+            // A parked network (keep-Wi-Fi Stop) is being reused: watch for drops again.
+            if (!rejoin.enabled) rejoin.start()
             log("Wi-Fi already joined: $ssid — skipping re-join (mode switch)")
             onAvailable(net)
             return
@@ -151,7 +151,7 @@ object BikeWifi {
                 // a successful handshake on DIRECT-go-CFMOTO / 800NK before video went steady.
                 // [BikeLink] / [EasyConnProber] call [rebindProcessToBike] when PXC actually starts.
                 AppHttp.ensureCellularUplink()
-                rejoinAttempts = 0
+                rejoin.resetAttempts()
                 logLinkOnce(network)
                 if (!firstDelivered) {
                     firstDelivered = true
@@ -179,6 +179,11 @@ object BikeWifi {
             }
 
             override fun onUnavailable() {
+                // Stopped while the request was pending: don't log "will retry" or flag an error.
+                if (!active || !rejoin.enabled) {
+                    if (currentNetwork == null) unbindProcess()
+                    return
+                }
                 val timeoutSec = (if (firstDelivered) REJOIN_TIMEOUT_MS else FIRST_JOIN_TIMEOUT_MS) / 1000
                 logCb?.invoke(
                     "Wi-Fi join unavailable after ${timeoutSec}s " +
@@ -236,24 +241,17 @@ object BikeWifi {
 
     private fun scheduleRejoin() {
         if (!active) return
-        rejoinAttempts++
-        // Before the first successful join, never use the near-instant retry — that cancels the
-        // system device picker mid-tap ("app canceled the request to choose a device").
-        // After firstDelivered, first attempt is near-instant to beat home-Wi‑Fi / dash timeout.
-        val delay = when {
-            !firstDelivered -> FIRST_JOIN_RETRY_MS
-            rejoinAttempts <= 1 -> REJOIN_FAST_MS
-            else -> minOf(REJOIN_BASE_MS * (rejoinAttempts - 1), REJOIN_MAX_MS)
-        }
-        handler.postDelayed({
-            if (!active) return@postDelayed
-            logCb?.invoke("re-requesting bike Wi-Fi (attempt $rejoinAttempts) …")
+        // Before the first successful join the loop never uses the near-instant retry (it would
+        // cancel the system device picker mid-tap); after firstDelivered the first one is near-instant.
+        rejoin.schedule(firstDelivered) { attempt ->
+            if (!active) return@schedule
+            logCb?.invoke("re-requesting bike Wi-Fi (attempt $attempt) …")
             // Don't stomp the WAITING_FOR_BIKE state the service sets once AA is parked.
             if (ConnectionState.phase != Phase.WAITING_FOR_BIKE) {
                 ConnectionState.set(Phase.RECONNECTING, "waiting for bike Wi-Fi")
             }
             registerCallback()
-        }, delay)
+        }
     }
 
     /**
@@ -314,8 +312,19 @@ object BikeWifi {
     /**
      * Keep the SoftAP association (callback stays registered) but unbind the process so
      * cellular / maps work. Some dashes forget the clock the moment the group drops.
+     *
+     * Parking is still a Stop: the re-join loop is cancelled so a later drop or a pending join
+     * timeout can't flip the phase back to RECONNECTING. With no live bike network there is nothing
+     * to keep (bike off / never joined), so that case releases the request entirely — otherwise its
+     * 90 s timeout fires after Stop and restarts the retry loop.
      */
     fun park(context: Context, log: (String) -> Unit) {
+        rejoin.stop()
+        if (currentNetwork == null) {
+            log("Wi-Fi keep-after-disconnect: no live bike network to keep — releasing the join request")
+            leave(context, log)
+            return
+        }
         val cm = this.cm ?: (context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager)
         unbindProcess(cm)
         log("Wi-Fi kept after disconnect (dash clock) — process unbound, SoftAP still associated")
@@ -323,7 +332,7 @@ object BikeWifi {
 
     fun leave(context: Context, log: (String) -> Unit) {
         active = false
-        handler.removeCallbacksAndMessages(null)
+        rejoin.stop()
         val cm = this.cm ?: (context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager)
         callback?.let {
             try { cm.unregisterNetworkCallback(it) } catch (_: Exception) {}
