@@ -2,19 +2,19 @@
 
 # 🏍️ OpenCfMoto — Rider Extras
 
-### Wireless Android Auto on Carbit / EasyConnect dashes (CFMoto MotoPlay and siblings) — plus fuel range, rain alerts, ride reports and bike care. No root, no PC.
+### Wireless Android Auto on Carbit / EasyConnect dashes (CFMoto MotoPlay and siblings) — plus tyre pressure, fuel range, rain alerts, ride reports and bike care. No root, no PC.
 
 **CFMoto** · **Voge** · **Moto Morini** · **Morbidelli** · **Zontes** · **Benelli** · **QJ Motor** ·
 **Rieju** · **UM** · **Wmoto** · **Longjia** · **GOES** / **Gladiator** · and other brands with a pairing QR
 
-[![Download APK](https://img.shields.io/badge/Download-My%20moto%202.2.2-2ea44f?style=for-the-badge&logo=android&logoColor=white)](https://github.com/KasunRoczDev/open-cfmoto/releases/latest/download/OpenCfMoto.apk)
+[![Download APK](https://img.shields.io/badge/Download-My%20moto%202.3.0-2ea44f?style=for-the-badge&logo=android&logoColor=white)](https://github.com/KasunRoczDev/open-cfmoto/releases/latest/download/OpenCfMoto.apk)
 [![Latest release](https://img.shields.io/github/v/release/KasunRoczDev/open-cfmoto?style=for-the-badge&label=Release)](https://github.com/KasunRoczDev/open-cfmoto/releases/latest)
 [![Android 10+](https://img.shields.io/badge/Android-10%2B-3DDC84?style=for-the-badge&logo=android&logoColor=white)](#-what-you-need)
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue?style=for-the-badge)](LICENSE)
 [![Join the Discord](https://img.shields.io/badge/Discord-Community-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/KNTjJhmFZ6)
 
 Put **Google Maps / Waze** on your bike's dash over Wi‑Fi, drive it from the touchscreen or handlebar,
-and let the app look after the rest — **range, rain, rides and service** — from a phone in your pocket.
+and let the app look after the rest — **tyres, range, rain, rides and service** — from a phone in your pocket.
 
 <br/>
 
@@ -45,7 +45,8 @@ and let the app look after the rest — **range, rain, rides and service** — f
 
 > 🧩 **This is the _Rider Extras_ build** by [KasunRoczDev](https://github.com/KasunRoczDev), based on
 > **[OpenCfMoto](https://github.com/zanderp/open-cfmoto)** by Alexandru and its contributors. Same
-> connection core, with extra rider features on top (see [What's new in 2.1](#-whats-new-in-21--rider-extras)).
+> connection core, with extra rider features on top (see [What's new in 2.3](#-whats-new-in-23--tyre-pressure) and
+> [2.1](#-whats-new-in-21--rider-extras)).
 > On your phone the app is called **My moto**.
 > It's signed with a different key than the original releases, so **uninstall the original app first**
 > if you're switching (save a backup with *Me ▸ Backup & restore* before you do).
@@ -72,10 +73,55 @@ and let the app look after the rest — **range, rain, rides and service** — f
 
 ## 📑 Contents
 
-[What's new in 2.1](#-whats-new-in-21--rider-extras) · [Features](#-features) · [What you need](#-what-you-need) ·
+[What's new in 2.3](#-whats-new-in-23--tyre-pressure) · [What's new in 2.1](#-whats-new-in-21--rider-extras) · [Features](#-features) · [What you need](#-what-you-need) ·
 [Supported bikes](#%EF%B8%8F-supported-bikes) · [Getting started](#-getting-started) · [Feature guide](#-feature-guide) ·
 [Map / GPX](#%EF%B8%8F-map--gpx-adventure-nav) · [Troubleshooting](#-troubleshooting) · [Building](#%EF%B8%8F-building-from-source) ·
 [Privacy](#-privacy) · [License](#-license)
+
+---
+
+## 🆕 What's new in 2.3 — Tyre pressure
+
+<table>
+<tr>
+<td width="50%" valign="top">
+
+### 🛞 Tyre pressure, built in
+Bluetooth valve-cap TPMS sensors (the ones sold with the **HR TPMS** app) now talk straight to
+**My moto**, so you don't need the sensor maker's app. **Me ▸ Tyre pressure** shows each tyre's **pressure,
+temperature and sensor battery**, live, and when it was last heard (sensors sleep while the bike is
+parked). Pair a sensor by typing or **scanning the ID** printed on it, with **Learn** (first inflated
+sensor that wakes up), or by tapping it in the **Sensors nearby** list.
+
+### 🎯 Your model's pressures and alerts
+For the **CFMoto 150SC** the app knows the manual's figures: **110/70-14** front and **130/70-13** rear,
+**27.6 psi (190 kPa)** each, **29 psi (200 kPa)** rear two-up or loaded. Each tyre shows how far
+it is from its target, and the alarm limits come from those numbers until you set your own. You get a
+notification with sound for **low**, **high**, **too hot** or a **low sensor battery**, in psi, bar or kPa.
+
+</td>
+<td width="50%" valign="top">
+
+### 🏍 On the Android Auto side panel
+The dash side panel now shows **your bike**, with **each tyre's pressure under its own wheel**: green when
+fine, red with *LOW* / *HIGH* / *HOT* when not, grey "12 min ago" while a sensor sleeps. The eco
+tree, fuel range and rain sit below it, and while you navigate the tyres take the tree's place.
+A live preview on the Tyre pressure screen shows exactly what the dash draws.
+
+### 🔕 Also
+- **Ride tab:** a **Tyres** card with both pressures, red on an alarm.
+- **Watch in the background:** keeps listening with the app closed, so alerts still reach you mid-ride.
+- **Backup:** pairing and limits are in **Full backup** with everything else.
+
+</td>
+</tr>
+</table>
+
+<p align="center">
+<img src="docs/screenshots/27_tpms.png" width="200" alt="Tyre pressure screen: front waiting for its sensor ID, rear 29.3 psi live, CFMoto 150SC tyre figures"/>&nbsp;&nbsp;
+<img src="docs/screenshots/28_tpms_dash_panel.png" width="200" alt="Dash side panel: CFMoto 150SC with 29.3 psi under the rear wheel"/>
+<br/><sub>Me ▸ Tyre pressure and the dash side panel with the pressure on each wheel</sub>
+</p>
 
 ---
 
@@ -169,6 +215,7 @@ instead of linking the dash to a dead session (map with no directions).
 
 | | |
 | --- | --- |
+| 🛞 **Tyre pressure (TPMS)** | Bluetooth valve-cap sensors read directly: pressure, temperature and battery per tyre, model-based targets (150SC), low/high/hot alerts, and each pressure on its wheel on the dash side panel. |
 | ⛽ **Fuel log & range** | Fill-ups, measured km/L, cost per km, monthly spend, and **⛽ ~185 km** live on the dash. |
 | 🌧️ **Rain alerts** | Rain now, in N min or up the road, or the temperature, on the dash side panel (Open-Meteo). |
 | 🌿 **Eco speed coach** | Per-model eco band with a live ✓ / *Ease off* hint beside the turn-by-turn directions. |
@@ -395,6 +442,23 @@ mirroring link).
 <img src="docs/screenshots/09_trip_map.png" width="220" alt="Ride route on the map"/>
 
 <br clear="all"/>
+
+### 🛞 Tyre pressure (TPMS)
+
+Works with Bluetooth valve-cap sensors that send their readings as Bluetooth broadcasts, the kind sold with
+the **HR TPMS** app (sensors named **TPMS** with a 6-character ID, and older **KY** sensors). Nothing
+connects; the phone just listens, so the sensors keep working with their own app too.
+
+1. **Me ▸ Tyre pressure** → allow **Nearby devices** if asked.
+2. Tap **Front** or **Rear** → type the ID printed on the sensor (or tap the QR icon and scan it) →
+   **Pair by ID**. No ID? Use **Learn**, or tap the sensor in **Sensors nearby**.
+3. Wake the sensors by rolling the bike a few metres. They sleep a few minutes after you stop and show
+   **"Seen N min ago"** until they wake again.
+
+Set the bike's **model in Garage** (e.g. *150 SC*) to get the manual's pressures and limits. Pick psi / bar / kPa,
+°C / °F and your own limits under **Units and alerts**. **On the dash** puts the tyres on the Android Auto
+side panel (needs **Setup ▸ side panel**). **Watch in the background** keeps alerts coming with the app
+closed (it shows a notification while on).
 
 ### 🏍️ Garage (multiple bikes)
 
@@ -782,6 +846,7 @@ OpenCfMoto routes and **Connect** for Maps/Waze Android Auto.
 | **Trip** | GPS trip computer + saved rides and route maps. |
 | **Logs** | Show/hide diagnostics (Share / Clear). |
 | **About** | Copyright, credits, Discord. |
+| **Me ▸ Tyre pressure** | Live tyre pressure, pairing, targets, alarm limits and the dash preview. |
 | **Me ▸ Fuel · Maintenance · Backup** | Fuel log & range, service schedule & history, full backup / restore. |
 | **Trips ▸ Weekly report** | Week-by-week distance, eco %, fuel and best ride. |
 
