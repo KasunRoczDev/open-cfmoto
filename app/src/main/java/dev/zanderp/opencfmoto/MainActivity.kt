@@ -29,6 +29,7 @@ class MainActivity : AppCompatActivity() {
     private val searchFocusTick = mutableIntStateOf(0)
     private val openMaintenanceTick = mutableIntStateOf(0)
     private val openReportTick = mutableIntStateOf(0)
+    private val openTpmsTick = mutableIntStateOf(0)
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
         if (RemotePad.consume(this, event)) return true
@@ -54,13 +55,14 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContent { OcmTheme { AppShell(controller, searchFocusTick.intValue, openMaintenanceTick.intValue, openReportTick.intValue) } }
+        setContent { OcmTheme { AppShell(controller, searchFocusTick.intValue, openMaintenanceTick.intValue, openReportTick.intValue, openTpmsTick.intValue) } }
         controller.attach(port)
         // Fresh launch with a bike saved: Wi‑Fi off would only fail the connect later — ask now.
         if (savedInstanceState == null && BikeMemory.lastQr(this) != null) WifiGate.promptOnLaunch(this)
         installTypeOnPhoneHandler()
         takeOpenMaintenance(intent)
         takeOpenReport(intent)
+        takeOpenTpms(intent)
         takeCheckUpdate(intent)
         val flags = takeIntentFlags(intent)
         controller.onHostCreated(
@@ -78,6 +80,7 @@ class MainActivity : AppCompatActivity() {
         setIntent(intent)
         takeOpenMaintenance(intent)
         takeOpenReport(intent)
+        takeOpenTpms(intent)
         takeCheckUpdate(intent)
         val f = takeIntentFlags(intent)
         controller.onNewIntent(resume = f.resume, btTrigger = f.btTrigger, startGpx = f.startGpx, gpxToBike = f.gpxToBike)
@@ -87,6 +90,8 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         controller.attach(port)
         controller.onHostResumed(resumeExtra = takeIntentFlags(intent).resume)
+        // Tyre pressure "watch in the background" (re)starts from the foreground, where Android allows it.
+        dev.zanderp.opencfmoto.tpms.TpmsService.sync(this)
     }
 
     override fun onDestroy() {
@@ -119,6 +124,13 @@ class MainActivity : AppCompatActivity() {
         if (i?.getBooleanExtra(EXTRA_OPEN_REPORT, false) != true) return
         i.removeExtra(EXTRA_OPEN_REPORT)
         openReportTick.intValue += 1
+    }
+
+    /** Tyre alarm / watch notification tap → open Me ▸ Tyre pressure (one-shot). */
+    private fun takeOpenTpms(i: Intent?) {
+        if (i?.getBooleanExtra(dev.zanderp.opencfmoto.tpms.TpmsNotifier.EXTRA_OPEN_TPMS, false) != true) return
+        i.removeExtra(dev.zanderp.opencfmoto.tpms.TpmsNotifier.EXTRA_OPEN_TPMS)
+        openTpmsTick.intValue += 1
     }
 
     /** "Update available" notification tap → run the update check (offers Install). One-shot. */

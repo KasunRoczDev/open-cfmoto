@@ -78,6 +78,11 @@ object MetricsStrip {
     @Volatile private var noGps = false
     private var lastEcoSaveMs = 0L                   // main-looper (GPS) thread only
     private var lastSide: SidePanelView? = null      // metrics-strip thread only
+    // Tyre block (SIDE mode): the selected bike's render and where its wheels are.
+    @Volatile private var bikeModel: String? = null
+    @Volatile private var bikeArt = DashBikeArt.GENERIC
+    @Volatile private var bikeBitmap: Bitmap? = null
+    private const val TPMS_CLIENT = "dash"
 
     @Synchronized
     fun start(
@@ -116,6 +121,11 @@ object MetricsStrip {
             weatherLat = Double.NaN
             weatherLon = Double.NaN
             lastEcoSaveMs = SystemClock.elapsedRealtime()
+            bikeModel = BikeMemory.selected(app)?.model
+            bikeArt = DashBikeArt.forModel(bikeModel)
+            bikeBitmap = null
+            // Tyre sensors keep reporting for the whole dash session (low-power, sensors-only scan).
+            dev.zanderp.opencfmoto.tpms.TpmsMonitor.acquire(app, TPMS_CLIENT, foreground = false)
         }
         lastSide = null
         is24h = android.text.format.DateFormat.is24HourFormat(app)
@@ -138,6 +148,8 @@ object MetricsStrip {
                     null
                 }
                 fuelRangeAtStartKm?.let { log("[FUEL] range at start ~${it.toInt()} km") }
+                bikeBitmap = DashBikeArt.load(app, bikeArt)
+                lastSide = null   // redraw with the bike picture
             }
         }
         ex.scheduleWithFixedDelay({ refresh() }, 0L, TICK_MS, TimeUnit.MILLISECONDS)
@@ -154,6 +166,7 @@ object MetricsStrip {
     @Synchronized
     fun stop() {
         if (mode == StripMode.SIDE) appCtx?.let { EcoStore.save(it, forest) }
+        dev.zanderp.opencfmoto.tpms.TpmsMonitor.release(TPMS_CLIENT)
         source?.stop()
         source = null
         executor?.shutdownNow()
@@ -344,9 +357,13 @@ object MetricsStrip {
             fuelLevel = fuelRangeAtStartKm?.let { start -> fuelLevel((start - sessionKm).coerceAtLeast(0.0)) } ?: FuelLevel.OK,
             weatherText = freshWeather()?.let { dev.zanderp.opencfmoto.weather.RainAhead.text(it) }?.ifEmpty { null },
             weatherRain = freshWeather()?.kind?.let { it != dev.zanderp.opencfmoto.weather.WeatherKind.DRY } ?: false,
+            tyres = dev.zanderp.opencfmoto.tpms.TpmsDash.panel(
+                dev.zanderp.opencfmoto.tpms.TpmsMonitor.state.value, bikeModel, System.currentTimeMillis(),
+            ),
         )
         if (v == lastSide) return
+        if (v.tyres?.alarm == true && lastSide?.tyres?.alarm != true) log("[TPMS] tyre alarm on the dash: ${v.tyres}")
         lastSide = v
-        out(SidePanelRenderer.render(v, stripW, stripH))
+        out(SidePanelRenderer.render(v, stripW, stripH, bikeBitmap, bikeArt))
     }
 }

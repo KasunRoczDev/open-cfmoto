@@ -27,6 +27,7 @@ import androidx.compose.material.icons.rounded.QrCodeScanner
 import androidx.compose.material.icons.rounded.ScreenShare
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Stop
+import androidx.compose.material.icons.rounded.TireRepair
 import androidx.compose.material.icons.rounded.TwoWheeler
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -79,6 +80,9 @@ fun RideScreen(
     onScan: () -> Unit,
     onSearch: () -> Unit,
     onRides: () -> Unit,
+    tyres: String? = null,
+    tyreAlarm: Boolean = false,
+    onTyres: () -> Unit = {},
 ) {
     val c = Ocm.colors
     OcmScreen {
@@ -123,6 +127,7 @@ fun RideScreen(
             else Text(s.detail, style = OcmType.body, color = c.text2)
         }
         hero.summary?.let { RideCard(it, onRides) }
+        tyres?.let { TyreCard(it, tyreAlarm, onTyres) }
         SectionLabel(stringResource(R.string.ui_ride_actions))
         Row(horizontalArrangement = Arrangement.spacedBy(OcmSpace.s)) {
             ActionTile(stringResource(R.string.ui_tile_dash_view), Icons.Rounded.CastConnected, onDashView, s.dashViewEnabled, Modifier.weight(1f))
@@ -228,6 +233,25 @@ private fun RideCard(sum: RideSummary, onClick: () -> Unit) {
             Column(Modifier.padding(start = 12.dp), horizontalAlignment = Alignment.End) {
                 Text(stringResource(R.string.ui_this_month).uppercase(), style = OcmType.label, color = c.text2)
                 Text(stringResource(R.string.ui_km, sum.monthKm.toString()), style = OcmType.stat, color = c.accent)
+            }
+        }
+    }
+}
+
+/** Tyre pressure at a glance (from the BLE valve sensors); red when a wheel is out of its limits. */
+@Composable
+private fun TyreCard(text: String, alarm: Boolean, onClick: () -> Unit) {
+    val c = Ocm.colors
+    OcmCard(onClick = onClick) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                Icons.Rounded.TireRepair, contentDescription = null,
+                tint = if (alarm) androidx.compose.ui.graphics.Color(0xFFF87171) else c.accent,
+            )
+            Spacer(Modifier.width(OcmSpace.s))
+            Column(Modifier.weight(1f)) {
+                Text(stringResource(R.string.tpms_ride_label), style = OcmType.body, color = c.text2)
+                Text(text, style = OcmType.title, color = if (alarm) androidx.compose.ui.graphics.Color(0xFFF87171) else c.text)
             }
         }
     }

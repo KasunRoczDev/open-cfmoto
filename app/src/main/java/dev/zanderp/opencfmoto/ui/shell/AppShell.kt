@@ -76,7 +76,7 @@ private val Tabs = listOf(
 /** @param searchFocusTick bumped by MainActivity when the bike asks to type on the phone.
  *  @param openMaintenanceTick bumped by MainActivity when a maintenance notification is tapped. */
 @Composable
-fun AppShell(c: ConnectionController, searchFocusTick: Int, openMaintenanceTick: Int = 0, openReportTick: Int = 0) {
+fun AppShell(c: ConnectionController, searchFocusTick: Int, openMaintenanceTick: Int = 0, openReportTick: Int = 0, openTpmsTick: Int = 0) {
     val ctx = LocalContext.current
     val nav = rememberNavController()
     val (phase, detail) = ConnectionState.flow.collectAsStateWithLifecycle().value
@@ -117,6 +117,17 @@ fun AppShell(c: ConnectionController, searchFocusTick: Int, openMaintenanceTick:
         }
     }
     LaunchedEffect(openMaintenanceTick) { if (openMaintenanceTick > 0) nav.navigate("maintenance") { launchSingleTop = true } }
+    LaunchedEffect(openTpmsTick) { if (openTpmsTick > 0) nav.navigate("tpms") { launchSingleTop = true } }
+
+    // Tyre sensors: live while Ride is on show (low-power, sensors only); the Tyre pressure screen scans fast itself.
+    val tpms by dev.zanderp.opencfmoto.tpms.TpmsMonitor.state.collectAsStateWithLifecycle()
+    androidx.compose.runtime.DisposableEffect(route, tpms.anyPaired) {
+        val watch = route == "ride" && tpms.anyPaired
+        if (watch) dev.zanderp.opencfmoto.tpms.TpmsMonitor.acquire(ctx, "ride", foreground = false)
+        onDispose { if (watch) dev.zanderp.opencfmoto.tpms.TpmsMonitor.release("ride") }
+    }
+    val tyreText = remember(tpms) { dev.zanderp.opencfmoto.ui.tpms.tyreSummary(ctx, tpms) }
+    val tyreAlarm = remember(tpms) { dev.zanderp.opencfmoto.ui.tpms.tyreAlarm(tpms) }
     LaunchedEffect(openReportTick) { if (openReportTick > 0) nav.navigate("report?back=1") { launchSingleTop = true } }   // the notification is about last week
 
     Scaffold(
@@ -124,7 +135,7 @@ fun AppShell(c: ConnectionController, searchFocusTick: Int, openMaintenanceTick:
         bottomBar = {
             NavigationBar(containerColor = Ocm.colors.surface) {
                 for (t in Tabs) {
-                    val selected = route == t.route || (t.route == "trips" && route?.startsWith("report") == true) || (t.route == "me" && (route == "logs" || route == "forest" || route == "maintenance" || route == "fuel" || route == "backup"))
+                    val selected = route == t.route || (t.route == "trips" && route?.startsWith("report") == true) || (t.route == "me" && (route == "logs" || route == "forest" || route == "maintenance" || route == "fuel" || route == "backup" || route == "tpms"))
                     NavigationBarItem(
                         selected = selected,
                         onClick = {
@@ -163,6 +174,7 @@ fun AppShell(c: ConnectionController, searchFocusTick: Int, openMaintenanceTick:
                     onScan = c::startAaScan,
                     onSearch = { searchOpen = true },
                     onRides = { TripsListActivity.start(ctx) },
+                    tyres = tyreText, tyreAlarm = tyreAlarm, onTyres = { nav.navigate("tpms") },
                 )
             }
             composable("trips") {
@@ -173,6 +185,7 @@ fun AppShell(c: ConnectionController, searchFocusTick: Int, openMaintenanceTick:
                     onGarage = { GarageActivity.start(ctx) }, onSettings = { SetupActivity.start(ctx) }, onForest = { nav.navigate("forest") },
                     onMaintenance = { nav.navigate("maintenance") }, maintenance = maintenance,
                     onFuel = { nav.navigate("fuel") }, fuelRangeKm = fuelRangeKm,
+                    onTyres = { nav.navigate("tpms") }, tyres = tyreText, tyreAlarm = tyreAlarm,
                     onBackup = { nav.navigate("backup") },
                     lastBackupText = remember(route) {
                         dev.zanderp.opencfmoto.AppSettings.lastBackupMs(ctx)?.let {
@@ -193,6 +206,7 @@ fun AppShell(c: ConnectionController, searchFocusTick: Int, openMaintenanceTick:
             composable("report?back={back}", arguments = listOf(navArgument("back") { type = NavType.IntType; defaultValue = 0 })) { entry ->
                 dev.zanderp.opencfmoto.ui.report.WeeklyReportScreen(weeksBack = entry.arguments?.getInt("back") ?: 0)
             }
+            composable("tpms") { dev.zanderp.opencfmoto.ui.tpms.TpmsScreen() }
             composable("backup") { dev.zanderp.opencfmoto.ui.backup.BackupScreen() }
             composable("logs") {
                 LogsScreen(

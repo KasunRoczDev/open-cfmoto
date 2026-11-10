@@ -159,6 +159,10 @@
                 android:resource="@xml/ride_widget_info" />
         </receiver>
         <service
+            android:name=".tpms.TpmsService"
+            android:exported="false"
+            android:foregroundServiceType="connectedDevice" />
+        <service
             android:name=".BikeRideService"
             android:exported="false"
             android:foregroundServiceType="location" />

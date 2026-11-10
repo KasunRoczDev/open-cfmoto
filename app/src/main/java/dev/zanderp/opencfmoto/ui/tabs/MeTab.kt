@@ -13,6 +13,7 @@ import androidx.compose.material.icons.rounded.LocalGasStation
 import androidx.compose.material.icons.rounded.Park
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.SystemUpdate
+import androidx.compose.material.icons.rounded.TireRepair
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -34,6 +35,7 @@ fun MeTab(
     onGarage: () -> Unit, onSettings: () -> Unit, onForest: () -> Unit, onMaintenance: () -> Unit,
     maintenance: MaintenanceSummary,
     onFuel: () -> Unit, fuelRangeKm: Double?,
+    onTyres: () -> Unit, tyres: String?, tyreAlarm: Boolean,
     onBackup: () -> Unit, lastBackupText: String?,
     onLogs: () -> Unit, onUpdate: () -> Unit, onAbout: () -> Unit,
 ) {
@@ -61,6 +63,10 @@ fun MeTab(
                 stringResource(R.string.ui_me_fuel),
                 fuelRangeKm?.let { stringResource(R.string.fuel_subtitle_range, it.toInt()) } ?: stringResource(R.string.fuel_subtitle_setup),
                 Icons.Rounded.LocalGasStation, onFuel,
+            )
+            SettingRow(
+                stringResource(R.string.ui_me_tpms), tyres ?: stringResource(R.string.tpms_subtitle_setup),
+                Icons.Rounded.TireRepair, onTyres, badge = if (tyreAlarm) "!" else null,
             )
         }
         SectionLabel(stringResource(R.string.ui_me_section_riding))
