@@ -9,6 +9,7 @@
 
 [![Download APK](https://img.shields.io/badge/Download-My%20moto%202.3.0-2ea44f?style=for-the-badge&logo=android&logoColor=white)](https://github.com/KasunRoczDev/open-cfmoto/releases/latest/download/OpenCfMoto.apk)
 [![Latest release](https://img.shields.io/github/v/release/KasunRoczDev/open-cfmoto?style=for-the-badge&label=Release)](https://github.com/KasunRoczDev/open-cfmoto/releases/latest)
+[![Website](https://img.shields.io/badge/Website-My%20moto-27C1D3?style=for-the-badge&logo=googlechrome&logoColor=white)](https://kasunrocz-softwares.github.io/MyMoto/)
 [![Android 10+](https://img.shields.io/badge/Android-10%2B-3DDC84?style=for-the-badge&logo=android&logoColor=white)](#-what-you-need)
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue?style=for-the-badge)](LICENSE)
 [![Join the Discord](https://img.shields.io/badge/Discord-Community-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/KNTjJhmFZ6)
@@ -39,7 +40,7 @@ and let the app look after the rest — **tyres, range, rain, rides and service*
 
 <img src="docs/media/hud-demo.gif" width="560" alt="Android Auto on the CFMoto MotoPlay dashboard"/>
 
-**▶ [Watch the full demo](docs/media/hud-demo.mp4)** · 📸 **[Dash showcase](docs/SHOWCASE.md)** — community photos on CFMoto, Voge, Morini, QJ and more · 🏍️ **[Supported bikes](docs/SUPPORTED-BIKES.md)**
+**🌐 [Website](https://kasunrocz-softwares.github.io/MyMoto/)** · **▶ [Watch the full demo](docs/media/hud-demo.mp4)** · 📸 **[Dash showcase](docs/SHOWCASE.md)** — community photos on CFMoto, Voge, Morini, QJ and more · 🏍️ **[Supported bikes](docs/SUPPORTED-BIKES.md)**
 
 </div>
 
